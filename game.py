@@ -136,15 +136,15 @@ class AlignIt:
             pygame.display.update()
 
     def move_square(self, path, color):
-        prev_x = 0
-        prev_y = 0
-        for cords in path:
+        for i, cords in enumerate(path):
+            prev_x = path[i-1][0]
+            prev_y = path[i-1][1]
             self.sqr_grid[prev_x][prev_y].draw_colored_rect(BLACK)
-            grid_x = cords[0]
-            grid_y = cords[1]
-            self.sqr_grid[grid_x][grid_y].draw_colored_rect(color)
-            prev_x = grid_x
-            prev_y = grid_y
+            x = cords[0]
+            y = cords[1]
+            self.sqr_grid[x][y].draw_colored_rect(color)
+            sleep(0.1)
+            pygame.display.update()
 
     def draw_grid(self, new):
         if new:
