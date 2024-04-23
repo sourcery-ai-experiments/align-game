@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import random
 import sys
 from time import sleep
@@ -72,7 +70,8 @@ class AlignIt:
                     start = (selected_square.grid_x, selected_square.grid_y)
                     end = (x_grid, y_grid)
                     path = astar(self.space, start, end)
-                    if path == 0:
+                    if path is None:
+                        print('path is none')
                         break
                     first = path[0]
                     last = path[-1]
@@ -108,7 +107,7 @@ class AlignIt:
             else:
                 inf_val = -2
                 grow = True
-                color = BLACK
+                color = WHITE
                 sleep(.5)
             selected_square.inflate_ip(inf_val, inf_val)
             selected_square.draw_colored_rect(color, 2, False)
@@ -134,7 +133,6 @@ class AlignIt:
             )
             self.handle_quit()
             grow = self.handle_selected_square(selected_square, grow)
-
             pygame.display.update()
 
     def move_square(self, path, color):
@@ -184,8 +182,8 @@ class AlignIt:
             y = random.randint(OFFSET, WINDOW_HEIGHT)
 
             x, y = normalize_cords(x, y)
-            x_grid = int((x / 50) - 3)
-            y_grid = int((y / 50) - 3)
+            x_grid = int((x / BLOCKSIZE) - 3)
+            y_grid = int((y / BLOCKSIZE) - 3)
 
             x_grid_fd = (x_grid >= 0) < len(self.space)
             y_grid_fd = 0 <= y_grid < len(self.space[0])  # boundary checks
