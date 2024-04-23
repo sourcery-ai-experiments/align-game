@@ -1,8 +1,13 @@
-import pygame
-import sys
+from __future__ import annotations
+
 import random
-from astar import astar
+import sys
 from time import sleep
+
+import pygame
+
+from astar import astar
+from coloredRect import ColoredRect
 
 
 WINDOW_HEIGHT = 600
@@ -34,65 +39,6 @@ def normalize_cords(x, y):
     return (x, y)
 
 
-class ColoredRect(pygame.Rect):
-    def __init__(self, color, x, y):
-        super().__init__(x, y, BLOCKSIZE, BLOCKSIZE)
-        x = (x - 150) / 50
-        y = (y - 150) / 50
-        self.color = color
-        self.grid_x = int(x)
-        self.grid_y = int(y)
-
-    def __str__(self):
-        return f"{super().__str__()}, {self.color}"
-
-    def __repr__(self):
-        return repr(self.__str__())
-
-    def draw_colored_rect(self, color, fill=0, overide=True):
-        if overide:
-            self.color = color
-        pygame.draw.rect(SCREEN, color, self, fill)
-        return self
-
-
-class squareGrid:
-    def __init__(self, dim):
-        self.dim = dim
-        self.grid = [[0 for _ in range(dim)] for _ in range(dim)]
-
-    def find_path(self, start, end):
-        path = astar(self.grid, start, end)
-        return path
-
-    def find_adjacent(self, x_y):
-        x, y = x_y
-        directions = [
-            (1, 0), (0, 1), (1, 1), (1, -1),
-            (-1, 0), (0, -1), (-1, -1), (-1, 1)
-        ]
-        target = self.grid[x][y]
-        lines = {0: [], 1: [], 2: [], 3: []}
-        grid_check = [[False for _ in range(9)] for _ in range(9)]
-        for i, direction in enumerate(directions):
-            x, y = x_y
-            dir_x, dir_y = direction
-            while True:
-                x += dir_x
-                y += dir_y
-                try:
-                    if self.grid[x][y] == target and grid_check[x][y] is not True:
-                        if x < 0 or y < 0:
-                            continue
-                        lines[i].append((x, y))
-                        grid_check[x][y] = True
-                    else:
-                        break
-                except Exception:
-                    break
-        return lines
-
-
 class AlignIt:
     def __init__(self):
         self.sqr_grid = [[0 for _ in range(9)] for _ in range(9)]
@@ -102,18 +48,23 @@ class AlignIt:
         self.main()
 
     def setup_game(self, next_colors):
-        global SCREEN, CLOCK
-        pygame.init()
-        pygame.mixer.music.pause()
-        SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-        CLOCK = pygame.time.Clock()
-        SCREEN.fill(BLACK)
-        self.draw_future_grid(next_colors)
-        self.draw_grid(True)
+        global SCREEN, CLOCK   # makes them global
+        pygame.init()             # initialise pygame
+        pygame.mixer.music.pause()  # ?
+        SCREEN = pygame.display.set_mode(
+            (WINDOW_WIDTH, WINDOW_HEIGHT),
+        )  # declare space
+        CLOCK = pygame.time.Clock()           # framerate
+        SCREEN.fill(BLACK)  # background
+        self.draw_future_grid(next_colors)       # 3 future colors
+        self.draw_grid(True)                      # draws grid
 
     def main(self):
-        next_colors = [rand_color() for _ in range(3)]
-        self.setup_game(next_colors)
+        next_colors = [
+            rand_color()
+            for _ in range(3)
+        ]   # generates future blocks
+        self.setup_game(next_colors)      # calls function
         move_made = True
         selected_square = None
         grow = True
@@ -122,6 +73,7 @@ class AlignIt:
             self.draw_grid(False)
             if move_made:
                 self.draw_predicted(next_colors)
+                # generates 3 new futureblocks
                 next_colors = [rand_color() for _ in range(3)]
                 self.draw_future_grid(next_colors)
                 move_made = False
@@ -134,9 +86,14 @@ class AlignIt:
                     x_grid = int((x / 50) - 3)
                     y_grid = int((y / 50) - 3)
                     if selected_square and self.space[x_grid][y_grid] == 0:
-                        start = (selected_square.grid_x, selected_square.grid_y)
+                        start = (
+                            selected_square.grid_x,
+                            selected_square.grid_y,
+                        )
                         end = (x_grid, y_grid)
                         path = astar(self.space, start, end)
+                        if path == 0:
+                            break
                         first = path[0]
                         last = path[-1]
                         color = self.sqr_grid[first[0]][first[1]].color
@@ -145,7 +102,7 @@ class AlignIt:
                         self.sqr_grid[first[0]][first[1]].color = BLACK
                         self.space[first[0]][first[1]] = 0
                         self.move_square(path, color)
-                        lines = self.sqr_grid[last[0]][last[1]].find_adjusent(end)
+                        lines = self.sqr_grid[last[0]][last[1]]
                         print(lines)
                         move_made = True
                         selected_square = None
@@ -161,7 +118,7 @@ class AlignIt:
                     inf_val = 2
                     grow = False
                     color = selected_square.color
-                    sleep(.5)
+                    sleep(.2)
                 else:
                     inf_val = -2
                     grow = True
@@ -189,7 +146,9 @@ class AlignIt:
                 col = 0
                 for y in range(OFFSET, WINDOW_HEIGHT, BLOCKSIZE):
                     rect = ColoredRect(WHITE, x, y)
-                    self.sqr_grid[row][col] = rect.draw_colored_rect(WHITE, 1, False)
+                    self.sqr_grid[row][col] = rect.draw_colored_rect(
+                        WHITE, 1, False,
+                    )
                     col += 1
                 row += 1
         else:
@@ -198,13 +157,14 @@ class AlignIt:
                     rect.draw_colored_rect(WHITE, 1, False)
 
     def draw_future_grid(self, colors):
+        self.next_sqrs.clear()
         for i, color in enumerate(colors):
-            self.next_sqrs = ColoredRect(
+            rect = ColoredRect(
                 color,
                 BLOCKSIZE,
-                ((i + 5) * BLOCKSIZE) +
-                (i * 25)
-            ).draw_colored_rect(color)
+                ((i + 5) * BLOCKSIZE) + (i * 25),
+            )
+            self.next_sqrs.append(rect)  # pass it as single color block
 
     def draw_predicted(self, next_colors):
         placed = 0
@@ -213,19 +173,23 @@ class AlignIt:
                 break
             x = random.randint(150, 600)
             y = random.randint(150, 600)
+            # x == 155 -> 150   x == 205 -> 200 etc
             x, y = normalize_cords(x, y)
-            x_grid = int((x / 50) - 3)
+            x_grid = int((x / 50) - 3)     # if x == 150 / 50  - 3  == -3
             y_grid = int((y / 50) - 3)
-            if self.space[x_grid][y_grid] != 0:
-                continue
-            color = next_colors.pop()
-            self.sqr_grid[x_grid][y_grid] = ColoredRect(
-                color,
-                x,
-                y
-            ).draw_colored_rect(color)
-            self.space[x_grid][y_grid] = 1
-            placed += 1
+
+            x_grid_fd = (x_grid >= 0) < len(self.space)
+            y_grid_fd = 0 <= y_grid < len(self.space[0])
+            # boundary checks
+            if x_grid_fd and y_grid_fd and self.space[x_grid][y_grid] == 0:
+                color = next_colors.pop()
+                self.sqr_grid[x_grid][y_grid] = ColoredRect(
+                    color,
+                    x,
+                    y,
+                ).draw_colored_rect(color)
+                self.space[x_grid][y_grid] = 1
+                placed += 1
 
 
 if __name__ == '__main__':
