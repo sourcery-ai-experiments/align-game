@@ -50,7 +50,7 @@ class AlignIt:
     def setup_game(self, next_colors):
         global SCREEN, CLOCK   # makes them global
         pygame.init()             # initialise pygame
-        pygame.mixer.music.pause()  # ?
+        # pygame.mixer.music.pause()
         SCREEN = pygame.display.set_mode(
             (WINDOW_WIDTH, WINDOW_HEIGHT),
         )  # declare space
@@ -173,14 +173,13 @@ class AlignIt:
                 break
             x = random.randint(150, 600)
             y = random.randint(150, 600)
-            # x == 155 -> 150   x == 205 -> 200 etc
+
             x, y = normalize_cords(x, y)
-            x_grid = int((x / 50) - 3)     # if x == 150 / 50  - 3  == -3
+            x_grid = int((x / 50) - 3)
             y_grid = int((y / 50) - 3)
 
             x_grid_fd = (x_grid >= 0) < len(self.space)
-            y_grid_fd = 0 <= y_grid < len(self.space[0])
-            # boundary checks
+            y_grid_fd = 0 <= y_grid < len(self.space[0])  # boundary checks
             if x_grid_fd and y_grid_fd and self.space[x_grid][y_grid] == 0:
                 color = next_colors.pop()
                 self.sqr_grid[x_grid][y_grid] = ColoredRect(
