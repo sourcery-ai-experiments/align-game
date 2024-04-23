@@ -10,8 +10,8 @@ from astar import astar
 from coloredRect import ColoredRect
 
 
-WINDOW_HEIGHT = 600
-WINDOW_WIDTH = 600
+WINDOW_HEIGHT = 300
+WINDOW_WIDTH = 300
 OFFSET = 150
 BLOCKSIZE = 50
 BLACK = (0, 0, 0)
@@ -41,8 +41,8 @@ def normalize_cords(x, y):
 
 class AlignIt:
     def __init__(self):
-        self.sqr_grid = [[0 for _ in range(9)] for _ in range(9)]
-        self.space = [[0 for _ in range(9)] for _ in range(9)]
+        self.sqr_grid = [[0 for _ in range(3)] for _ in range(3)]
+        self.space = [[0 for _ in range(3)] for _ in range(3)]
         self.next_sqrs = []
         self.score = 0
         self.main()
@@ -59,12 +59,64 @@ class AlignIt:
         self.draw_future_grid(next_colors)       # 3 future colors
         self.draw_grid(True)                      # draws grid
 
+    def handle_mouse_click(self, selected_square, next_colors):
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONUP:
+                x, y = pygame.mouse.get_pos()
+                if x < OFFSET or y < OFFSET:
+                    break
+                x, y = normalize_cords(x, y)
+                x_grid = int((x / BLOCKSIZE) - 3)
+                y_grid = int((y / BLOCKSIZE) - 3)
+                if selected_square and self.space[x_grid][y_grid] == 0:
+                    start = (selected_square.grid_x, selected_square.grid_y)
+                    end = (x_grid, y_grid)
+                    path = astar(self.space, start, end)
+                    if path == 0:
+                        break
+                    first = path[0]
+                    last = path[-1]
+                    color = self.sqr_grid[first[0]][first[1]].color
+                    self.sqr_grid[last[0]][last[1]].color = color
+                    self.space[last[0]][last[1]] = 1
+                    self.sqr_grid[first[0]][first[1]].color = BLACK
+                    self.space[first[0]][first[1]] = 0
+                    self.move_square(path, color)
+                    lines = self.sqr_grid[last[0]][last[1]]
+                    print(lines)
+                    self.move_made = True
+                    selected_square = None
+                    break
+                if self.space[x_grid][y_grid] == 0:
+                    break
+                selected_square = self.sqr_grid[x_grid][y_grid]
+        return selected_square
+
+    def handle_quit(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+    def handle_selected_square(self, selected_square, grow):
+        if selected_square:
+            if grow:
+                inf_val = 2
+                grow = False
+                color = selected_square.color
+                sleep(.2)
+            else:
+                inf_val = -2
+                grow = True
+                color = BLACK
+                sleep(.5)
+            selected_square.inflate_ip(inf_val, inf_val)
+            selected_square.draw_colored_rect(color, 2, False)
+            return grow
+
     def main(self):
-        next_colors = [
-            rand_color()
-            for _ in range(3)
-        ]   # generates future blocks
-        self.setup_game(next_colors)      # calls function
+        next_colors = [rand_color() for _ in range(3)]
+        self.setup_game(next_colors)
         move_made = True
         selected_square = None
         grow = True
@@ -73,59 +125,16 @@ class AlignIt:
             self.draw_grid(False)
             if move_made:
                 self.draw_predicted(next_colors)
-                # generates 3 new futureblocks
                 next_colors = [rand_color() for _ in range(3)]
                 self.draw_future_grid(next_colors)
                 move_made = False
-            for event in pygame.event.get():
-                if event.type == pygame.MOUSEBUTTONUP:
-                    x, y = pygame.mouse.get_pos()
-                    if x < 150 or y < 150:
-                        break
-                    x, y = normalize_cords(x, y)
-                    x_grid = int((x / 50) - 3)
-                    y_grid = int((y / 50) - 3)
-                    if selected_square and self.space[x_grid][y_grid] == 0:
-                        start = (
-                            selected_square.grid_x,
-                            selected_square.grid_y,
-                        )
-                        end = (x_grid, y_grid)
-                        path = astar(self.space, start, end)
-                        if path == 0:
-                            break
-                        first = path[0]
-                        last = path[-1]
-                        color = self.sqr_grid[first[0]][first[1]].color
-                        self.sqr_grid[last[0]][last[1]].color = color
-                        self.space[last[0]][last[1]] = 1
-                        self.sqr_grid[first[0]][first[1]].color = BLACK
-                        self.space[first[0]][first[1]] = 0
-                        self.move_square(path, color)
-                        lines = self.sqr_grid[last[0]][last[1]]
-                        print(lines)
-                        move_made = True
-                        selected_square = None
-                        break
-                    if self.space[x_grid][y_grid] == 0:
-                        break
-                    selected_square = self.sqr_grid[x_grid][y_grid]
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-            if selected_square:
-                if grow:
-                    inf_val = 2
-                    grow = False
-                    color = selected_square.color
-                    sleep(.2)
-                else:
-                    inf_val = -2
-                    grow = True
-                    color = BLACK
-                    sleep(.5)
-                selected_square.inflate_ip(inf_val, inf_val)
-                selected_square.draw_colored_rect(color, 2, False)
+
+            selected_square = self.handle_mouse_click(
+                selected_square, next_colors,
+            )
+            self.handle_quit()
+            grow = self.handle_selected_square(selected_square, grow)
+
             pygame.display.update()
 
     def move_square(self, path, color):
@@ -171,8 +180,8 @@ class AlignIt:
         while True:
             if placed == 3:
                 break
-            x = random.randint(150, 600)
-            y = random.randint(150, 600)
+            x = random.randint(OFFSET, WINDOW_WIDTH)
+            y = random.randint(OFFSET, WINDOW_HEIGHT)
 
             x, y = normalize_cords(x, y)
             x_grid = int((x / 50) - 3)
