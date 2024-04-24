@@ -8,8 +8,8 @@ from astar import astar
 from coloredRect import ColoredRect
 
 
-WINDOW_HEIGHT = 300
-WINDOW_WIDTH = 300
+WINDOW_HEIGHT = 600
+WINDOW_WIDTH = 600
 OFFSET = 150
 BLOCKSIZE = 50
 BLACK = (0, 0, 0)
@@ -32,30 +32,32 @@ def rand_color():
 
 
 def normalize_cords(x, y):
-    x = x - (x % 50)
-    y = y - (y % 50)
+    x = x - (x % BLOCKSIZE)
+    y = y - (y % BLOCKSIZE)
     return (x, y)
 
 
 class AlignIt:
+    dim = 9
+
     def __init__(self):
-        self.sqr_grid = [[0 for _ in range(3)] for _ in range(3)]
-        self.space = [[0 for _ in range(3)] for _ in range(3)]
+        self.sqr_grid = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
+        self.space = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
         self.next_sqrs = []
         self.score = 0
         self.main()
 
     def setup_game(self, next_colors):
-        global SCREEN, CLOCK   # makes them global
-        pygame.init()             # initialise pygame
-        # pygame.mixer.music.pause()
+        global SCREEN, CLOCK
+        pygame.init()
+
         SCREEN = pygame.display.set_mode(
             (WINDOW_WIDTH, WINDOW_HEIGHT),
-        )  # declare space
-        CLOCK = pygame.time.Clock()           # framerate
-        SCREEN.fill(BLACK)  # background
-        self.draw_future_grid(next_colors)       # 3 future colors
-        self.draw_grid(True)                      # draws grid
+        )
+        CLOCK = pygame.time.Clock()
+        SCREEN.fill(BLACK)
+        # self.draw_future_grid(next_colors)
+        self.draw_grid(True)
 
     def handle_mouse_click(self, selected_square, next_colors):
         for event in pygame.event.get():
@@ -71,18 +73,15 @@ class AlignIt:
                     end = (x_grid, y_grid)
                     path = astar(self.space, start, end)
                     if path is None:
-                        print('path is none')
                         break
                     first = path[0]
                     last = path[-1]
                     color = self.sqr_grid[first[0]][first[1]].color
-                    self.sqr_grid[last[0]][last[1]].color = color
+
                     self.space[last[0]][last[1]] = 1
-                    self.sqr_grid[first[0]][first[1]].color = BLACK
+
                     self.space[first[0]][first[1]] = 0
                     self.move_square(path, color)
-                    lines = self.sqr_grid[last[0]][last[1]]
-                    print(lines)
                     self.move_made = True
                     selected_square = None
                     break
@@ -90,12 +89,6 @@ class AlignIt:
                     break
                 selected_square = self.sqr_grid[x_grid][y_grid]
         return selected_square
-
-    def handle_quit(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
 
     def handle_selected_square(self, selected_square, grow):
         if selected_square:
@@ -121,19 +114,27 @@ class AlignIt:
         grow = True
 
         while True:
+
             self.draw_grid(False)
             if move_made:
                 self.draw_predicted(next_colors)
                 next_colors = [rand_color() for _ in range(3)]
-                self.draw_future_grid(next_colors)
+                # self.draw_future_grid(next_colors)
                 move_made = False
 
             selected_square = self.handle_mouse_click(
                 selected_square, next_colors,
             )
+
             self.handle_quit()
             grow = self.handle_selected_square(selected_square, grow)
             pygame.display.update()
+
+    def handle_quit(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
     def move_square(self, path, color):
         for i, cords in enumerate(path):
@@ -163,15 +164,15 @@ class AlignIt:
                 for rect in row:
                     rect.draw_colored_rect(WHITE, 1, False)
 
-    def draw_future_grid(self, colors):
-        self.next_sqrs.clear()
-        for i, color in enumerate(colors):
-            rect = ColoredRect(
-                color,
-                BLOCKSIZE,
-                ((i + 5) * BLOCKSIZE) + (i * 25),
-            )
-            self.next_sqrs.append(rect)  # pass it as single color block
+    # def draw_future_grid(self, colors):
+    #     self.next_sqrs.clear()
+    #     for i, color in enumerate(colors):
+    #         rect = ColoredRect(
+    #             color,
+    #             BLOCKSIZE,
+    #             ((i + 5) * BLOCKSIZE) + (i * 25),
+    #         )
+    #         self.next_sqrs.append(rect)  # pass it as single color block
 
     def draw_predicted(self, next_colors):
         placed = 0

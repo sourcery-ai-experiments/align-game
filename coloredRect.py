@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import pygame
 
 BLOCKSIZE = 50
@@ -18,7 +16,7 @@ class ColoredRect(pygame.Rect):
         return f'{super().__str__()}, {self.color}'
 
     def __repr__(self):
-        return repr(self.__str__)
+        return repr(self.__str__())
 
     def draw_colored_rect(self, color, fill=0, overide=True):
         if overide:

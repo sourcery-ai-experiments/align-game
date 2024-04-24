@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import astar
 
 
@@ -20,7 +18,8 @@ class squareGrid:
         ]
         target = self.grid[x][y]
         lines = {0: [], 1: [], 2: [], 3: []}
-        grid_check = [[False for _ in range(9)] for _ in range(9)]
+        grid_check = [[False for _ in range(self.dim)]
+                      for _ in range(self.dim)]
         for i, direction in enumerate(directions):
             x, y = x_y
             dir_x, dir_y = direction
