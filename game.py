@@ -67,18 +67,14 @@ class AlignIt:
     def setup_game(self, next_colors):
         global SCREEN, CLOCK, Xscreen
         pygame.init()
-        Xscreen = pygame.display.set_mode(
-            (Xbutton, Xbutton),
-        )
         SCREEN = pygame.display.set_mode(
-            (WINDOW_WIDTH, WINDOW_HEIGHT), pygame.NOFRAME,
+            (WINDOW_WIDTH, WINDOW_HEIGHT),
         )
 
         pygame.display.set_caption('Align it!')
         CLOCK = pygame.time.Clock()
         SCREEN.fill(BLACK)
         self.draw_grid(True)
-        Xscreen.fill(BLACK)
         self.draw_future_grid(next_colors)
         button_width = 100
         button_height = 50
@@ -89,7 +85,7 @@ class AlignIt:
         )
 
     def handle_mouse_click(self, selected_square, next_colors):
-        self.red_button.draw(SCREEN)
+
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONUP:
                 x, y = pygame.mouse.get_pos()
@@ -117,10 +113,9 @@ class AlignIt:
                     break
                 selected_square = self.sqr_grid[x_grid][y_grid]
 
-            if event.type == pygame.MOUSEBUTTONUP:
-                if self.red_button.is_clicked((x, y)):
-                    pygame.quit()
-                    sys.exit()
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
         return selected_square
 
     def handle_selected_square(self, selected_square, grow):
