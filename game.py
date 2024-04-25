@@ -158,34 +158,45 @@ class AlignIt:
 
     def draw_future_grid(self, colors):
         self.next_sqrs.clear()
-        for i, color in enumerate(colors):
+        for i in range(3):
+            if i < len(colors):
+                color = colors[i]
+            else:
+                color = rand_color()
+
             rect = ColoredRect(
                 color,
                 BLOCKSIZE,
                 ((i + 5) * BLOCKSIZE) + (i * 25),
             ).draw_colored_rect(color)
-            self.next_sqrs.append(rect)  # pass it as single color block
+            self.next_sqrs.append(rect)
 
     def spawn_blocks(self, next_colors, num_blocks):
         for color in next_colors[:num_blocks]:
-            x = random.randint(OFFSET, WINDOW_WIDTH)
-            y = random.randint(OFFSET, WINDOW_HEIGHT)
+            while True:
+                x = random.randint(OFFSET, WINDOW_WIDTH - BLOCKSIZE)
+                y = random.randint(OFFSET, WINDOW_HEIGHT - BLOCKSIZE)
+                print(' x   y', x, y)
+                x, y = normalize_cords(x, y)
+                x_grid = int((x / BLOCKSIZE) - 3)
+                y_grid = int((y / BLOCKSIZE) - 3)
+                print('x_grid y_grid', x_grid, y_grid)
+                if (
+                    0 <= x_grid < len(self.space[0])
+                    and 0 <= y_grid < len(self.space[0])
 
-            x, y = normalize_cords(x, y)
-            x_grid = int((x / BLOCKSIZE) - 3)
-            y_grid = int((y / BLOCKSIZE) - 3)
-
-            if (
-                0 <= x_grid < len(self.space[0])
-                and 0 <= y_grid < len(self.space[0])
-            ):
-                if self.space[x_grid][y_grid] == 0:
+                    and self.space[x_grid][y_grid] == 0
+                ):
+                    print('block can spawn x_grid y_grid')
                     self.sqr_grid[x_grid][y_grid] = ColoredRect(
                         color,
                         x,
                         y,
                     ).draw_colored_rect(color)
                     self.space[x_grid][y_grid] = 1
+                    break
+                else:
+                    print('block cannot spawn!!!!!!!!!!!!!!')
 
 
 if __name__ == '__main__':
