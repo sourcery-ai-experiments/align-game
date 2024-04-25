@@ -9,7 +9,6 @@ from coloredRect import ColoredRect
 
 WINDOW_HEIGHT = 600
 WINDOW_WIDTH = 600
-Xbutton = 10
 OFFSET = 150
 BLOCKSIZE = 50
 BLACK = (0, 0, 0)
@@ -37,23 +36,6 @@ def normalize_cords(x, y):
     return (x, y)
 
 
-class Button:
-    def __init__(self, x, y, width, height, color, text):
-        self.rect = pygame.Rect(x, y, width, height)
-        self.color = color
-        self.text = text
-
-    def draw(self, surface):
-        pygame.draw.rect(surface, self.color, self.rect)
-        font = pygame.font.Font(None, 36)
-        text_surface = font.render(self.text, True, BLACK)
-        text_rect = text_surface.get_rect(center=self.rect.center)
-        surface.blit(text_surface, text_rect)
-
-    def is_clicked(self, pos):
-        return self.rect.collidepoint(pos)
-
-
 class AlignIt:
     dim = 9
 
@@ -65,24 +47,16 @@ class AlignIt:
         self.main()
 
     def setup_game(self, next_colors):
-        global SCREEN, CLOCK, Xscreen
+        global SCREEN, CLOCK
         pygame.init()
         SCREEN = pygame.display.set_mode(
             (WINDOW_WIDTH, WINDOW_HEIGHT),
         )
-
         pygame.display.set_caption('Align it!')
         CLOCK = pygame.time.Clock()
         SCREEN.fill(BLACK)
         self.draw_grid(True)
         self.draw_future_grid(next_colors)
-        button_width = 100
-        button_height = 50
-        button_x = WINDOW_WIDTH - button_width - 10
-        button_y = 10
-        self.red_button = Button(
-            button_x, button_y, button_width, button_height, RED, 'EXIT',
-        )
 
     def handle_mouse_click(self, selected_square, next_colors):
 
@@ -108,11 +82,11 @@ class AlignIt:
                     self.move_square(path, color)
                     self.move_made = True
                     selected_square = None
+                    self.spawn_blocks(next_colors, 3)
                     break
                 if self.space[x_grid][y_grid] == 0:
                     break
                 selected_square = self.sqr_grid[x_grid][y_grid]
-
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
@@ -144,7 +118,7 @@ class AlignIt:
         while True:
             self.draw_grid(False)
             if move_made:
-                self.draw_predicted(next_colors)
+                self.spawn_blocks(next_colors, 3)
                 next_colors = [rand_color() for _ in range(3)]
                 self.draw_future_grid(next_colors)
                 move_made = False
@@ -189,14 +163,11 @@ class AlignIt:
                 color,
                 BLOCKSIZE,
                 ((i + 5) * BLOCKSIZE) + (i * 25),
-            )
+            ).draw_colored_rect(color)
             self.next_sqrs.append(rect)  # pass it as single color block
 
-    def draw_predicted(self, next_colors):
-        placed = 0
-        while True:
-            if placed == 3:
-                break
+    def spawn_blocks(self, next_colors, num_blocks):
+        for color in next_colors[:num_blocks]:
             x = random.randint(OFFSET, WINDOW_WIDTH)
             y = random.randint(OFFSET, WINDOW_HEIGHT)
 
@@ -204,17 +175,17 @@ class AlignIt:
             x_grid = int((x / BLOCKSIZE) - 3)
             y_grid = int((y / BLOCKSIZE) - 3)
 
-            x_grid_fd = (x_grid >= 0) < len(self.space)
-            y_grid_fd = 0 <= y_grid < len(self.space[0])  # boundary checks
-            if x_grid_fd and y_grid_fd and self.space[x_grid][y_grid] == 0:
-                color = next_colors.pop()
-                self.sqr_grid[x_grid][y_grid] = ColoredRect(
-                    color,
-                    x,
-                    y,
-                ).draw_colored_rect(color)
-                self.space[x_grid][y_grid] = 1
-                placed += 1
+            if (
+                0 <= x_grid < len(self.space[0])
+                and 0 <= y_grid < len(self.space[0])
+            ):
+                if self.space[x_grid][y_grid] == 0:
+                    self.sqr_grid[x_grid][y_grid] = ColoredRect(
+                        color,
+                        x,
+                        y,
+                    ).draw_colored_rect(color)
+                    self.space[x_grid][y_grid] = 1
 
 
 if __name__ == '__main__':
