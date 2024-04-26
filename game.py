@@ -39,6 +39,7 @@ def normalize_cords(x, y):
 
 class AlignIt:
     dim = 9
+    same_color_counter = 0
 
     def __init__(self):
         self.sqr_grid = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
@@ -71,10 +72,8 @@ class AlignIt:
                 next_colors = [rand_color() for _ in range(3)]
                 self.draw_future_grid(next_colors)
                 self.move_made = False
-
             self.handle_mouse_click()
             self.handle_selected_square()
-
             pygame.display.update()
 
     def handle_mouse_click(self):
@@ -105,8 +104,8 @@ class AlignIt:
                     self.sqr_grid[first[0]][first[1]].color = BLACK
                     self.space[first[0]][first[1]] = 0
                     self.move_square(path, color)
-                    lines = self.sqr_grid[last[0]][last[1]]
-                    print(lines)
+                    # lines = self.sqr_grid[last[0]][last[1]]
+                    # print(lines)
                     self.move_made = True
                     self.selected_square = None
                     break
@@ -141,6 +140,10 @@ class AlignIt:
             x = cords[0]
             y = cords[1]
             self.sqr_grid[x][y].draw_colored_rect(color)
+            same_color_neighbors = self.get_same_color_neighbors(x, y, color)
+            if same_color_neighbors:
+                self.same_color_counter + 1
+                print(f'squares of the same color {self.same_color_counter}')
             sleep(0.1)
             pygame.display.update()
 
@@ -193,6 +196,22 @@ class AlignIt:
                 ).draw_colored_rect(color)
                 self.space[x_grid][y_grid] = 1
                 placed += 1
+
+    def get_same_color_neighbors(self, x_grid, y_grid, color):
+        neighbors = [
+            (x_grid + 1, y_grid), (x_grid - 1, y_grid),
+            (x_grid, y_grid + 1), (x_grid, y_grid - 1),
+        ]
+        same_color_neighbors = []
+        for neighbor_x, neighbor_y in neighbors:
+            if (
+                0 <= neighbor_x < len(self.space[0])
+                and 0 <= neighbor_y < len(self.space[0])
+                and self.space[neighbor_x][neighbor_y] == 1
+                and self.sqr_grid[neighbor_x][neighbor_y].color == color
+            ):
+                same_color_neighbors.append((neighbor_x, neighbor_y))
+        return same_color_neighbors
 
 
 if __name__ == '__main__':
