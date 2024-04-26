@@ -39,7 +39,6 @@ def normalize_cords(x, y):
 
 class AlignIt:
     dim = 9
-    same_color_counter = 0
 
     def __init__(self):
         self.sqr_grid = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
@@ -49,6 +48,7 @@ class AlignIt:
         self.selected_square = None
         self.grow = True
         self.move_made = True
+        self.same_color_counter = 0
         self.main()
 
     def setup_game(self, next_colors):
@@ -104,8 +104,6 @@ class AlignIt:
                     self.sqr_grid[first[0]][first[1]].color = BLACK
                     self.space[first[0]][first[1]] = 0
                     self.move_square(path, color)
-                    # lines = self.sqr_grid[last[0]][last[1]]
-                    # print(lines)
                     self.move_made = True
                     self.selected_square = None
                     break
@@ -142,7 +140,7 @@ class AlignIt:
             self.sqr_grid[x][y].draw_colored_rect(color)
             same_color_neighbors = self.get_same_color_neighbors(x, y, color)
             if same_color_neighbors:
-                self.same_color_counter + 1
+                self.same_color_counter += 1
                 print(f'squares of the same color {self.same_color_counter}')
             sleep(0.1)
             pygame.display.update()
