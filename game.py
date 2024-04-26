@@ -74,9 +74,23 @@ class AlignIt:
                 next_colors = [rand_color() for _ in range(3)]
                 self.draw_future_grid(next_colors)
                 self.move_made = False
+                last_moved_square = self.find_last_moved_square()
+                if last_moved_square:
+                    lines = self.find_adjacent(last_moved_square)
+                    print(lines)
             self.handle_mouse_click()
             self.handle_selected_square()
             pygame.display.update()
+
+    def find_last_moved_square(self):
+        for x in range(self.dim):
+            for y in range(self.dim):
+                if (
+                    self.space[x][y] == 1
+                    and self.sqr_grid[x][y].color != BLACK
+                ):
+                    return (x, y)
+        return None
 
     def handle_mouse_click(self):
         for event in pygame.event.get():
@@ -104,8 +118,8 @@ class AlignIt:
                     self.sqr_grid[first[0]][first[1]].color = BLACK
                     self.space[first[0]][first[1]] = 0
                     self.move_square(path, color)
-                    lines = self.find_adjacent(last)
-                    print(lines)
+                    # lines = self.find_adjacent(last)
+                    # print(lines)
                     self.move_made = True
                     self.selected_square = None
                     break
