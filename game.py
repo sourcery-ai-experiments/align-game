@@ -8,8 +8,8 @@ from astar import astar
 from coloredRect import ColoredRect
 
 
-WINDOW_HEIGHT = 600
-WINDOW_WIDTH = 600
+WINDOW_HEIGHT = 300
+WINDOW_WIDTH = 300
 OFFSET = 150
 BLOCKSIZE = 50
 BLACK = (0, 0, 0)
@@ -40,7 +40,7 @@ def normalize_cords(x, y):
 
 
 class AlignIt:
-    dim = 9
+    dim = 3
 
     def __init__(self):
         self.sqr_grid = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
@@ -195,6 +195,8 @@ class AlignIt:
 
     def find_adjacent(self, x_y):
         x, y = x_y
+        org_x, org_y = x, y
+        print(x, y)
         directions = [
             (1, 0),  # (0, 1), (1, 1), (1, -1),
             (-1, 0),  # (0, -1), (-1, -1), (-1, 1),
@@ -204,7 +206,7 @@ class AlignIt:
         grid_check = [[False for _ in range(self.dim)]
                       for _ in range(self.dim)]
         for i, direction in enumerate(directions):
-            x, y = x_y
+            x, y = org_x, org_y
             dir_x, dir_y = direction
             while True:
                 x += dir_x
@@ -215,6 +217,7 @@ class AlignIt:
                         if x < 0 or y < 0:
                             continue
                         lines[i % 1].append((x, y))
+                        lines[i % 1].append((org_x, org_y))
                         grid_check[x][y] = True
                     else:
                         break
