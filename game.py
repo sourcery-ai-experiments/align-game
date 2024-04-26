@@ -24,7 +24,9 @@ CYAN = '#009599'
 PINK = (255, 153, 255)
 BROWN = (255, 128, 0)
 ORANGE = '#F26522'
-colors = [GREEN, RED, BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN]
+colors = [
+    GREEN,  # RED, BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN
+]
 
 
 def rand_color():
@@ -90,20 +92,20 @@ class AlignIt:
                         self.selected_square.grid_x,
                         self.selected_square.grid_y,
                     )
-
                     end = (x_grid, y_grid)
                     path = astar(self.space, start, end)
                     if path is None:
                         break
                     first = path[0]
                     last = path[-1]
-
                     color = self.sqr_grid[first[0]][first[1]].color
                     self.sqr_grid[last[0]][last[1]].color = color
                     self.space[last[0]][last[1]] = 1
                     self.sqr_grid[first[0]][first[1]].color = BLACK
                     self.space[first[0]][first[1]] = 0
                     self.move_square(path, color)
+                    lines = self.find_adjacent(last)
+                    print(lines)
                     self.move_made = True
                     self.selected_square = None
                     break
@@ -138,10 +140,6 @@ class AlignIt:
             x = cords[0]
             y = cords[1]
             self.sqr_grid[x][y].draw_colored_rect(color)
-            same_color_neighbors = self.get_same_color_neighbors(x, y, color)
-            if same_color_neighbors:
-                self.same_color_counter += 1
-                print(f'squares of the same color {self.same_color_counter}')
             sleep(0.1)
             pygame.display.update()
 
@@ -195,21 +193,34 @@ class AlignIt:
                 self.space[x_grid][y_grid] = 1
                 placed += 1
 
-    def get_same_color_neighbors(self, x_grid, y_grid, color):
-        neighbors = [
-            (x_grid + 1, y_grid), (x_grid - 1, y_grid),
-            (x_grid, y_grid + 1), (x_grid, y_grid - 1),
+    def find_adjacent(self, x_y):
+        x, y = x_y
+        directions = [
+            (1, 0),  # (0, 1), (1, 1), (1, -1),
+            (-1, 0),  # (0, -1), (-1, -1), (-1, 1),
         ]
-        same_color_neighbors = []
-        for neighbor_x, neighbor_y in neighbors:
-            if (
-                0 <= neighbor_x < len(self.space[0])
-                and 0 <= neighbor_y < len(self.space[0])
-                and self.space[neighbor_x][neighbor_y] == 1
-                and self.sqr_grid[neighbor_x][neighbor_y].color == color
-            ):
-                same_color_neighbors.append((neighbor_x, neighbor_y))
-        return same_color_neighbors
+        target = self.space[x][y]
+        lines = {0: [], 1: [], 2: [], 3: []}
+        grid_check = [[False for _ in range(self.dim)]
+                      for _ in range(self.dim)]
+        for i, direction in enumerate(directions):
+            x, y = x_y
+            dir_x, dir_y = direction
+            while True:
+                x += dir_x
+                y += dir_y
+                try:
+                    is_taken = grid_check[x][y] is not True
+                    if self.space[x][y] == target and is_taken:
+                        if x < 0 or y < 0:
+                            continue
+                        lines[i % 1].append((x, y))
+                        grid_check[x][y] = True
+                    else:
+                        break
+                except Exception:
+                    break
+        return lines
 
 
 if __name__ == '__main__':
