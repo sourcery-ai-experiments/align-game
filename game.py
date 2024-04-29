@@ -231,7 +231,7 @@ class AlignIt:
         return lines, org_x, org_y
 
     def check_length(self, lines, org_x, org_y):
-        if len(lines[0] or lines[1] or lines[2] or lines[3]) >= 5:
+        if any(len(line) >= 5 for line in lines.values()):
             print('ass')
             for line in lines.values():
                 for x, y in line:
