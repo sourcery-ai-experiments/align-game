@@ -99,14 +99,12 @@ class AlignIt:
                     first = path[0]
                     last = path[-1]
                     color = self.sqr_grid[first[0]][first[1]].color
-                    # self.sqr_grid[last[0]][last[1]].color = color
                     self.space[last[0]][last[1]] = 1
-                    # self.sqr_grid[first[0]][first[1]].color = BLACK
                     self.space[first[0]][first[1]] = 0
                     self.move_square(path, color)
-                    # find color of next square moved
-                    lines = self.find_adjacent(last)
-                    print(lines)
+                    lines = self.find_adjacent_color(last, color)
+                    print(f'hor ---{lines[0]}    ver ---{lines[1]}')
+                    print(f'UL-DR ---{lines[2]}     DL-UR ---{lines[3]}')
                     self.move_made = True
                     self.selected_square = None
                     break
@@ -194,33 +192,42 @@ class AlignIt:
                 self.space[x_grid][y_grid] = 1
                 placed += 1
 
-    def find_adjacent(self, x_y):
-        x, y = x_y
+    def find_adjacent_color(self, x_y, color):
+        org_x, org_y = x_y
         directions = [
             (1, 0),  (0, 1), (1, 1), (1, -1),
             (-1, 0),  (0, -1), (-1, -1), (-1, 1),
         ]
-        target = self.space[x][y]
-        lines = {0: [(x, y)], 1: [(x, y)], 2: [(x, y)], 3: [(x, y)]}
-        grid_check = [[False for _ in range(self.dim)]
-                      for _ in range(self.dim)]
+        target = self.space[org_x][org_y]
+        lines = {
+            0: [(org_x, org_y)],
+            1: [(org_x, org_y)],
+            2: [(org_x, org_y)],
+            3: [(org_x, org_y)],
+        }
         for i, direction in enumerate(directions):
+            x, y = org_x, org_y
             dir_x, dir_y = direction
             while True:
                 x += dir_x
                 y += dir_y
                 try:
-                    is_taken = grid_check[x][y] is not True
-                    if self.space[x][y] == target and is_taken:
-                        if x < 0 or y < 0:
-                            continue
-                        lines[i % 4].append((x, y))
-                        grid_check[x][y] = True
-                    else:
-                        break
-                except Exception:
-                    break
+                    color_org = self.sqr_grid[org_x][org_y].color
+                    color_adj = self.sqr_grid[x][y].color
+                    is_same_color = color_org == color_adj
+                    is_taken = self.space[x][y] != 0
 
+                    if self.space[x][y] == target:
+                        if is_taken:
+                            if is_same_color:
+                                if x < 0 or y < 0:
+                                    continue
+                                lines[i % 4].append((x, y))
+                            else:
+                                break
+                except Exception:
+                    print('error')
+                    break
         return lines
 
 
