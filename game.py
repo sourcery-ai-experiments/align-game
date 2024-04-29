@@ -232,7 +232,6 @@ class AlignIt:
 
     def check_length(self, lines, org_x, org_y):
         if any(len(line) >= 5 for line in lines.values()):
-            print('ass')
             for line in lines.values():
                 for x, y in line:
                     self.sqr_grid[x][y].draw_colored_rect(BLACK)
