@@ -102,10 +102,10 @@ class AlignIt:
                     self.space[last[0]][last[1]] = 1
                     self.space[first[0]][first[1]] = 0
                     self.move_square(path, color)
-                    lines = self.find_adjacent_color(last, color)
+                    lines, org_x, org_y = self.find_adjacent_color(last, color)
                     print(f'hor ---{lines[0]}    ver ---{lines[1]}')
                     print(f'UL-DR ---{lines[2]}     DL-UR ---{lines[3]}')
-                    self.check_lenght(lines, (x_grid, y_grid))
+                    self.check_length(lines, org_x, org_y)
                     self.move_made = True
                     self.selected_square = None
                     break
@@ -228,14 +228,14 @@ class AlignIt:
                 except Exception:
                     print('error')
                     break
-        return lines
+        return lines, org_x, org_y
 
-    def check_lenght(self, lines, x_y):
-        org_x, org_y = x_y
-
+    def check_length(self, lines, org_x, org_y):
         if len(lines[0]) >= 5:
             print('ass')
-            self.sqr_grid[org_x][org_y].draw_colored_rect(BLACK)
+            for line in lines.values():
+                for x, y in line:
+                    self.sqr_grid[x][y].draw_colored_rect(BLACK)
 
 
 if __name__ == '__main__':
