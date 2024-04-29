@@ -105,6 +105,7 @@ class AlignIt:
                     lines = self.find_adjacent_color(last, color)
                     print(f'hor ---{lines[0]}    ver ---{lines[1]}')
                     print(f'UL-DR ---{lines[2]}     DL-UR ---{lines[3]}')
+                    self.check_lenght(lines, (x_grid, y_grid))
                     self.move_made = True
                     self.selected_square = None
                     break
@@ -216,9 +217,8 @@ class AlignIt:
                     color_adj = self.sqr_grid[x][y].color
                     is_same_color = color_org == color_adj
                     is_taken = self.space[x][y] != 0
-
                     if self.space[x][y] == target:
-                        if is_taken:
+                        if is_taken:   # maybe unnesisary
                             if is_same_color:
                                 if x < 0 or y < 0:
                                     continue
@@ -229,6 +229,13 @@ class AlignIt:
                     print('error')
                     break
         return lines
+
+    def check_lenght(self, lines, x_y):
+        org_x, org_y = x_y
+
+        if len(lines[0]) >= 5:
+            print('ass')
+            self.sqr_grid[org_x][org_y].draw_colored_rect(BLACK)
 
 
 if __name__ == '__main__':
