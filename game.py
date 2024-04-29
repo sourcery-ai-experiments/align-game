@@ -8,8 +8,8 @@ from astar import astar
 from coloredRect import ColoredRect
 
 
-WINDOW_HEIGHT = 300
-WINDOW_WIDTH = 300
+WINDOW_HEIGHT = 600
+WINDOW_WIDTH = 600
 OFFSET = 150
 BLOCKSIZE = 50
 BLACK = (0, 0, 0)
@@ -25,7 +25,7 @@ PINK = (255, 153, 255)
 BROWN = (255, 128, 0)
 ORANGE = '#F26522'
 colors = [
-    GREEN,  # RED, BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN
+    GREEN, RED, BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN,
 ]
 
 
@@ -40,7 +40,7 @@ def normalize_cords(x, y):
 
 
 class AlignIt:
-    dim = 3
+    dim = 9
 
     def __init__(self):
         self.sqr_grid = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
@@ -74,23 +74,9 @@ class AlignIt:
                 next_colors = [rand_color() for _ in range(3)]
                 self.draw_future_grid(next_colors)
                 self.move_made = False
-                last_moved_square = self.find_last_moved_square()
-                if last_moved_square:
-                    lines = self.find_adjacent(last_moved_square)
-                    print(lines)
             self.handle_mouse_click()
             self.handle_selected_square()
             pygame.display.update()
-
-    def find_last_moved_square(self):
-        for x in range(self.dim):
-            for y in range(self.dim):
-                if (
-                    self.space[x][y] == 1
-                    and self.sqr_grid[x][y].color != BLACK
-                ):
-                    return (x, y)
-        return None
 
     def handle_mouse_click(self):
         for event in pygame.event.get():
@@ -113,13 +99,14 @@ class AlignIt:
                     first = path[0]
                     last = path[-1]
                     color = self.sqr_grid[first[0]][first[1]].color
-                    self.sqr_grid[last[0]][last[1]].color = color
+                    # self.sqr_grid[last[0]][last[1]].color = color
                     self.space[last[0]][last[1]] = 1
-                    self.sqr_grid[first[0]][first[1]].color = BLACK
+                    # self.sqr_grid[first[0]][first[1]].color = BLACK
                     self.space[first[0]][first[1]] = 0
                     self.move_square(path, color)
-                    # lines = self.find_adjacent(last)
-                    # print(lines)
+                    # find color of next square moved
+                    lines = self.find_adjacent(last)
+                    print(lines)
                     self.move_made = True
                     self.selected_square = None
                     break
@@ -209,18 +196,15 @@ class AlignIt:
 
     def find_adjacent(self, x_y):
         x, y = x_y
-        org_x, org_y = x, y
-        print(x, y)
         directions = [
-            (1, 0),  # (0, 1), (1, 1), (1, -1),
-            (-1, 0),  # (0, -1), (-1, -1), (-1, 1),
+            (1, 0),  (0, 1), (1, 1), (1, -1),
+            (-1, 0),  (0, -1), (-1, -1), (-1, 1),
         ]
         target = self.space[x][y]
-        lines = {0: [], 1: [], 2: [], 3: []}
+        lines = {0: [(x, y)], 1: [(x, y)], 2: [(x, y)], 3: [(x, y)]}
         grid_check = [[False for _ in range(self.dim)]
                       for _ in range(self.dim)]
         for i, direction in enumerate(directions):
-            x, y = org_x, org_y
             dir_x, dir_y = direction
             while True:
                 x += dir_x
@@ -230,13 +214,13 @@ class AlignIt:
                     if self.space[x][y] == target and is_taken:
                         if x < 0 or y < 0:
                             continue
-                        lines[i % 1].append((x, y))
-                        lines[i % 1].append((org_x, org_y))
+                        lines[i % 4].append((x, y))
                         grid_check[x][y] = True
                     else:
                         break
                 except Exception:
                     break
+
         return lines
 
 
