@@ -25,7 +25,7 @@ PINK = (255, 153, 255)
 BROWN = (255, 128, 0)
 ORANGE = '#F26522'
 colors = [
-    GREEN, RED, BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN,
+    GREEN, RED,  # BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN,
 ]
 
 
@@ -70,9 +70,11 @@ class AlignIt:
         while True:
             self.draw_grid(False)
             if self.move_made:
-                self.draw_predicted(next_colors)
-                # self.lines
-                # self.check_length(lines)
+                predicted_col_cords = self.draw_predicted(next_colors)
+                for x_grid, y_grid, color in predicted_col_cords:
+                    lines = self.find_adjacent_color((x_grid, y_grid), color)
+                    self.check_length_remove_square(lines)
+                    print(lines)
                 next_colors = [rand_color() for _ in range(3)]
                 self.draw_future_grid(next_colors)
                 self.move_made = False
@@ -174,21 +176,22 @@ class AlignIt:
     def draw_predicted(self, next_colors):
         placed = 0
         future_square_cord_color = []
-        color = None
         while True:
-            if not next_colors or placed == 3:
+            if placed == 3 or not next_colors:
                 break
             x = random.randint(OFFSET, WINDOW_WIDTH)
             y = random.randint(OFFSET, WINDOW_HEIGHT)
             x, y = normalize_cords(x, y)
             x_grid = int((x / 50) - 3)
             y_grid = int((y / 50) - 3)
+
             if (
                 0 <= x_grid < len(self.space[0])
                 and 0 <= y_grid < len(self.space[0])
                 and self.space[x_grid][y_grid] == 0
             ):
-                color = next_colors.pop()
+
+                color = next_colors.pop()   # was in to if statement bellow
                 self.sqr_grid[x_grid][y_grid] = ColoredRect(
                     color,
                     x,
@@ -196,8 +199,8 @@ class AlignIt:
                 ).draw_colored_rect(color)
                 self.space[x_grid][y_grid] = 1
                 placed += 1
-            future_square_cord_color.append((x_grid, y_grid, color))
-        return future_square_cord_color, color
+                future_square_cord_color.append((x_grid, y_grid, color))
+        return future_square_cord_color
 
     def find_adjacent_color(self, x_y, color):
         org_x, org_y = x_y
