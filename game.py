@@ -71,6 +71,8 @@ class AlignIt:
             self.draw_grid(False)
             if self.move_made:
                 self.draw_predicted(next_colors)
+                # self.lines
+                # self.check_length(lines)
                 next_colors = [rand_color() for _ in range(3)]
                 self.draw_future_grid(next_colors)
                 self.move_made = False
@@ -102,10 +104,10 @@ class AlignIt:
                     self.space[last[0]][last[1]] = 1
                     self.space[first[0]][first[1]] = 0
                     self.move_square(path, color)
-                    lines, org_x, org_y = self.find_adjacent_color(last, color)
+                    lines = self.find_adjacent_color(last, color)
                     print(f'hor ---{lines[0]}    ver ---{lines[1]}')
                     print(f'UL-DR ---{lines[2]}     DL-UR ---{lines[3]}')
-                    self.check_length(lines, org_x, org_y)
+                    self.check_length_remove_square(lines)
                     self.move_made = True
                     self.selected_square = None
                     break
@@ -171,8 +173,10 @@ class AlignIt:
 
     def draw_predicted(self, next_colors):
         placed = 0
+        future_square_cord_color = []
+        color = None
         while True:
-            if placed == 3:
+            if not next_colors or placed == 3:
                 break
             x = random.randint(OFFSET, WINDOW_WIDTH)
             y = random.randint(OFFSET, WINDOW_HEIGHT)
@@ -192,6 +196,8 @@ class AlignIt:
                 ).draw_colored_rect(color)
                 self.space[x_grid][y_grid] = 1
                 placed += 1
+            future_square_cord_color.append((x_grid, y_grid, color))
+        return future_square_cord_color, color
 
     def find_adjacent_color(self, x_y, color):
         org_x, org_y = x_y
@@ -199,7 +205,6 @@ class AlignIt:
             (1, 0),  (0, 1), (1, 1), (1, -1),
             (-1, 0),  (0, -1), (-1, -1), (-1, 1),
         ]
-        target = self.space[org_x][org_y]
         lines = {
             0: [(org_x, org_y)],
             1: [(org_x, org_y)],
@@ -216,23 +221,21 @@ class AlignIt:
                     color_org = self.sqr_grid[org_x][org_y].color
                     color_adj = self.sqr_grid[x][y].color
                     is_same_color = color_org == color_adj
-                    is_taken = self.space[x][y] != 0
-                    if self.space[x][y] == target:
-                        if is_taken:   # maybe unnesisary
-                            if is_same_color:
-                                if x < 0 or y < 0:
-                                    continue
-                                lines[i % 4].append((x, y))
-                            else:
-                                break
+                    is_taken = self.space[x][y] == 1
+                    if is_taken and is_same_color:
+                        if x < 0 or y < 0:
+                            continue
+                        lines[i % 4].append((x, y))
+                    else:
+                        break
                 except Exception:
                     print('error')
                     break
-        return lines, org_x, org_y
+        return lines
 
-    def check_length(self, lines, org_x, org_y):
-        if any(len(line) >= 5 for line in lines.values()):
-            for line in lines.values():
+    def check_length_remove_square(self, lines):
+        for line in lines.values():
+            if len(line) >= 5:
                 for x, y in line:
                     self.sqr_grid[x][y].draw_colored_rect(BLACK)
                     self.space[x][y] = 0
