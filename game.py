@@ -53,11 +53,13 @@ class AlignIt:
         self.grow = True
         self.move_made = True
         self.same_color_counter = 0
+
         self.main()
 
     def setup_game(self, next_colors):
         global SCREEN, CLOCK
         pygame.init()
+        self.text_font = pygame.font.SysFont('Arial', 30)
         pygame.mixer.music.pause()
         SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         CLOCK = pygame.time.Clock()
@@ -175,6 +177,11 @@ class AlignIt:
                 (i * 25),
             ).draw_colored_rect(color)
 
+    def game_over(self, text, color, x, y):
+        screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        img = self.text_font.render(text, True, color)
+        screen.blit(img, (x, y))
+
     def draw_predicted(self, next_colors):
         placed = 0
         future_square_cord_color = []
@@ -209,7 +216,7 @@ class AlignIt:
                 print('no space')
         if available_positions == 0:
             print('Game Over')
-
+            self.game_over('Game Over', (255, 255, 255), 10, 10)
         return future_square_cord_color
 
     def find_adjacent_color(self, x_y, color):
