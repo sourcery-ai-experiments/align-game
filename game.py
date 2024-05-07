@@ -53,7 +53,6 @@ class AlignIt:
         self.grow = True
         self.move_made = True
         self.same_color_counter = 0
-
         self.main()
 
     def setup_game(self, next_colors):
@@ -78,7 +77,6 @@ class AlignIt:
                 for x_grid, y_grid, color in predicted_col_cords:
                     lines = self.find_adjacent_color((x_grid, y_grid), color)
                     self.check_length_remove_square(lines)
-                    print(lines)
                 next_colors = [rand_color() for _ in range(3)]
                 self.draw_future_grid(next_colors)
                 self.move_made = False
@@ -111,8 +109,8 @@ class AlignIt:
                     self.space[first[0]][first[1]] = 0
                     self.move_square(path, color)
                     lines = self.find_adjacent_color(last, color)
-                    print(f'hor ---{lines[0]}    ver ---{lines[1]}')
-                    print(f'UL-DR ---{lines[2]}     DL-UR ---{lines[3]}')
+                    # print(f'hor ---{lines[0]}    ver ---{lines[1]}')
+                    # print(f'UL-DR ---{lines[2]}     DL-UR ---{lines[3]}')
                     self.check_length_remove_square(lines)
                     self.move_made = True
                     self.selected_square = None
@@ -182,14 +180,21 @@ class AlignIt:
         img = self.text_font.render(text, True, color)
         screen.blit(img, (x, y))
 
+    # def score(self, text, points, color, x, y):
+    #     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    #     img = self.text_font.render(text, True, color)
+    #     screen.blit(img, (x, y))
+
     def draw_predicted(self, next_colors):
         placed = 0
         future_square_cord_color = []
         available_positions = 0
+        # self.score('score', (255, 255, 255), 500, 10)
         for row in self.space:
             available_positions += row.count(0)
-
+        print(self.score)
         while placed < 3 and available_positions > 0 and next_colors:
+
             x = random.randint(OFFSET, WINDOW_WIDTH)
             y = random.randint(OFFSET, WINDOW_HEIGHT)
             x, y = normalize_cords(x, y)
@@ -212,8 +217,8 @@ class AlignIt:
                 future_square_cord_color.append((x_grid, y_grid, color))
                 available_positions -= 1
 
-            else:
-                print('no space')
+            # else:
+            #     print('no space')
         if available_positions == 0:
             print('Game Over')
             self.game_over('Game Over', (255, 255, 255), 10, 10)
@@ -249,7 +254,6 @@ class AlignIt:
                     else:
                         break
                 except Exception:
-                    print('error')
                     break
         return lines
 
@@ -259,6 +263,7 @@ class AlignIt:
                 for x, y in line:
                     self.sqr_grid[x][y].draw_colored_rect(BLACK)
                     self.space[x][y] = 0
+                    self.score += 1
 
 
 if __name__ == '__main__':
