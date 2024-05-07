@@ -45,20 +45,17 @@ class AlignIt:
     dim = 9
 
     def __init__(self):
+        self.removed_lines = 0
         self.sqr_grid = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
         self.space = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
         self.next_sqrs = []
-
         self.score_hr = 0
         self.score_vr = 0
         self.score_tldr = 0
         self.score_dltr = 0
-
         self.score_hrvr = self.score_hr + self.score_vr
         self.score_diag = self.score_dltr + self.score_tldr
-
-        self.score = self.score_hrvr + self.score_diag
-
+        self.scoreall = self.score_hrvr + self.score_diag
         self.selected_square = None
         self.grow = True
         self.move_made = True
@@ -92,6 +89,7 @@ class AlignIt:
                 self.move_made = False
             self.handle_mouse_click()
             self.handle_selected_square()
+            # self.score()
             pygame.display.update()
 
     def handle_mouse_click(self):
@@ -190,16 +188,14 @@ class AlignIt:
         img = self.text_font.render(text, True, color)
         screen.blit(img, (x, y))
 
-    # def score(self, text, points, color, x, y):
-    #     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    #     img = self.text_font.render(text, True, color)
-    #     screen.blit(img, (x, y))
+    # def score(self):
+    #     img = self.text_font.render(f"score: {self.score}", True, WHITE)
+    #     SCREEN.blit(img, (10, 10))
 
     def draw_predicted(self, next_colors):
         placed = 0
         future_square_cord_color = []
         available_positions = 0
-        # self.score('score', (255, 255, 255), 500, 10)
         for row in self.space:
             available_positions += row.count(0)
         print(
@@ -207,7 +203,7 @@ class AlignIt:
             f'ver {self.score_vr}',
             f'topL {self.score_tldr}',
             f'downL {self.score_dltr}',
-            f'score {self.score:.1f}',
+            f'score {self.scoreall:.1f}',
         )
         while placed < 3 and available_positions > 0 and next_colors:
 
@@ -233,8 +229,10 @@ class AlignIt:
                 future_square_cord_color.append((x_grid, y_grid, color))
                 available_positions -= 1
 
-            # else:
-            #     print('no space')
+                lines = self.find_adjacent_color((x_grid, y_grid), color)
+                self.check_length_remove_square(lines)
+        # self.draw_grid(False)
+
         if available_positions == 0:
             print('Game Over')
             self.game_over('Game Over', (255, 255, 255), 10, 10)
@@ -280,17 +278,19 @@ class AlignIt:
                     self.sqr_grid[x][y].draw_colored_rect(BLACK)
                     self.space[x][y] = 0
                 if direction == 0:
-                    self.score_hr += 0.1
+                    self.score_hr += 1
                 elif direction == 1:
-                    self.score_vr += 0.2
+                    self.score_vr += 1
                 elif direction == 2:
                     self.score_tldr += 1
                 elif direction == 3:
-                    self.score_dltr += 1.1
+                    self.score_dltr += 1
+                self.removed_lines += 1
 
                 self.score_hrvr = self.score_hr + self.score_vr
                 self.score_diag = self.score_dltr + self.score_tldr
-                self.score = self.score_hrvr + self.score_diag
+                self.scoreall = self.score_hrvr + self.score_diag
+                print(self.removed_lines)
 
 
 if __name__ == '__main__':
