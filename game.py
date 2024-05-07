@@ -27,7 +27,7 @@ PINK = (255, 153, 255)
 BROWN = (255, 128, 0)
 ORANGE = '#F26522'
 colors = [
-    GREEN, RED, BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN,
+    GREEN, RED,  # BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN,
 ]
 
 
@@ -48,7 +48,17 @@ class AlignIt:
         self.sqr_grid = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
         self.space = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
         self.next_sqrs = []
-        self.score = 0
+
+        self.score_hr = 0
+        self.score_vr = 0
+        self.score_tldr = 0
+        self.score_dltr = 0
+
+        self.score_hrvr = self.score_hr + self.score_vr
+        self.score_diag = self.score_dltr + self.score_tldr
+
+        self.score = self.score_hrvr + self.score_diag
+
         self.selected_square = None
         self.grow = True
         self.move_made = True
@@ -192,7 +202,13 @@ class AlignIt:
         # self.score('score', (255, 255, 255), 500, 10)
         for row in self.space:
             available_positions += row.count(0)
-        print(self.score)
+        print(
+            f'hor {self.score_hr}',
+            f'ver {self.score_vr}',
+            f'topL {self.score_tldr}',
+            f'downL {self.score_dltr}',
+            f'score {self.score:.1f}',
+        )
         while placed < 3 and available_positions > 0 and next_colors:
 
             x = random.randint(OFFSET, WINDOW_WIDTH)
@@ -258,12 +274,23 @@ class AlignIt:
         return lines
 
     def check_length_remove_square(self, lines):
-        for line in lines.values():
+        for direction, line in lines.items():
             if len(line) >= 5:
                 for x, y in line:
                     self.sqr_grid[x][y].draw_colored_rect(BLACK)
                     self.space[x][y] = 0
-                    self.score += 1
+                if direction == 0:
+                    self.score_hr += 0.1
+                elif direction == 1:
+                    self.score_vr += 0.2
+                elif direction == 2:
+                    self.score_tldr += 1
+                elif direction == 3:
+                    self.score_dltr += 1.1
+
+                self.score_hrvr = self.score_hr + self.score_vr
+                self.score_diag = self.score_dltr + self.score_tldr
+                self.score = self.score_hrvr + self.score_diag
 
 
 if __name__ == '__main__':
