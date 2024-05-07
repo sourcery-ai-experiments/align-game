@@ -27,7 +27,7 @@ PINK = (255, 153, 255)
 BROWN = (255, 128, 0)
 ORANGE = '#F26522'
 colors = [
-    GREEN, RED,  # BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN,
+    GREEN,  # RED,  # BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN,
 ]
 
 
@@ -279,13 +279,13 @@ class AlignIt:
                     self.sqr_grid[x][y].draw_colored_rect(BLACK)
                     self.space[x][y] = 0
                 if direction == 0:
-                    self.score_hr += 1
+                    self.score_hr += len(line)
                 elif direction == 1:
-                    self.score_vr += 1
+                    self.score_vr += len(line)
                 elif direction == 2:
-                    self.score_tldr += 1
+                    self.score_tldr += len(line)
                 elif direction == 3:
-                    self.score_dltr += 1
+                    self.score_dltr += len(line)
                 self.removed_lines += 1
 
                 self.score_hrvr = self.score_hr + self.score_vr
