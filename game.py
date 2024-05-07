@@ -27,7 +27,7 @@ PINK = (255, 153, 255)
 BROWN = (255, 128, 0)
 ORANGE = '#F26522'
 colors = [
-    GREEN,  # RED,  # BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN,
+    GREEN, RED, BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN,
 ]
 
 
@@ -127,6 +127,7 @@ class AlignIt:
                     break
                 self.selected_square = self.sqr_grid[x_grid][y_grid]
             if event.type == pygame.QUIT:
+                self.save_score()
                 pygame.quit()
                 sys.exit()
 
@@ -232,7 +233,6 @@ class AlignIt:
 
                 lines = self.find_adjacent_color((x_grid, y_grid), color)
                 self.check_length_remove_square(lines)
-        # self.draw_grid(False)
 
         if available_positions == 0:
             print('Game Over')
@@ -292,6 +292,12 @@ class AlignIt:
                 self.score_diag = self.score_dltr + self.score_tldr
                 self.scoreall = self.score_hrvr + self.score_diag
                 print(self.removed_lines)
+
+    def save_score(self):
+        name = ('your name: ')
+        with open('score.txt', 'a') as file:
+            file.write(name)
+            file.write(str(self.scoreall))
 
 
 if __name__ == '__main__':
