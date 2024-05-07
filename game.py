@@ -83,8 +83,9 @@ class AlignIt:
         while True:
             self.draw_grid(False)
             if self.move_made:
-                predicted_col_cords = self.draw_predicted(next_colors)
-                for x_grid, y_grid, color in predicted_col_cords:
+                future_square_cord_color = self.draw_predicted(next_colors)
+                self.future_square_cord_color = future_square_cord_color
+                for x_grid, y_grid, color in self.future_square_cord_color:
                     lines = self.find_adjacent_color((x_grid, y_grid), color)
                     self.check_length_remove_square(lines)
                 next_colors = [rand_color() for _ in range(3)]
@@ -206,13 +207,13 @@ class AlignIt:
         available_positions = 0
         for row in self.space:
             available_positions += row.count(0)
-        print(
-            f'hor {self.score_hr}',
-            f'ver {self.score_vr}',
-            f'topL {self.score_tldr}',
-            f'downL {self.score_dltr}',
-            f'score {self.scoreall:.1f}',
-        )
+        # print(
+        #     f'hor {self.score_hr}',
+        #     f'ver {self.score_vr}',
+        #     f'topL {self.score_tldr}',
+        #     f'downL {self.score_dltr}',
+        #     f'score {self.scoreall:.1f}',
+        # )
         while placed < 3 and available_positions > 0 and next_colors:
 
             x = random.randint(OFFSET, WINDOW_WIDTH)
@@ -241,9 +242,7 @@ class AlignIt:
                 self.check_length_remove_square(lines)
 
         if available_positions == 0:
-            print('Game Over')
             self.game_over('Game Over', (255, 255, 255), 10, 10)
-        print(future_square_cord_color)
         return future_square_cord_color
 
     def find_adjacent_color(self, x_y, color):
@@ -298,24 +297,18 @@ class AlignIt:
                 self.score_hrvr = self.score_hr + self.score_vr
                 self.score_diag = self.score_dltr + self.score_tldr
                 self.scoreall = self.score_hrvr + self.score_diag
-                print(self.removed_lines)
 
     def save_score(self):
         # name = input('your name: ')
         current_time = datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')
-        print(
-            f'{self.future_square_cord_color}',
-        )
         with open('score.txt', 'a') as file:
             # file.write(f"your name: {name}" + "\n")
             file.write(f'your score: {str(self.scoreall)}' + '\n')
             file.write(f'moves made: {self.moves_made}' + '\n')
             file.write(f'date: {current_time}' + '\n')
-            # file.write(str(self.space) + "\n")
-            # file.write(str(self.sqr_grid) + "\n")
-            file.write(
-                f'predicted sqr: {str(self.future_square_cord_color),}' + '\n',
-            )
+            file.write(str(self.space) + '\n')
+            file.write(str(self.sqr_grid) + '\n')
+            file.write(f'{str(self.future_square_cord_color),}' + '\n')
             file.write('------------------------------' + '\n')
 
 
