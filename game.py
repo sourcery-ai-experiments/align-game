@@ -299,17 +299,32 @@ class AlignIt:
                 self.scoreall = self.score_hrvr + self.score_diag
 
     def save_score(self):
-        # name = input('your name: ')
-        current_time = datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')
-        with open('score.txt', 'a') as file:
-            # file.write(f"your name: {name}" + "\n")
-            file.write(f'your score: {str(self.scoreall)}' + '\n')
-            file.write(f'moves made: {self.moves_made}' + '\n')
-            file.write(f'date: {current_time}' + '\n')
-            file.write(str(self.space) + '\n')
-            file.write(str(self.sqr_grid) + '\n')
-            file.write(f'{str(self.future_square_cord_color),}' + '\n')
-            file.write('------------------------------' + '\n')
+        name = input('your name: ')
+        if name == 'reset':
+            self.space = [
+                [0 for _ in range(self.dim)]
+                for _ in range(self.dim)
+            ]
+            self.sqr_grid = [
+                [0 for _ in range(self.dim)]
+                for _ in range(self.dim)
+            ]
+            if __name__ == '__main__':
+                AlignIt()
+        elif name == 'quit':
+            pygame.quit()
+        else:
+            t = datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+            current_time = t
+            with open('score.txt', 'a') as file:
+                file.write(f'your name: {name}' + '\n')
+                file.write(f'your score: {str(self.scoreall)}' + '\n')
+                file.write(f'moves made: {self.moves_made}' + '\n')
+                file.write(f'date: {current_time}' + '\n')
+                file.write(str(self.space) + '\n')
+                file.write(str(self.sqr_grid) + '\n')
+                file.write(f'{str(self.future_square_cord_color),}' + '\n')
+                file.write('------------------------------' + '\n')
 
 
 if __name__ == '__main__':
