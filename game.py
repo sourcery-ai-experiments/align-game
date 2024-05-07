@@ -89,7 +89,7 @@ class AlignIt:
                 self.move_made = False
             self.handle_mouse_click()
             self.handle_selected_square()
-            # self.score()
+            self.score()
             pygame.display.update()
 
     def handle_mouse_click(self):
@@ -188,9 +188,10 @@ class AlignIt:
         img = self.text_font.render(text, True, color)
         screen.blit(img, (x, y))
 
-    # def score(self):
-    #     img = self.text_font.render(f"score: {self.score}", True, WHITE)
-    #     SCREEN.blit(img, (10, 10))
+    def score(self):
+        img = self.text_font.render(f'score: {self.scoreall}', True, WHITE)
+        SCREEN.fill(BLACK, (470, 10, 130, 30))
+        SCREEN.blit(img, (470, 10))
 
     def draw_predicted(self, next_colors):
         placed = 0
