@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 import random
 import sys
 from time import sleep
@@ -27,7 +28,7 @@ PINK = (255, 153, 255)
 BROWN = (255, 128, 0)
 ORANGE = '#F26522'
 colors = [
-    GREEN, RED, BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN,
+    GREEN,  # RED, BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN,
 ]
 
 
@@ -60,6 +61,8 @@ class AlignIt:
         self.grow = True
         self.move_made = True
         self.same_color_counter = 0
+        self.moves_made = 0
+        self.future_square_cord_color = []
         self.main()
 
     def setup_game(self, next_colors):
@@ -148,6 +151,7 @@ class AlignIt:
             pygame.display.update()
 
     def move_square(self, path, color):
+        self.moves_made += 1
         for i, cords in enumerate(path):
             prev_x = path[i-1][0]
             prev_y = path[i-1][1]
@@ -156,6 +160,7 @@ class AlignIt:
             y = cords[1]
             self.sqr_grid[x][y].draw_colored_rect(color)
             sleep(0.1)
+
             pygame.display.update()
 
     def draw_grid(self, new):
@@ -197,6 +202,7 @@ class AlignIt:
     def draw_predicted(self, next_colors):
         placed = 0
         future_square_cord_color = []
+
         available_positions = 0
         for row in self.space:
             available_positions += row.count(0)
@@ -237,6 +243,7 @@ class AlignIt:
         if available_positions == 0:
             print('Game Over')
             self.game_over('Game Over', (255, 255, 255), 10, 10)
+        print(future_square_cord_color)
         return future_square_cord_color
 
     def find_adjacent_color(self, x_y, color):
@@ -294,10 +301,22 @@ class AlignIt:
                 print(self.removed_lines)
 
     def save_score(self):
-        name = ('your name: ')
+        # name = input('your name: ')
+        current_time = datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+        print(
+            f'{self.future_square_cord_color}',
+        )
         with open('score.txt', 'a') as file:
-            file.write(name)
-            file.write(str(self.scoreall))
+            # file.write(f"your name: {name}" + "\n")
+            file.write(f'your score: {str(self.scoreall)}' + '\n')
+            file.write(f'moves made: {self.moves_made}' + '\n')
+            file.write(f'date: {current_time}' + '\n')
+            # file.write(str(self.space) + "\n")
+            # file.write(str(self.sqr_grid) + "\n")
+            file.write(
+                f'predicted sqr: {str(self.future_square_cord_color),}' + '\n',
+            )
+            file.write('------------------------------' + '\n')
 
 
 if __name__ == '__main__':
