@@ -323,20 +323,20 @@ class AlignIt:
                 file.write(str(self.sqr_grid) + '\n')
                 file.write(f'{str(self.future_square_cord_color),} \n')
 
-    # def load_score(self):
-    #     with open('score.txt') as file:
-    #         lines = file.readlines()
-    #         data = lines[-4:]
-    #         self.score_vr = int(data[0])
-    #         self.scoreall = int(data[0])
-    #         print(data[0])
+    def load_score(self):
+        with open('score.txt') as file:
+            lines = file.readlines()
+            data = lines[-4:]
+            self.score_vr = int(data[0])
+            self.scoreall = int(data[0])
+            print(data[0])
 
-    # def colored_grid(self):
-    #     with open('score.txt') as file:
-    #         lines = file.readlines()
-    #         data = lines[-4:]
+    def colored_grid(self):
+        with open('score.txt') as file:
+            lines = file.readlines()
+            data = lines[-4:]
 
-    #         print(data[2])
+            print(data[2])
 
 
 if __name__ == '__main__':
