@@ -100,7 +100,7 @@ class AlignIt:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONUP:
                 x, y = pygame.mouse.get_pos()
-                if x < 150 or y < 150:
+                if x < OFFSET or y < OFFSET:
                     break
                 x, y = normalize_cords(x, y)
                 x_grid = int((x / 50) - 3)
