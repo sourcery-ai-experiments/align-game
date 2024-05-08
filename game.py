@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import random
 import sys
 from time import sleep
@@ -8,7 +6,6 @@ import pygame
 
 from astar import astar
 from coloredRect import ColoredRect
-
 
 WINDOW_HEIGHT = 600
 WINDOW_WIDTH = 600
@@ -36,8 +33,8 @@ def rand_color():
 
 
 def normalize_cords(x, y):
-    x = x - (x % 50)
-    y = y - (y % 50)
+    x = x - (x % BLOCKSIZE)
+    y = y - (y % BLOCKSIZE)
     return (x, y)
 
 
@@ -154,15 +151,14 @@ class AlignIt:
     def draw_grid(self, new):
         if new:
             row = 0
-            for x in range(OFFSET, WINDOW_WIDTH, BLOCKSIZE):
-                col = 0
-                for y in range(OFFSET, WINDOW_HEIGHT, BLOCKSIZE):
+            for row, x in enumerate(range(OFFSET, WINDOW_WIDTH, BLOCKSIZE)):
+                for col, y in enumerate(
+                    range(OFFSET, WINDOW_HEIGHT, BLOCKSIZE),
+                ):
                     rect = ColoredRect(WHITE, x, y)
                     self.sqr_grid[row][col] = rect.draw_colored_rect(
                         WHITE, 1, False,
                     )
-                    col += 1
-                row += 1
         else:
             for row in self.sqr_grid:
                 for rect in row:
