@@ -7,7 +7,6 @@ import pygame
 from astar import astar
 from coloredRect import ColoredRect
 
-
 WINDOW_HEIGHT = 600
 WINDOW_WIDTH = 600
 OFFSET = 150
@@ -50,16 +49,18 @@ class AlignIt:
     def setup_game(self, next_colors):
         global SCREEN, CLOCK
         pygame.init()
-
         SCREEN = pygame.display.set_mode(
             (WINDOW_WIDTH, WINDOW_HEIGHT),
         )
+
+        pygame.display.set_caption('Align it!')
         CLOCK = pygame.time.Clock()
         SCREEN.fill(BLACK)
-        # self.draw_future_grid(next_colors)
         self.draw_grid(True)
+        self.draw_future_grid(next_colors)
 
     def handle_mouse_click(self, selected_square, next_colors):
+
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONUP:
                 x, y = pygame.mouse.get_pos()
@@ -77,9 +78,7 @@ class AlignIt:
                     first = path[0]
                     last = path[-1]
                     color = self.sqr_grid[first[0]][first[1]].color
-
                     self.space[last[0]][last[1]] = 1
-
                     self.space[first[0]][first[1]] = 0
                     self.move_square(path, color)
                     self.move_made = True
@@ -88,6 +87,10 @@ class AlignIt:
                 if self.space[x_grid][y_grid] == 0:
                     break
                 selected_square = self.sqr_grid[x_grid][y_grid]
+
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
         return selected_square
 
     def handle_selected_square(self, selected_square, grow):
@@ -114,27 +117,17 @@ class AlignIt:
         grow = True
 
         while True:
-
             self.draw_grid(False)
             if move_made:
                 self.draw_predicted(next_colors)
                 next_colors = [rand_color() for _ in range(3)]
-                # self.draw_future_grid(next_colors)
+                self.draw_future_grid(next_colors)
                 move_made = False
-
             selected_square = self.handle_mouse_click(
                 selected_square, next_colors,
             )
-
-            self.handle_quit()
             grow = self.handle_selected_square(selected_square, grow)
             pygame.display.update()
-
-    def handle_quit(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
 
     def move_square(self, path, color):
         for i, cords in enumerate(path):
@@ -163,15 +156,15 @@ class AlignIt:
                 for rect in row:
                     rect.draw_colored_rect(WHITE, 1, False)
 
-    # def draw_future_grid(self, colors):
-    #     self.next_sqrs.clear()
-    #     for i, color in enumerate(colors):
-    #         rect = ColoredRect(
-    #             color,
-    #             BLOCKSIZE,
-    #             ((i + 5) * BLOCKSIZE) + (i * 25),
-    #         )
-    #         self.next_sqrs.append(rect)  # pass it as single color block
+    def draw_future_grid(self, colors):
+        self.next_sqrs.clear()
+        for i, color in enumerate(colors):
+            rect = ColoredRect(
+                color,
+                BLOCKSIZE,
+                ((i + 5) * BLOCKSIZE) + (i * 25),
+            )
+            self.next_sqrs.append(rect)  # pass it as single color block
 
     def draw_predicted(self, next_colors):
         placed = 0
@@ -184,8 +177,8 @@ class AlignIt:
             x_grid = int((x / BLOCKSIZE) - 3)
             y_grid = int((y / BLOCKSIZE) - 3)
 
-            x_grid_fd = (x_grid >= 0) < len(self.space)
-            y_grid_fd = 0 <= y_grid < len(self.space[0])  # boundary checks
+            x_grid_fd = 0 <= x_grid < len(self.space)
+            y_grid_fd = 0 <= y_grid < len(self.space)
             if x_grid_fd and y_grid_fd and self.space[x_grid][y_grid] == 0:
                 color = next_colors.pop()
                 self.sqr_grid[x_grid][y_grid] = ColoredRect(

@@ -88,7 +88,6 @@ def astar(maze, start, end, allow_diagonal_movement=False):
         if outer_iterations > max_iterations:
             # if we hit this point return the path such as it is
             # it will not contain the destination
-            print('we were here')
             return return_path(current_node)
 
         # Generate children
