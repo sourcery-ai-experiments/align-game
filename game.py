@@ -176,9 +176,8 @@ class AlignIt:
 
     def draw_predicted(self, next_colors):
         placed = 0
-        while True:
-            if placed == 3:
-                break
+        while not placed == 3:
+
             x = random.randint(OFFSET, WINDOW_WIDTH)
             y = random.randint(OFFSET, WINDOW_HEIGHT)
 
