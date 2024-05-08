@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import datetime
 import random
 import sys
@@ -9,7 +7,6 @@ import pygame
 
 from astar import astar
 from coloredRect import ColoredRect
-
 
 WINDOW_HEIGHT = 600
 WINDOW_WIDTH = 600
@@ -37,8 +34,8 @@ def rand_color():
 
 
 def normalize_cords(x, y):
-    x = x - (x % 50)
-    y = y - (y % 50)
+    x = x - (x % BLOCKSIZE)
+    y = y - (y % BLOCKSIZE)
     return (x, y)
 
 
@@ -75,8 +72,8 @@ class AlignIt:
         SCREEN.fill(BLACK)
         self.draw_future_grid(next_colors)
         self.draw_grid(True)
-        self.load_score()
-        self.colored_grid()
+        # self.load_score()
+        # self.colored_grid()
 
     def main(self):
         next_colors = [rand_color() for _ in range(3)]
@@ -164,7 +161,6 @@ class AlignIt:
             y = cords[1]
             self.sqr_grid[x][y].draw_colored_rect(color)
             sleep(0.1)
-
             pygame.display.update()
 
     def draw_grid(self, new):
@@ -178,7 +174,6 @@ class AlignIt:
                     self.sqr_grid[row][col] = rect.draw_colored_rect(
                         WHITE, 1, False,
                     )
-
         else:
             for row in self.sqr_grid:
                 for rect in row:
@@ -329,20 +324,20 @@ class AlignIt:
                 file.write(str(self.sqr_grid) + '\n')
                 file.write(f'{str(self.future_square_cord_color),} \n')
 
-    def load_score(self):
-        with open('score.txt') as file:
-            lines = file.readlines()
-            data = lines[-4:]
-            self.score_vr = int(data[0])
-            self.scoreall = int(data[0])
-            print(data[0])
+    # def load_score(self):
+    #     with open('score.txt') as file:
+    #         lines = file.readlines()
+    #         data = lines[-4:]
+    #         self.score_vr = int(data[0])
+    #         self.scoreall = int(data[0])
+    #         print(data[0])
 
-    def colored_grid(self):
-        with open('score.txt') as file:
-            lines = file.readlines()
-            data = lines[-4:]
+    # def colored_grid(self):
+    #     with open('score.txt') as file:
+    #         lines = file.readlines()
+    #         data = lines[-4:]
 
-            print(data[2])
+    #         print(data[2])
 
 
 if __name__ == '__main__':
