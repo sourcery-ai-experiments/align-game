@@ -74,7 +74,7 @@ def astar(maze, start, end, allow_diagonal_movement=False):
         )
 
     # Loop until you find the end
-    while len(open_list) > 0:
+    while open_list:
         outer_iterations += 1
 
         # Get the current node

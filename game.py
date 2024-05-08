@@ -168,15 +168,14 @@ class AlignIt:
     def draw_grid(self, new):
         if new:
             row = 0
-            for x in range(OFFSET, WINDOW_WIDTH, BLOCKSIZE):
-                col = 0
-                for y in range(OFFSET, WINDOW_HEIGHT, BLOCKSIZE):
+            for row, x in enumerate(range(OFFSET, WINDOW_WIDTH, BLOCKSIZE)):
+                for col, y in enumerate(
+                    range(OFFSET, WINDOW_HEIGHT, BLOCKSIZE),
+                ):
                     rect = ColoredRect(WHITE, x, y)
                     self.sqr_grid[row][col] = rect.draw_colored_rect(
                         WHITE, 1, False,
                     )
-                    col += 1
-                row += 1
         else:
             for row in self.sqr_grid:
                 for rect in row:
@@ -194,9 +193,8 @@ class AlignIt:
 
     def draw_predicted(self, next_colors):
         placed = 0
-        while True:
-            if placed == 3:
-                break
+        while not placed == 3:
+
             x = random.randint(OFFSET, WINDOW_WIDTH)
             y = random.randint(OFFSET, WINDOW_HEIGHT)
 
