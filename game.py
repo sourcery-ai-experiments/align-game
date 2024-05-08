@@ -213,7 +213,6 @@ class AlignIt:
         #     f'score {self.scoreall:.1f}',
         # )
         while placed < 3 and available_positions > 0 and next_colors:
-
             x = random.randint(OFFSET, WINDOW_WIDTH)
             y = random.randint(OFFSET, WINDOW_HEIGHT)
             x, y = normalize_cords(x, y)
