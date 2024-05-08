@@ -7,8 +7,7 @@ class squareGrid:
         self.grid = [[0 for _ in range(dim)] for _ in range(dim)]
 
     def find_path(self, start, end):
-        path = astar(self.grid, start, end)
-        return path
+        return astar(self.grid, start, end)
 
     def find_adjacent(self, x_y):
         x, y = x_y
