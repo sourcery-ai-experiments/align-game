@@ -302,7 +302,7 @@ class AlignIt:
 
     def save_score(self):
         name = input('your name: ')
-        if name == 'reset':
+        if name == 'r':
             self.space = [
                 [0 for _ in range(self.dim)]
                 for _ in range(self.dim)
@@ -313,7 +313,7 @@ class AlignIt:
             ]
             if __name__ == '__main__':
                 AlignIt()
-        elif name == 'quit':
+        elif name == 'q':
             pygame.quit()
         else:
             t = datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')
@@ -321,21 +321,20 @@ class AlignIt:
             with open('score.txt', 'a') as file:
                 file.write('------------------------------' + '\n')
                 file.write(f'your name: {name}' + '\n')
-                file.write(f'your score: {str(self.scoreall)}' + '\n')
                 file.write(f'moves made: {self.moves_made}' + '\n')
                 file.write(f'date: {current_time}' + '\n')
+                file.write(f'{str(self.scoreall)}' + '\n')
                 file.write(str(self.space) + '\n')
                 file.write(str(self.sqr_grid) + '\n')
                 file.write(f'{str(self.future_square_cord_color),}' + '\n')
 
-    # def load_game_from_file(self, score):
-    #     with open('score.txt', 'r') as file:
-    #         savefile = []
-    #         lines = file.readlines()
-    #         for line in lines:
-    #             if line == "------------------------------":
-    #                 latest_date = max(dates)
-    #                 savefile.append()
+    def load_game_from_file(self):
+
+        with open('score.txt') as file:
+            lines = file.readlines()
+            data = lines[-4:]
+            self.score_vr = int(data[0])
+            self.scoreall = int(data[0])
 
 
 if __name__ == '__main__':
