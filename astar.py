@@ -18,7 +18,7 @@ class Node:
         return self.position == other.position
 
     def __repr__(self):
-        return f"{self.position} - g: {self.g} h: {self.h} f: {self.f}"
+        return f'{self.position} - g: {self.g} h: {self.h} f: {self.f}'
 
     # defining less than for purposes of heap queue
     def __lt__(self, other):
@@ -63,16 +63,18 @@ def astar(maze, start, end, allow_diagonal_movement=False):
 
     # Adding a stop condition
     outer_iterations = 0
-    max_iterations = (len(maze[0]) * len(maze) // 2)
+    max_iterations = (len(maze[0]) * len(maze) // 2 + 1)
 
     # what squares do we search
-    adjacent_squares = ((0, -1), (0, 1), (-1, 0), (1, 0),)
+    adjacent_squares = ((0, -1), (0, 1), (-1, 0), (1, 0))
     if allow_diagonal_movement:
-        adjacent_squares = ((0, -1), (0, 1), (-1, 0), (1, 0),
-                            (-1, -1), (-1, 1), (1, -1), (1, 1),)
+        adjacent_squares = (
+            (0, -1), (0, 1), (-1, 0), (1, 0),
+            (-1, -1), (-1, 1), (1, -1), (1, 1),
+        )
 
     # Loop until you find the end
-    while len(open_list) > 0:
+    while open_list:
         outer_iterations += 1
 
         # Get the current node
@@ -86,6 +88,7 @@ def astar(maze, start, end, allow_diagonal_movement=False):
         if outer_iterations > max_iterations:
             # if we hit this point return the path such as it is
             # it will not contain the destination
+            print('we were here')
             return return_path(current_node)
 
         # Generate children
@@ -96,7 +99,7 @@ def astar(maze, start, end, allow_diagonal_movement=False):
             # Get node position
             node_position = (
                 current_node.position[0] + new_position[0],
-                current_node.position[1] + new_position[1]
+                current_node.position[1] + new_position[1],
             )
 
             # Make sure within range
@@ -121,8 +124,10 @@ def astar(maze, start, end, allow_diagonal_movement=False):
         # Loop through children
         for child in children:
             # Child is on the closed list
-            if len([closed_child for closed_child in closed_list
-                    if closed_child == child]) > 0:
+            if len([
+                closed_child for closed_child in closed_list
+                if closed_child == child
+            ]) > 0:
                 continue
 
             # Create the f, g, and h values
@@ -132,9 +137,11 @@ def astar(maze, start, end, allow_diagonal_movement=False):
             child.f = child.g + child.h
 
             # Child is already in the open list
-            if len([open_node for open_node in open_list
-                    if child.position == open_node.position and
-                    child.g > open_node.g]) > 0:
+            if len([
+                open_node for open_node in open_list
+                if child.position == open_node.position and
+                child.g > open_node.g
+            ]) > 0:
                 continue
 
             # Add the child to the open list
