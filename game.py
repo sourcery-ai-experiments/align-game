@@ -65,20 +65,6 @@ class AlignIt:
         self.future_square_cord_color = []
         self.main()
 
-        # latest_saved_game = self.load_game_from_file()
-
-        # if latest_saved_game:
-        #     print("Latest saved game loaded successfully.")
-
-        #     self.space = latest_saved_game['space']
-        #     self.sqr_grid = latest_saved_game['sqr_grid']
-        #     self.future_square_cord_color =
-        # latest_saved_game['predicted squares']
-        #     self.scoreall = latest_saved_game['your score']
-        #     self.moves_made = latest_saved_game['moves made']
-        # next_colors = [rand_color() for _ in range(3)]
-        # self.setup_game(next_colors)
-
     def setup_game(self, next_colors):
         global SCREEN, CLOCK
         pygame.init()
@@ -89,6 +75,7 @@ class AlignIt:
         SCREEN.fill(BLACK)
         self.draw_future_grid(next_colors)
         self.draw_grid(True)
+        self.load_game_from_file()
 
     def main(self):
         next_colors = [rand_color() for _ in range(3)]
@@ -105,6 +92,7 @@ class AlignIt:
                 next_colors = [rand_color() for _ in range(3)]
                 self.draw_future_grid(next_colors)
                 self.move_made = False
+
             self.handle_mouse_click()
             self.handle_selected_square()
             self.score()
@@ -331,6 +319,7 @@ class AlignIt:
             t = datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')
             current_time = t
             with open('score.txt', 'a') as file:
+                file.write('------------------------------' + '\n')
                 file.write(f'your name: {name}' + '\n')
                 file.write(f'your score: {str(self.scoreall)}' + '\n')
                 file.write(f'moves made: {self.moves_made}' + '\n')
@@ -338,45 +327,15 @@ class AlignIt:
                 file.write(str(self.space) + '\n')
                 file.write(str(self.sqr_grid) + '\n')
                 file.write(f'{str(self.future_square_cord_color),}' + '\n')
-                file.write('------------------------------' + '\n')
 
-    # def load_game_from_file():
-    #     try:
-    #         with open('score.txt', 'r') as file:
-    #             lines = file.readlines()
-    #             saved_games = []
-    #             game_data = {}
-    #             for line in lines:
-    #                 if line.strip() == '------------------------------':
-    #                     if game_data:
-    #                         saved_games.append(game_data)
-    #                         game_data = {}
-    #                 else:
-    #                     key, value = line.strip().split(': ')
-    #                     if key == 'date':
-    #                         game_data[key] = value
-    #                     elif key == 'your score':
-    #                         game_data[key] = int(value)
-    #                     elif key == 'moves made':
-    #                         game_data[key] = int(value)
-    #                     elif key == 'space':
-    #                         game_data[key] = eval(value)
-    #                     elif key == 'sqr_grid':
-    #                         game_data[key] = eval(value)
-    #                     elif key == 'predicted squares':
-    #                         game_data[key] = eval(value)
-    #             if saved_games:
-    #                 latest_game = max(saved_games,
-    # key=lambda x: x.get('date'))
-    #                 return latest_game
-    #             else:
-    #                 print("No saved game found.")
-    #                 return None
-    #     except FileNotFoundError:
-    #         print("No saved game found.")
-    #         return None
-
-    # latest_saved_game = load_game_from_file()
+    # def load_game_from_file(self, score):
+    #     with open('score.txt', 'r') as file:
+    #         savefile = []
+    #         lines = file.readlines()
+    #         for line in lines:
+    #             if line == "------------------------------":
+    #                 latest_date = max(dates)
+    #                 savefile.append()
 
 
 if __name__ == '__main__':
