@@ -75,7 +75,8 @@ class AlignIt:
         SCREEN.fill(BLACK)
         self.draw_future_grid(next_colors)
         self.draw_grid(True)
-        self.load_game_from_file()
+        self.load_score()
+        self.colored_grid()
 
     def main(self):
         next_colors = [rand_color() for _ in range(3)]
@@ -169,15 +170,15 @@ class AlignIt:
     def draw_grid(self, new):
         if new:
             row = 0
-            for x in range(OFFSET, WINDOW_WIDTH, BLOCKSIZE):
-                col = 0
-                for y in range(OFFSET, WINDOW_HEIGHT, BLOCKSIZE):
+            for row, x in enumerate(range(OFFSET, WINDOW_WIDTH, BLOCKSIZE)):
+                for col, y in enumerate(
+                    range(OFFSET, WINDOW_HEIGHT, BLOCKSIZE),
+                ):
                     rect = ColoredRect(WHITE, x, y)
                     self.sqr_grid[row][col] = rect.draw_colored_rect(
                         WHITE, 1, False,
                     )
-                    col += 1
-                row += 1
+
         else:
             for row in self.sqr_grid:
                 for rect in row:
@@ -328,20 +329,20 @@ class AlignIt:
                 file.write(str(self.sqr_grid) + '\n')
                 file.write(f'{str(self.future_square_cord_color),} \n')
 
-    # def load_game_from_file(self):
-    #     with open('score.txt', "r") as file:
-    #         lines = file.readlines()
-    #         data = lines[-4:]
-    #         self.score_vr = int(data[0])
-    #         self.scoreall = int(data[0])
+    def load_score(self):
+        with open('score.txt') as file:
+            lines = file.readlines()
+            data = lines[-4:]
+            self.score_vr = int(data[0])
+            self.scoreall = int(data[0])
+            print(data[0])
 
-    # def colored_grid(self):
-    #     with open('score.txt', "r") as file:
-    #         lines = file.readlines()
-    #         data = lines[-4:]
+    def colored_grid(self):
+        with open('score.txt') as file:
+            lines = file.readlines()
+            data = lines[-4:]
 
-    #         self.sqr_grid = [[0 for _ in
-    # range(self.dim)] for _ in range(self.dim)]
+            print(data[2])
 
 
 if __name__ == '__main__':
