@@ -1,3 +1,4 @@
+import datetime
 import random
 import sys
 from time import sleep
@@ -42,15 +43,23 @@ class AlignIt:
     dim = 9
 
     def __init__(self):
+        self.removed_lines = 0
         self.sqr_grid = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
         self.space = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
         self.next_sqrs = []
-        self.score = 0
+        self.score_hr = 0
+        self.score_vr = 0
+        self.score_tldr = 0
+        self.score_dltr = 0
+        self.score_hrvr = self.score_hr + self.score_vr
+        self.score_diag = self.score_dltr + self.score_tldr
+        self.scoreall = self.score_hrvr + self.score_diag
         self.selected_square = None
         self.grow = True
         self.move_made = True
         self.same_color_counter = 0
-
+        self.moves_made = 0
+        self.future_square_cord_color = []
         self.main()
 
     def setup_game(self, next_colors):
@@ -63,6 +72,8 @@ class AlignIt:
         SCREEN.fill(BLACK)
         self.draw_future_grid(next_colors)
         self.draw_grid(True)
+        # self.load_score()
+        # self.colored_grid()
 
     def main(self):
         next_colors = [rand_color() for _ in range(3)]
@@ -71,23 +82,25 @@ class AlignIt:
         while True:
             self.draw_grid(False)
             if self.move_made:
-                predicted_col_cords = self.draw_predicted(next_colors)
-                for x_grid, y_grid, color in predicted_col_cords:
+                future_square_cord_color = self.draw_predicted(next_colors)
+                self.future_square_cord_color = future_square_cord_color
+                for x_grid, y_grid, color in self.future_square_cord_color:
                     lines = self.find_adjacent_color((x_grid, y_grid), color)
                     self.check_length_remove_square(lines)
-                    print(lines)
                 next_colors = [rand_color() for _ in range(3)]
                 self.draw_future_grid(next_colors)
                 self.move_made = False
+
             self.handle_mouse_click()
             self.handle_selected_square()
+            self.score()
             pygame.display.update()
 
     def handle_mouse_click(self):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONUP:
                 x, y = pygame.mouse.get_pos()
-                if x < 150 or y < 150:
+                if x < OFFSET or y < OFFSET:
                     break
                 x, y = normalize_cords(x, y)
                 x_grid = int((x / 50) - 3)
@@ -108,8 +121,8 @@ class AlignIt:
                     self.space[first[0]][first[1]] = 0
                     self.move_square(path, color)
                     lines = self.find_adjacent_color(last, color)
-                    print(f'hor ---{lines[0]}    ver ---{lines[1]}')
-                    print(f'UL-DR ---{lines[2]}     DL-UR ---{lines[3]}')
+                    # print(f'hor ---{lines[0]}    ver ---{lines[1]}')
+                    # print(f'UL-DR ---{lines[2]}     DL-UR ---{lines[3]}')
                     self.check_length_remove_square(lines)
                     self.move_made = True
                     self.selected_square = None
@@ -118,6 +131,7 @@ class AlignIt:
                     break
                 self.selected_square = self.sqr_grid[x_grid][y_grid]
             if event.type == pygame.QUIT:
+                self.save_score()
                 pygame.quit()
                 sys.exit()
 
@@ -138,6 +152,7 @@ class AlignIt:
             pygame.display.update()
 
     def move_square(self, path, color):
+        self.moves_made += 1
         for i, cords in enumerate(path):
             prev_x = path[i-1][0]
             prev_y = path[i-1][1]
@@ -178,13 +193,25 @@ class AlignIt:
         img = self.text_font.render(text, True, color)
         screen.blit(img, (x, y))
 
+    def score(self):
+        img = self.text_font.render(f'score: {self.scoreall}', True, WHITE)
+        SCREEN.fill(BLACK, (470, 10, 130, 30))
+        SCREEN.blit(img, (470, 10))
+
     def draw_predicted(self, next_colors):
         placed = 0
         future_square_cord_color = []
+
         available_positions = 0
         for row in self.space:
             available_positions += row.count(0)
-
+        # print(
+        #     f'hor {self.score_hr}',
+        #     f'ver {self.score_vr}',
+        #     f'topL {self.score_tldr}',
+        #     f'downL {self.score_dltr}',
+        #     f'score {self.scoreall:.1f}',
+        # )
         while placed < 3 and available_positions > 0 and next_colors:
             x = random.randint(OFFSET, WINDOW_WIDTH)
             y = random.randint(OFFSET, WINDOW_HEIGHT)
@@ -208,10 +235,10 @@ class AlignIt:
                 future_square_cord_color.append((x_grid, y_grid, color))
                 available_positions -= 1
 
-            else:
-                print('no space')
+                lines = self.find_adjacent_color((x_grid, y_grid), color)
+                self.check_length_remove_square(lines)
+
         if available_positions == 0:
-            print('Game Over')
             self.game_over('Game Over', (255, 255, 255), 10, 10)
         return future_square_cord_color
 
@@ -245,16 +272,71 @@ class AlignIt:
                     else:
                         break
                 except Exception:
-                    print('error')
                     break
         return lines
 
     def check_length_remove_square(self, lines):
-        for line in lines.values():
+        for direction, line in lines.items():
             if len(line) >= 5:
                 for x, y in line:
                     self.sqr_grid[x][y].draw_colored_rect(BLACK)
                     self.space[x][y] = 0
+                if direction == 0:
+                    self.score_hr += len(line)
+                elif direction == 1:
+                    self.score_vr += len(line)
+                elif direction == 2:
+                    self.score_tldr += len(line)
+                elif direction == 3:
+                    self.score_dltr += len(line)
+                self.removed_lines += 1
+
+                self.score_hrvr = self.score_hr + self.score_vr
+                self.score_diag = self.score_dltr + self.score_tldr
+                self.scoreall = self.score_hrvr + self.score_diag
+
+    def save_score(self):
+        name = input('your name: ')
+        if name == 'r':
+            self.space = [
+                [0 for _ in range(self.dim)]
+                for _ in range(self.dim)
+            ]
+            self.sqr_grid = [
+                [0 for _ in range(self.dim)]
+                for _ in range(self.dim)
+            ]
+            if __name__ == '__main__':
+                AlignIt()
+        elif name == 'q':
+            pygame.quit()
+        else:
+            t = datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+            current_time = t
+            with open('score.txt', 'a') as file:
+                file.write('------------------------------ \n')
+                file.write(f'your name: {name} \n')
+                file.write(f'moves made: {self.moves_made} \n')
+                file.write(f'date: {current_time} \n')
+                file.write(f'{str(self.scoreall)} \n')
+                file.write(str(self.space) + '\n')
+                file.write(str(self.sqr_grid) + '\n')
+                file.write(f'{str(self.future_square_cord_color),} \n')
+
+    # def load_score(self):
+    #     with open('score.txt') as file:
+    #         lines = file.readlines()
+    #         data = lines[-4:]
+    #         self.score_vr = int(data[0])
+    #         self.scoreall = int(data[0])
+    #         print(data[0])
+
+    # def colored_grid(self):
+    #     with open('score.txt') as file:
+    #         lines = file.readlines()
+    #         data = lines[-4:]
+
+    #         print(data[2])
 
 
 if __name__ == '__main__':
