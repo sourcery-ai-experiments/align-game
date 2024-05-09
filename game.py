@@ -25,7 +25,7 @@ PINK = (255, 153, 255)
 BROWN = (255, 128, 0)
 ORANGE = '#F26522'
 colors = [
-    GREEN, RED, BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN,
+    GREEN, RED,   BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN,
 ]
 
 
@@ -47,13 +47,7 @@ class AlignIt:
         self.sqr_grid = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
         self.space = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
         self.next_sqrs = []
-        self.score_hr = 0
-        self.score_vr = 0
-        self.score_tldr = 0
-        self.score_dltr = 0
-        self.score_hrvr = self.score_hr + self.score_vr
-        self.score_diag = self.score_dltr + self.score_tldr
-        self.scoreall = self.score_hrvr + self.score_diag
+        self.scoreall = 0
         self.selected_square = None
         self.grow = True
         self.move_made = True
@@ -144,6 +138,7 @@ class AlignIt:
                 self.selected_square = self.sqr_grid[x_grid][y_grid]
                 print('colored square selected')
             if event.type == pygame.QUIT:
+                self.quit_menu('what?', (RED), 100, 100)
                 self.user_input()
                 self.handle_quit()
 
@@ -203,6 +198,11 @@ class AlignIt:
                 (i * 25),
             ).draw_colored_rect(color)
 
+    def quit_menu(self, text, color, x, y):
+        screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        img = self.text_font.render(text, True, color)
+        screen.blit(img, (x, y))
+
     def game_over(self, text, color, x, y):
         screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         img = self.text_font.render(text, True, color)
@@ -249,7 +249,7 @@ class AlignIt:
                 self.check_length_remove_square(lines)
 
         if available_positions == 0:
-            self.game_over('Game Over', (255, 255, 255), 10, 10)
+            self.game_over('Game Over', (RED), 10, 10)
         return future_sqr_cord_color
 
     def find_adjacent_color(self, x_y, color):
@@ -291,18 +291,14 @@ class AlignIt:
                     self.sqr_grid[x][y].draw_colored_rect(BLACK)
                     self.space[x][y] = 0
                 if direction == 0:
-                    self.score_hr += len(line)
+                    self.scoreall += len(line)
                 elif direction == 1:
-                    self.score_vr += len(line)
+                    self.scoreall += len(line)
                 elif direction == 2:
-                    self.score_tldr += len(line)
+                    self.scoreall += len(line)
                 elif direction == 3:
-                    self.score_dltr += len(line)
+                    self.scoreall += len(line)
                 self.removed_lines += 1
-
-                self.score_hrvr = self.score_hr + self.score_vr
-                self.score_diag = self.score_dltr + self.score_tldr
-                self.scoreall = self.score_hrvr + self.score_diag
 
     def user_input(self):
         name = input('your name: ')
