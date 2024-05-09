@@ -72,7 +72,7 @@ class AlignIt:
         SCREEN.fill(BLACK)
         self.draw_future_grid(next_colors)
         self.draw_grid(True)
-        self.load_score()
+        # self.load_score()
         # self.colored_grid()
         # self.load_space()
 
@@ -133,7 +133,8 @@ class AlignIt:
                     break
                 self.selected_square = self.sqr_grid[x_grid][y_grid]
             if event.type == pygame.QUIT:
-                self.save_score()
+                self.user_input()
+                self.save_score(self.self.name)
                 pygame.quit()
                 sys.exit()
 
@@ -304,7 +305,20 @@ class AlignIt:
                 self.score_diag = self.score_dltr + self.score_tldr
                 self.scoreall = self.score_hrvr + self.score_diag
 
-    def save_score(self):
+    def save_score(self, name):
+        t = datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+        current_time = t
+        with open('score.txt', 'a') as file:
+            file.write('------------------------------ \n')
+            file.write(f'your name: {name} \n')
+            file.write(f'moves made: {self.moves_made} \n')
+            file.write(f'date: {current_time} \n')
+            file.write(f'{str(self.scoreall)} \n')
+            file.write(str(self.space) + '\n')
+            file.write(str(self.sqr_grid) + '\n')
+            file.write(f'{str(self.future_square_cord_color),} \n')
+
+    def user_input(self):
         name = input('your name: ')
         if name == 'r':
             self.space = [
@@ -320,24 +334,14 @@ class AlignIt:
         elif name == 'q':
             pygame.quit()
         else:
-            t = datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')
-            current_time = t
-            with open('score.txt', 'a') as file:
-                file.write('------------------------------ \n')
-                file.write(f'your name: {name} \n')
-                file.write(f'moves made: {self.moves_made} \n')
-                file.write(f'date: {current_time} \n')
-                file.write(f'{str(self.scoreall)} \n')
-                file.write(str(self.space) + '\n')
-                file.write(str(self.sqr_grid) + '\n')
-                file.write(f'{str(self.future_square_cord_color),} \n')
+            self.save_score(name)
 
-    def load_score(self):
-        with open('score.txt') as file:
-            lines = file.readlines()
-            data = lines[-4:]
-            self.score_vr = int(data[0])
-            self.scoreall = int(data[0])
+    # def load_score(self):
+    #     with open('score.txt') as file:
+    #         lines = file.readlines()
+    #         data = lines[-4:]
+    #         self.score_vr = int(data[0])
+    #         self.scoreall = int(data[0])
 
     # def load_space(self):
     #     with open('score.txt') as file:
