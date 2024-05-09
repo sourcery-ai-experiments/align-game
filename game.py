@@ -140,7 +140,10 @@ class AlignIt:
                     break
                 self.selected_square = self.sqr_grid[x_grid][y_grid]
             if event.type == pygame.QUIT:
-                self.quit_menu('Player name:', (255, 255, 255), 200, 200)
+                self.quit_menu(
+                    'Player name:', 'quit', 'reset',
+                    (255, 255, 255), 200, 200,
+                )
                 self.user_input()
                 self.handle_quit()
 
@@ -200,7 +203,45 @@ class AlignIt:
                 (i * 25),
             ).draw_colored_rect(color)
 
-    def quit_menu(self, text, color, x, y):
+    # def buttons(self):
+    #     quit_button = ("Walk", 200, 500, True, (200, 70))
+    #     quit_button.click()
+    #     reset_button = ("Left", 10, 500, True, (180, 70))
+    #     reset_button.click()
+
+    #     for event in pygame.event.get():
+
+    #         if event.type == pygame.MOUSEBUTTONUP:
+    #             if quit_button.click():
+    #                 print("walk")
+    #             if reset_button.click():
+    #                 print("left")
+
+    #     return buttona
+
+    def render_quit_button(self, screen, button_rect, quit_button_text):
+        pygame.draw.rect(screen, GREY, button_rect)
+        button_text_surface = self.text_font.render(
+            quit_button_text, True, BLACK,
+        )
+        text_rect = button_text_surface.get_rect(center=button_rect.center)
+        screen.blit(button_text_surface, text_rect)
+
+    def render_reset_button(self, screen, button_rect, reset_button_text):
+        pygame.draw.rect(screen, GREY, button_rect)
+        button_text_surface = self.text_font.render(
+            reset_button_text, True, BLACK,
+        )
+        text_rect = button_text_surface.get_rect(center=button_rect.center)
+        screen.blit(button_text_surface, text_rect)
+
+    def quit_menu(
+            self,
+            text,
+            quit_button_text,
+            reset_button_text,
+            color, x, y,
+    ):
         screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         img = self.text_font.render(text, True, color)
         score_text = self.text_font.render(
@@ -212,6 +253,10 @@ class AlignIt:
         screen.blit(img, (x, y))
         screen.blit(score_text, (x, y + 50))
         screen.blit(moves, (x, y + 100))
+        quit_button_rect = pygame.Rect(x, y + 150, 150, 50)
+        self.render_quit_button(screen, quit_button_rect, quit_button_text)
+        reset_button_rect = pygame.Rect(x, y + 210, 150, 50)
+        self.render_reset_button(screen, reset_button_rect, reset_button_text)
         pygame.display.update()
 
     def game_over(self, text, color, x, y):
