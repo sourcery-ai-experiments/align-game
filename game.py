@@ -25,7 +25,7 @@ PINK = (255, 153, 255)
 BROWN = (255, 128, 0)
 ORANGE = '#F26522'
 colors = [
-    GREEN, RED,  # BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN,
+    GREEN, RED,  BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN,
 ]
 
 
@@ -84,7 +84,6 @@ class AlignIt:
             if self.move_made:
                 if self.spawn is True:
                     self.spawning(next_colors)
-
                 for x_grid, y_grid, color in self.future_sqr_cord_color:
                     lines = self.find_adjacent_color((x_grid, y_grid), color)
                     self.check_length_remove_square(lines)
@@ -141,7 +140,7 @@ class AlignIt:
                     break
                 self.selected_square = self.sqr_grid[x_grid][y_grid]
             if event.type == pygame.QUIT:
-                self.quit_menu('what?', (RED), 100, 100)
+                self.quit_menu('Player name:', (255, 255, 255), 200, 200)
                 self.user_input()
                 self.handle_quit()
 
@@ -203,8 +202,10 @@ class AlignIt:
 
     def quit_menu(self, text, color, x, y):
         screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-        img = self.text_font.render(text, True, color)
+        font = pygame.font.SysFont('Arial', 30)
+        img = font.render(text, True, color)
         screen.blit(img, (x, y))
+        pygame.display.update()
 
     def game_over(self, text, color, x, y):
         screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
