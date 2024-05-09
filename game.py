@@ -202,9 +202,16 @@ class AlignIt:
 
     def quit_menu(self, text, color, x, y):
         screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-        font = pygame.font.SysFont('Arial', 30)
-        img = font.render(text, True, color)
+        img = self.text_font.render(text, True, color)
+        score_text = self.text_font.render(
+            f'Score: {self.scoreall}', True, WHITE,
+        )
+        moves = self.text_font.render(
+            f'Moves made: {self.moves_made}', True, WHITE,
+        )
         screen.blit(img, (x, y))
+        screen.blit(score_text, (x, y + 50))
+        screen.blit(moves, (x, y + 100))
         pygame.display.update()
 
     def game_over(self, text, color, x, y):
