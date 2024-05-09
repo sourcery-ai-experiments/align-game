@@ -93,10 +93,13 @@ class AlignIt:
                 self.move_made = False
 
             self.handle_mouse_click()
+
             self.handle_selected_square()
             self.score()
             self.movesmade()
             pygame.display.update()
+            if self.handle_quit():
+                break
 
     def handle_mouse_click(self):
         for event in pygame.event.get():
@@ -132,11 +135,15 @@ class AlignIt:
                 if self.space[x_grid][y_grid] == 0:
                     break
                 self.selected_square = self.sqr_grid[x_grid][y_grid]
+
+    def handle_quit(self):
+        for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.user_input()
                 self.save_score(self.self.name)
                 pygame.quit()
                 sys.exit()
+        return False
 
     def handle_selected_square(self):
         if self.selected_square:
