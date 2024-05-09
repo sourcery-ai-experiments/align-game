@@ -25,7 +25,7 @@ PINK = (255, 153, 255)
 BROWN = (255, 128, 0)
 ORANGE = '#F26522'
 colors = [
-    GREEN, RED,   BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN,
+    GREEN, RED,  # BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN,
 ]
 
 
@@ -43,6 +43,7 @@ class AlignIt:
     dim = 9
 
     def __init__(self):
+        self.spawn = True
         self.removed_lines = 0
         self.sqr_grid = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
         self.space = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
@@ -70,6 +71,10 @@ class AlignIt:
         # self.colored_grid()
         # self.load_space()
 
+    def spawning(self, next_colors):
+        future_sqr_cord_color = self.draw_predicted(next_colors)
+        self.future_sqr_cord_color = future_sqr_cord_color
+
     def main(self):
         next_colors = [rand_color() for _ in range(3)]
         self.setup_game(next_colors)
@@ -77,11 +82,13 @@ class AlignIt:
         while True:
             self.draw_grid(False)
             if self.move_made:
-                future_sqr_cord_color = self.draw_predicted(next_colors)
-                self.future_sqr_cord_color = future_sqr_cord_color
+                if self.spawn is True:
+                    self.spawning(next_colors)
+
                 for x_grid, y_grid, color in self.future_sqr_cord_color:
                     lines = self.find_adjacent_color((x_grid, y_grid), color)
                     self.check_length_remove_square(lines)
+                self.spawn = True
                 next_colors = [rand_color() for _ in range(3)]
                 self.draw_future_grid(next_colors)
                 self.move_made = False
@@ -95,7 +102,6 @@ class AlignIt:
         x, y = normalize_cords(x, y)
         x_grid = int((x / 50) - 3)
         y_grid = int((y / 50) - 3)
-        print(x_grid, y_grid)
         return x_grid, y_grid
 
     def square_path(self, start, end):
@@ -121,7 +127,6 @@ class AlignIt:
                 if x < OFFSET or y < OFFSET:
                     break
                 if self.selected_square and self.space[x_grid][y_grid] == 0:
-                    print('move square')
                     start = (
                         self.selected_square.grid_x,
                         self.selected_square.grid_y,
@@ -133,10 +138,8 @@ class AlignIt:
                     self.selected_square = None
                     break
                 if self.space[x_grid][y_grid] == 0:
-                    print('black square')
                     break
                 self.selected_square = self.sqr_grid[x_grid][y_grid]
-                print('colored square selected')
             if event.type == pygame.QUIT:
                 self.quit_menu('what?', (RED), 100, 100)
                 self.user_input()
@@ -287,6 +290,7 @@ class AlignIt:
     def check_length_remove_square(self, lines):
         for direction, line in lines.items():
             if len(line) >= 5:
+                self.spawn = False
                 for x, y in line:
                     self.sqr_grid[x][y].draw_colored_rect(BLACK)
                     self.space[x][y] = 0
