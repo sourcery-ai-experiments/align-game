@@ -104,6 +104,21 @@ class AlignIt:
         print(x_grid, y_grid)
         return x_grid, y_grid
 
+    def square_path(self, start, end):
+        path = astar(self.space, start, end)
+        if path is None:
+            return None, None
+        first = path[0]
+        last = path[-1]
+        color = self.sqr_grid[first[0]][first[1]].color
+        self.space[last[0]][last[1]] = 1
+        self.space[first[0]][first[1]] = 0
+        self.move_square(path, color)
+        lines = self.find_adjacent_color(last, color)
+        self.check_length_remove_square(lines)
+        self.move_made = True
+        return path, color
+
     def handle_mouse_click(self):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONUP:
@@ -111,7 +126,6 @@ class AlignIt:
                 x_grid, y_grid = self.select_square(x, y)
                 if x < OFFSET or y < OFFSET:
                     break
-
                 if self.selected_square and self.space[x_grid][y_grid] == 0:
                     print('move square')
                     start = (
@@ -119,20 +133,9 @@ class AlignIt:
                         self.selected_square.grid_y,
                     )
                     end = (x_grid, y_grid)
-                    path = astar(self.space, start, end)
+                    path, color = self.square_path(start, end)
                     if path is None:
                         break
-                    first = path[0]
-                    last = path[-1]
-                    color = self.sqr_grid[first[0]][first[1]].color
-                    self.space[last[0]][last[1]] = 1
-                    self.space[first[0]][first[1]] = 0
-                    self.move_square(path, color)
-                    lines = self.find_adjacent_color(last, color)
-                    # print(f'hor ---{lines[0]}    ver ---{lines[1]}')
-                    # print(f'UL-DR ---{lines[2]}     DL-UR ---{lines[3]}')
-                    self.check_length_remove_square(lines)
-                    self.move_made = True
                     self.selected_square = None
                     break
                 if self.space[x_grid][y_grid] == 0:
