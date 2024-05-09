@@ -72,8 +72,9 @@ class AlignIt:
         SCREEN.fill(BLACK)
         self.draw_future_grid(next_colors)
         self.draw_grid(True)
-        # self.load_score()
+        self.load_score()
         # self.colored_grid()
+        # self.load_space()
 
     def main(self):
         next_colors = [rand_color() for _ in range(3)]
@@ -94,6 +95,7 @@ class AlignIt:
             self.handle_mouse_click()
             self.handle_selected_square()
             self.score()
+            self.movesmade()
             pygame.display.update()
 
     def handle_mouse_click(self):
@@ -198,6 +200,13 @@ class AlignIt:
         SCREEN.fill(BLACK, (470, 10, 130, 30))
         SCREEN.blit(img, (470, 10))
 
+    def movesmade(self):
+        img = self.text_font.render(
+            f'Moves made: {self.moves_made}', True, WHITE,
+        )
+        SCREEN.fill(BLACK, (200, 10, 230, 30))
+        SCREEN.blit(img, (200, 10))
+
     def draw_predicted(self, next_colors):
         placed = 0
         future_square_cord_color = []
@@ -261,9 +270,9 @@ class AlignIt:
                 x += dir_x
                 y += dir_y
                 try:
-                    color_org = self.sqr_grid[org_x][org_y].color
+                    color = self.sqr_grid[org_x][org_y].color
                     color_adj = self.sqr_grid[x][y].color
-                    is_same_color = color_org == color_adj
+                    is_same_color = color == color_adj
                     is_taken = self.space[x][y] == 1
                     if is_taken and is_same_color:
                         if x < 0 or y < 0:
@@ -323,19 +332,24 @@ class AlignIt:
                 file.write(str(self.sqr_grid) + '\n')
                 file.write(f'{str(self.future_square_cord_color),} \n')
 
-    # def load_score(self):
+    def load_score(self):
+        with open('score.txt') as file:
+            lines = file.readlines()
+            data = lines[-4:]
+            self.score_vr = int(data[0])
+            self.scoreall = int(data[0])
+
+    # def load_space(self):
     #     with open('score.txt') as file:
     #         lines = file.readlines()
     #         data = lines[-4:]
-    #         self.score_vr = int(data[0])
-    #         self.scoreall = int(data[0])
-    #         print(data[0])
+    #         self.space.append(str(data[1]))
+    #         print(data[1])
 
     # def colored_grid(self):
-    #     with open('score.txt') as file:
+    #     with open('score.txt' "r") as file:
     #         lines = file.readlines()
     #         data = lines[-4:]
-
     #         print(data[2])
 
 
