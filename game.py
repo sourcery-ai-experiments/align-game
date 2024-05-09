@@ -97,16 +97,21 @@ class AlignIt:
             self.movesmade()
             pygame.display.update()
 
+    def select_square(self, x, y):
+        x, y = normalize_cords(x, y)
+        x_grid = int((x / 50) - 3)
+        y_grid = int((y / 50) - 3)
+        print(x_grid, y_grid)
+        return x_grid, y_grid
+
     def handle_mouse_click(self):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONUP:
                 x, y = pygame.mouse.get_pos()
+                x_grid, y_grid = self.select_square(x, y)
                 if x < OFFSET or y < OFFSET:
                     break
-                x, y = normalize_cords(x, y)
-                x_grid = int((x / 50) - 3)
-                y_grid = int((y / 50) - 3)
-                print('selects square')
+
                 if self.selected_square and self.space[x_grid][y_grid] == 0:
                     print('move square')
                     start = (
