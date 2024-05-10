@@ -7,11 +7,11 @@ WINDOW_WIDTH = 600
 
 
 class Buttons:
-    def __init__(self, scoreall=None, moves_made=None):
-        self.scoreall = scoreall
-        self.moves_made = moves_made
+    def __init__(self, scoreall, moves_made):
         pygame.font.init()
         self.text_font = pygame.font.SysFont('Arial', 30)
+        self.scoreall = scoreall
+        self.moves_made = moves_made
 
     def quit_menu(
         self,

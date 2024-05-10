@@ -9,7 +9,7 @@ WINDOW_WIDTH = 600
 SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 
-class SCORE:
+class STATS:
 
     def save_score(
             self, name,
@@ -35,3 +35,15 @@ class SCORE:
         img = self.text_font.render(f'score: {self.scoreall}', True, WHITE)
         SCREEN.fill(BLACK, (470, 10, 130, 30))
         SCREEN.blit(img, (470, 10))
+
+    def game_over(self, text, color, x, y):
+        screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        img = self.text_font.render(text, True, color)
+        screen.blit(img, (x, y))
+
+    def movesmade(self):
+        img = self.text_font.render(
+            f'Moves made: {self.moves_made}', True, WHITE,
+        )
+        SCREEN.fill(BLACK, (200, 10, 230, 30))
+        SCREEN.blit(img, (200, 10))
