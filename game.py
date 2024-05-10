@@ -69,13 +69,13 @@ class AlignIt:
         self.draw_future_grid(next_colors)
         self.draw_grid(True)
 
-    def spawning(self, next_colors):
+    def handle_spawning(self, next_colors):
         future_sqr_cord_color = self.draw_predicted(next_colors)
         self.future_sqr_cord_color = future_sqr_cord_color
 
     def process_turn(self, next_colors):
         if self.spawn:
-            self.spawning(next_colors)
+            self.handle_spawning(next_colors)
             for x_grid, y_grid, color in self.future_sqr_cord_color:
                 lines = self.find_adjacent_color((x_grid, y_grid), color)
                 self.check_length_remove_square(lines)
@@ -87,7 +87,12 @@ class AlignIt:
         while True:
             self.draw_grid(False)
             if self.move_made:
-                self.process_turn(next_colors)
+                try:
+                    success = self.process_turn(next_colors)
+                    if not success:
+                        print('Failed to process turn.')
+                except Exception as e:
+                    print(f'An error occurred: {e}')
                 self.spawn = True
                 next_colors = [rand_color() for _ in range(3)]
                 self.draw_future_grid(next_colors)
@@ -106,8 +111,6 @@ class AlignIt:
 
     def square_path(self, start, end):
         path = astar(self.space, start, end)
-        if path is None:
-            return None, None
         first = path[0]
         last = path[-1]
         color = self.sqr_grid[first[0]][first[1]].color
@@ -263,22 +266,18 @@ class AlignIt:
                     break
         return lines
 
+    def stop_spawning(self):
+        self.spawn = False
+
     def check_length_remove_square(self, lines):
         for direction, line in lines.items():
             if len(line) >= 5:
-                self.spawn = False
+                self.stop_spawning()
                 for x, y in line:
                     self.sqr_grid[x][y].draw_colored_rect(BLACK)
                     self.space[x][y] = 0
-                if direction == 0:
+                if direction in [0, 1, 2, 3]:
                     self.scoreall += len(line)
-                elif direction == 1:
-                    self.scoreall += len(line)
-                elif direction == 2:
-                    self.scoreall += len(line)
-                elif direction == 3:
-                    self.scoreall += len(line)
-                self.removed_lines += 1
 
 
 if __name__ == '__main__':

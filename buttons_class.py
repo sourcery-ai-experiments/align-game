@@ -82,8 +82,6 @@ class Buttons:
 
     def reset_function(self):
         print('reset')
-        pass
 
     def load_function(self):
         print('load')
-        pass
