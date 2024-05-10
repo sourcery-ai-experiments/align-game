@@ -5,6 +5,7 @@ from time import sleep
 import pygame
 
 from astar import astar
+from buttons_class import Buttons
 from coloredRect import ColoredRect
 from score_class import SCORE
 
@@ -44,16 +45,19 @@ class AlignIt:
 
     def __init__(self):
         self.spawn = True
+        self.moves_made = 0
+        self.scoreall = 0
+        self.buttons_instance = Buttons(
+            moves_made=self.moves_made, scoreall=self.scoreall,
+        )
         self.removed_lines = 0
         self.sqr_grid = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
         self.space = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
         self.next_sqrs = []
-        self.scoreall = 0
         self.selected_square = None
         self.grow = True
         self.move_made = True
         self.same_color_counter = 0
-        self.moves_made = 0
         self.future_sqr_cord_color = []
         self.main()
 
@@ -140,7 +144,7 @@ class AlignIt:
                     break
                 self.selected_square = self.sqr_grid[x_grid][y_grid]
             if event.type == pygame.QUIT:
-                self.quit_menu(
+                self.buttons_instance.quit_menu(
                     'Player name:', 'quit', 'reset', 'load',
                     (255, 255, 255), 200, 200,
                 )
@@ -202,97 +206,6 @@ class AlignIt:
                 ((i + 5) * BLOCKSIZE) +
                 (i * 25),
             ).draw_colored_rect(color)
-
-    # def buttons(self):
-    #     quit_button = ("Walk", 200, 500, True, (200, 70))
-    #     quit_button.click()
-    #     reset_button = ("Left", 10, 500, True, (180, 70))
-    #     reset_button.click()
-
-    #     for event in pygame.event.get():
-
-    #         if event.type == pygame.MOUSEBUTTONUP:
-    #             if quit_button.click():
-    #                 print("walk")
-    #             if reset_button.click():
-    #                 print("left")
-
-    #     return buttona
-
-    def quit_menu(
-        self,
-        text,
-        load_button_text,
-        reset_button_text,
-        quit_button_text,
-        color, x, y,
-    ):
-        screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-        img = self.text_font.render(text, True, color)
-        score_text = self.text_font.render(
-            f'Score: {self.scoreall}', True, WHITE,
-        )
-        moves = self.text_font.render(
-            f'Moves made: {self.moves_made}', True, WHITE,
-        )
-        screen.blit(img, (x, y))
-        screen.blit(score_text, (x, y + 50))
-        screen.blit(moves, (x, y + 100))
-        load_button_rect = pygame.Rect(x, y + 270, 150, 50)
-        self.render_reset_button(screen, load_button_rect, load_button_text)
-        reset_button_rect = pygame.Rect(x, y + 210, 150, 50)
-        self.render_reset_button(screen, reset_button_rect, reset_button_text)
-        quit_button_rect = pygame.Rect(x, y + 150, 150, 50)
-        self.render_quit_button(screen, quit_button_rect, quit_button_text)
-        pygame.display.update()
-
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    mouse_pos = pygame.mouse.get_pos()
-                    if quit_button_rect.collidepoint(mouse_pos):
-                        self.load_function()
-                    elif reset_button_rect.collidepoint(mouse_pos):
-                        self.reset_function()
-                    elif load_button_rect.collidepoint(mouse_pos):
-                        self.quit_function()
-
-    def render_quit_button(self, screen, button_rect, quit_button_text):
-        pygame.draw.rect(screen, GREY, button_rect)
-        button_text_surface = self.text_font.render(
-            quit_button_text, True, BLACK,
-        )
-        text_rect = button_text_surface.get_rect(center=button_rect.center)
-        screen.blit(button_text_surface, text_rect)
-
-    def render_reset_button(self, screen, button_rect, reset_button_text):
-        pygame.draw.rect(screen, GREY, button_rect)
-        button_text_surface = self.text_font.render(
-            reset_button_text, True, BLACK,
-        )
-        text_rect = button_text_surface.get_rect(center=button_rect.center)
-        screen.blit(button_text_surface, text_rect)
-
-    def render_load_button(self, screen, button_rect, load_button_text):
-        pygame.draw.rect(screen, GREY, button_rect)
-        button_text_surface = self.text_font.render(
-            load_button_text, True, BLACK,
-        )
-        text_rect = button_text_surface.get_rect(center=button_rect.center)
-        screen.blit(button_text_surface, text_rect)
-
-    def quit_function(self):
-        print('quit')
-        pygame.quit()
-        quit()
-
-    def reset_function(self):
-        print('reset')
-        pass
-
-    def load_function(self):
-        print('load')
-        pass
 
     def game_over(self, text, color, x, y):
         screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
