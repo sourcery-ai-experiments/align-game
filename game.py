@@ -141,7 +141,7 @@ class AlignIt:
                 self.selected_square = self.sqr_grid[x_grid][y_grid]
             if event.type == pygame.QUIT:
                 self.quit_menu(
-                    'Player name:', 'quit', 'reset',
+                    'Player name:', 'quit', 'reset', 'load',
                     (255, 255, 255), 200, 200,
                 )
                 self.user_input()
@@ -235,11 +235,20 @@ class AlignIt:
         text_rect = button_text_surface.get_rect(center=button_rect.center)
         screen.blit(button_text_surface, text_rect)
 
+    def render_load_button(self, screen, button_rect, load_button_text):
+        pygame.draw.rect(screen, GREY, button_rect)
+        button_text_surface = self.text_font.render(
+            load_button_text, True, BLACK,
+        )
+        text_rect = button_text_surface.get_rect(center=button_rect.center)
+        screen.blit(button_text_surface, text_rect)
+
     def quit_menu(
             self,
             text,
             quit_button_text,
             reset_button_text,
+            load_button_text,
             color, x, y,
     ):
         screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -257,6 +266,8 @@ class AlignIt:
         self.render_quit_button(screen, quit_button_rect, quit_button_text)
         reset_button_rect = pygame.Rect(x, y + 210, 150, 50)
         self.render_reset_button(screen, reset_button_rect, reset_button_text)
+        load_button_rect = pygame.Rect(x, y + 270, 150, 50)
+        self.render_reset_button(screen, load_button_rect, load_button_text)
         pygame.display.update()
 
     def game_over(self, text, color, x, y):
