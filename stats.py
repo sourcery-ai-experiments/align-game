@@ -2,14 +2,14 @@ import datetime
 
 import pygame
 
-WHITE = (200, 200, 200)
-BLACK = (0, 0, 0)
-WINDOW_HEIGHT = 600
-WINDOW_WIDTH = 600
-SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+from constants import BLACK
+from constants import SCREEN
+from constants import WHITE
+from constants import WINDOW_HEIGHT
+from constants import WINDOW_WIDTH
 
 
-class STATS:
+class Stats:
 
     def save_score(
             self, name,

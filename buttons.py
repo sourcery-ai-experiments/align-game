@@ -1,9 +1,10 @@
 import pygame
-WHITE = (200, 200, 200)
-BLACK = (0, 0, 0)
-GREY = (160, 160, 160)
-WINDOW_HEIGHT = 600
-WINDOW_WIDTH = 600
+
+from constants import BLACK
+from constants import GREY
+from constants import WHITE
+from constants import WINDOW_HEIGHT
+from constants import WINDOW_WIDTH
 
 
 class Buttons:

@@ -4,29 +4,17 @@ from time import sleep
 import pygame
 
 from astar import astar
-from buttons_class import Buttons
+from buttons import Buttons
 from coloredRect import ColoredRect
-from stats import STATS
-
-WINDOW_HEIGHT = 600
-WINDOW_WIDTH = 600
-OFFSET = 150
-BLOCKSIZE = 50
-BLACK = (0, 0, 0)
-GREY = (160, 160, 160)
-WHITE = (200, 200, 200)
-GREEN = '#00A14B'
-RED = '#ED1C24'
-BLUE = '#21409A'
-YELLOW = '#FFDE17'
-PURPLE = '#7F3F98'
-CYAN = '#009599'
-PINK = (255, 153, 255)
-BROWN = (255, 128, 0)
-ORANGE = '#F26522'
-colors = [
-    GREEN, RED,  BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN,
-]
+from constants import BLACK
+from constants import BLOCKSIZE
+from constants import colors
+from constants import OFFSET
+from constants import RED
+from constants import WHITE
+from constants import WINDOW_HEIGHT
+from constants import WINDOW_WIDTH
+from stats import Stats
 
 
 def rand_color():
@@ -55,7 +43,6 @@ class AlignIt:
         self.grow = True
         self.move_made = True
         self.same_color_counter = 0
-        self.future_sqr_cord_color = []
         self.main()
 
     def setup_game(self, next_colors):
@@ -69,16 +56,10 @@ class AlignIt:
         self.draw_future_grid(next_colors)
         self.draw_grid(True)
 
-    def handle_spawning(self, next_colors):
-        future_sqr_cord_color = self.draw_predicted(next_colors)
-        self.future_sqr_cord_color = future_sqr_cord_color
-
-    def process_turn(self, next_colors):
-        if self.spawn:
-            self.handle_spawning(next_colors)
-            for x_grid, y_grid, color in self.future_sqr_cord_color:
-                lines = self.find_adjacent_color((x_grid, y_grid), color)
-                self.check_length_remove_square(lines)
+    def aprove_spawning(self, next_colors):
+        for x_grid, y_grid, color in self.draw_predicted(next_colors):
+            lines = self.find_adjacent_color((x_grid, y_grid), color)
+            self.check_length_remove_square(lines)
 
     def main(self):
         next_colors = [rand_color() for _ in range(3)]
@@ -87,20 +68,17 @@ class AlignIt:
         while True:
             self.draw_grid(False)
             if self.move_made:
-                try:
-                    success = self.process_turn(next_colors)
-                    if not success:
-                        print('Failed to process turn.')
-                except Exception as e:
-                    print(f'An error occurred: {e}')
+                if self.spawn:
+                    self.aprove_spawning(next_colors)
                 self.spawn = True
                 next_colors = [rand_color() for _ in range(3)]
                 self.draw_future_grid(next_colors)
                 self.move_made = False
             self.handle_mouse_click()
-            self.handle_selected_square()
-            STATS.score(self)
-            STATS.movesmade(self)
+            if self.selected_square is not None:
+                self.makes_square_pulse()
+            Stats.score(self)
+            Stats.movesmade(self)
             pygame.display.update()
 
     def select_square(self, x, y):
@@ -109,8 +87,13 @@ class AlignIt:
         y_grid = int((y / 50) - 3)
         return x_grid, y_grid
 
-    def square_path(self, start, end):
+    def get_path(self, start, end):
         path = astar(self.space, start, end)
+        if path is None:
+            print('no path found')
+        return path
+
+    def handle_sqr_movment(self, path):
         first = path[0]
         last = path[-1]
         color = self.sqr_grid[first[0]][first[1]].color
@@ -120,24 +103,22 @@ class AlignIt:
         lines = self.find_adjacent_color(last, color)
         self.check_length_remove_square(lines)
         self.move_made = True
-        return path, color
 
     def handle_mouse_click(self):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONUP:
                 x, y = pygame.mouse.get_pos()
-                x_grid, y_grid = self.select_square(x, y)
                 if x < OFFSET or y < OFFSET:
                     break
+                x_grid, y_grid = self.select_square(x, y)
                 if self.selected_square and self.space[x_grid][y_grid] == 0:
                     start = (
                         self.selected_square.grid_x,
                         self.selected_square.grid_y,
                     )
                     end = (x_grid, y_grid)
-                    path = self.square_path(start, end)
-                    if path is None:
-                        break
+                    path = self.get_path(start, end)
+                    self.handle_sqr_movment(path)
                     self.selected_square = None
                     break
                 if self.space[x_grid][y_grid] == 0:
@@ -149,20 +130,19 @@ class AlignIt:
                     (255, 255, 255), 200, 200,
                 )
 
-    def handle_selected_square(self):
-        if self.selected_square:
-            sleep(.5)
-            if self.grow:
-                inf_val = 2
-                self.grow = False
-                color = self.selected_square.color
-            else:
-                inf_val = -2
-                self.grow = True
-                color = BLACK
-            self.selected_square.inflate_ip(inf_val, inf_val)
-            self.selected_square.draw_colored_rect(color, 2, False)
-            pygame.display.update()
+    def makes_square_pulse(self):
+        sleep(.5)
+        if self.grow:
+            inf_val = 2
+            self.grow = False
+            color = self.selected_square.color
+        else:
+            inf_val = -2
+            self.grow = True
+            color = BLACK
+        self.selected_square.inflate_ip(inf_val, inf_val)
+        self.selected_square.draw_colored_rect(color, 2, False)
+        pygame.display.update()
 
     def move_square(self, path, color):
         self.moves_made += 1
@@ -231,7 +211,7 @@ class AlignIt:
                 lines = self.find_adjacent_color((x_grid, y_grid), color)
                 self.check_length_remove_square(lines)
         if available_positions == 0:
-            STATS.game_over(self, 'Game Over', (RED), 10, 10)
+            Stats.game_over(self, 'Game Over', (RED), 10, 10)
         return future_sqr_cord_color
 
     def find_adjacent_color(self, x_y, color):
@@ -266,13 +246,10 @@ class AlignIt:
                     break
         return lines
 
-    def stop_spawning(self):
-        self.spawn = False
-
     def check_length_remove_square(self, lines):
         for direction, line in lines.items():
             if len(line) >= 5:
-                self.stop_spawning()
+                self.spawn = False
                 for x, y in line:
                     self.sqr_grid[x][y].draw_colored_rect(BLACK)
                     self.space[x][y] = 0
