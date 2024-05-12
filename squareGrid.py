@@ -1,7 +1,7 @@
-import astar
+from astar import astar
 
 
-class squareGrid:
+class SquareGrid:
     def __init__(self, dim):
         self.dim = dim
         self.grid = [[0 for _ in range(dim)] for _ in range(dim)]
