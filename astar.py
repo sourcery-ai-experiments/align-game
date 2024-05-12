@@ -29,9 +29,8 @@ class Node:
         return self.f > other.f
 
 
-def return_path(current_node):
+def return_path(current):
     path = []
-    current = current_node
     while current is not None:
         path.append(current.position)
         current = current.parent
@@ -123,10 +122,11 @@ def astar(maze, start, end, allow_diagonal_movement=False):
         # Loop through children
         for child in children:
             # Child is on the closed list
-            if len([
-                closed_child for closed_child in closed_list
+            if [
+                closed_child
+                for closed_child in closed_list
                 if closed_child == child
-            ]) > 0:
+            ]:
                 continue
 
             # Create the f, g, and h values
@@ -136,11 +136,12 @@ def astar(maze, start, end, allow_diagonal_movement=False):
             child.f = child.g + child.h
 
             # Child is already in the open list
-            if len([
-                open_node for open_node in open_list
-                if child.position == open_node.position and
-                child.g > open_node.g
-            ]) > 0:
+            if [
+                open_node
+                for open_node in open_list
+                if child.position == open_node.position
+                and child.g > open_node.g
+            ]:
                 continue
 
             # Add the child to the open list
