@@ -1,5 +1,6 @@
 import pytest
-from game import squareGrid
+
+import squareGrid
 
 
 @pytest.fixture(params=[3])
@@ -8,15 +9,16 @@ def empty_grid(request):
 
 
 impossible_wall = [
-    (0, 1), (1, 1), (1, 0)
+    (0, 1), (1, 1), (1, 0),
 ]
 
 
 @pytest.mark.parametrize('start', [(0, 0)])
 @pytest.mark.parametrize('end', [(0, 2), (2, 0), (2, 2)])
-@pytest.mark.parametrize('walls, expected', [
-        pytest.param(impossible_wall, None)
-    ]
+@pytest.mark.parametrize(
+    'walls, expected', [
+        pytest.param(impossible_wall, None),
+    ],
 )
 def test_astar_no_path(empty_grid, start, end, walls, expected):
     # arrange
@@ -29,25 +31,26 @@ def test_astar_no_path(empty_grid, start, end, walls, expected):
 
 
 @pytest.mark.parametrize('start', [(0, 0)])
-@pytest.mark.parametrize('end, walls, expected', [
+@pytest.mark.parametrize(
+    'end, walls, expected', [
         pytest.param((0, 2), [(0, 1), (1, 1), (2, 1)], None),
         pytest.param(
             (2, 0),
             [(0, 1), (1, 1), (2, 1)],
-            [(0, 0), (1, 0), (2, 0)]
+            [(0, 0), (1, 0), (2, 0)],
         ),
         pytest.param((2, 2), [(0, 1), (1, 1), (2, 1)], None),
         pytest.param(
             (0, 2),
             [(1, 0), (1, 1), (1, 2)],
-            [(0, 0), (0, 1), (0, 2)]
+            [(0, 0), (0, 1), (0, 2)],
         ),
         pytest.param((2, 0), [(1, 0), (1, 1), (1, 2)], None),
         pytest.param((2, 2), [(1, 0), (1, 1), (1, 2)], None),
         pytest.param((0, 2), [(2, 0), (1, 1), (0, 2)], None),
         pytest.param((2, 0), [(2, 0), (1, 1), (0, 2)], None),
         pytest.param((1, 2), [(2, 0), (1, 1), (0, 2)], None),
-    ]
+    ],
 )
 def test_astar_path_found(empty_grid, start, end, walls, expected):
     # arrange
