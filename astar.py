@@ -63,7 +63,7 @@ def astar(maze, start, end, allow_diagonal_movement=False):
 
     # Adding a stop condition
     outer_iterations = 0
-    max_iterations = (len(maze[0]) * len(maze) // 2 + 1)
+    # max_iterations = (len(maze[0]) * len(maze) // 2 + 1)
 
     # what squares do we search
     adjacent_squares = ((0, -1), (0, 1), (-1, 0), (1, 0))
@@ -85,10 +85,11 @@ def astar(maze, start, end, allow_diagonal_movement=False):
         if current_node == end_node:
             return return_path(current_node)
 
-        if outer_iterations > max_iterations:
-            # if we hit this point return the path such as it is
-            # it will not contain the destination
-            return return_path(current_node)
+        # if outer_iterations > max_iterations:
+        #     # if we hit this point return the path such as it is
+        #     # it will not contain the destination
+        #     print("astar bug")
+        #     return return_path(current_node)
 
         # Generate children
         children = []
