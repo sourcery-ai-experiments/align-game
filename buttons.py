@@ -20,6 +20,7 @@ class Buttons:
         load_button_text,
         reset_button_text,
         quit_button_text,
+        back_button_text,
         color, x, y,
     ):
         screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -39,6 +40,8 @@ class Buttons:
         self.render_reset_button(screen, reset_button_rect, reset_button_text)
         quit_button_rect = pygame.Rect(x, y + 150, 150, 50)
         self.render_quit_button(screen, quit_button_rect, quit_button_text)
+        back_button_rect = pygame.Rect(x, y + 330, 150, 50)
+        self.render_quit_button(screen, back_button_rect, back_button_text)
         pygame.display.update()
 
         while True:
@@ -51,6 +54,8 @@ class Buttons:
                         self.reset_function()
                     elif load_button_rect.collidepoint(mouse_pos):
                         self.quit_function()
+                    elif back_button_rect.collidepoint(mouse_pos):
+                        self.back_function()
 
     def render_quit_button(self, screen, button_rect, quit_button_text):
         pygame.draw.rect(screen, GREY, button_rect)
@@ -76,6 +81,14 @@ class Buttons:
         text_rect = button_text_surface.get_rect(center=button_rect.center)
         screen.blit(button_text_surface, text_rect)
 
+    def render_back_button(self, screen, button_rect, back_button_text):
+        pygame.draw.rect(screen, GREY, button_rect)
+        button_text_surface = self.text_font.render(
+            back_button_text, True, BLACK,
+        )
+        text_rect = button_text_surface.get_rect(center=button_rect.center)
+        screen.blit(button_text_surface, text_rect)
+
     def quit_function(self):
         print('quit')
         pygame.quit()
@@ -86,3 +99,6 @@ class Buttons:
 
     def load_function(self):
         print('load')
+
+    def back_function(self):
+        print('back')

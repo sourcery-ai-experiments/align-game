@@ -132,7 +132,7 @@ class AlignIt:
                 self.selected_square = self.sqr_grid[x_grid][y_grid]
             if event.type == pygame.QUIT:
                 self.buttons_instance.quit_menu(
-                    'Player name:', 'quit', 'reset', 'load',
+                    'Player name:', 'quit', 'reset', 'load', 'back',
                     (255, 255, 255), 200, 200,
                 )
 
