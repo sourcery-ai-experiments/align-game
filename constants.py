@@ -1,4 +1,4 @@
-import pygame
+# import pygame
 WINDOW_HEIGHT = 600
 WINDOW_WIDTH = 600
 OFFSET = 150
@@ -18,4 +18,4 @@ ORANGE = '#F26522'
 colors = [
     GREEN, RED,  BLUE, YELLOW, PURPLE, CYAN, ORANGE, BROWN,
 ]
-SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+# SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
