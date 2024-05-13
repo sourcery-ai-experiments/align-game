@@ -4,17 +4,17 @@ from time import sleep
 import pygame
 
 from astar import astar
-from buttons import Buttons
 from coloredRect import ColoredRect
 from constants import BLACK
 from constants import BLOCKSIZE
 from constants import colors
 from constants import OFFSET
-from constants import RED
 from constants import WHITE
 from constants import WINDOW_HEIGHT
 from constants import WINDOW_WIDTH
-from stats import Stats
+# from constants import RED
+# from buttons import Buttons
+# from stats import Stats
 
 
 def rand_color():
@@ -34,7 +34,7 @@ class AlignIt:
         self.spawn = True
         self.moves_made = 0
         self.scoreall = 0
-        self.buttons_instance = Buttons(self.scoreall, self.moves_made)
+        # self.buttons_instance = Buttons(self.scoreall, self.moves_made)
         self.removed_lines = 0
         self.sqr_grid = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
         self.space = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
@@ -43,13 +43,14 @@ class AlignIt:
         self.grow = True
         self.move_made = True
         self.same_color_counter = 0
+        # self.stats = Stats()
         self.main()
 
     def setup_game(self, next_colors):
         global SCREEN, CLOCK
         pygame.init()
         self.text_font = pygame.font.SysFont('Arial', 30)
-        pygame.mixer.music.pause()
+        # pygame.mixer.music.pause()
         SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         CLOCK = pygame.time.Clock()
         SCREEN.fill(BLACK)
@@ -77,8 +78,8 @@ class AlignIt:
             self.handle_mouse_click()
             if self.selected_square is not None:
                 self.makes_square_pulse()
-            Stats.score(self)
-            Stats.movesmade(self)
+            # self.stats.score(self.scoreall)
+            # self.stats.movesmade()
             pygame.display.update()
 
     def select_square(self, x, y):
@@ -88,10 +89,7 @@ class AlignIt:
         return x_grid, y_grid
 
     def get_path(self, start, end):
-        path = astar(self.space, start, end)
-        if path is None:
-            print('no path found')
-        return path
+        return astar(self.space, start, end)
 
     def handle_sqr_movment(self, path):
         first = path[0]
@@ -118,6 +116,8 @@ class AlignIt:
                     )
                     end = (x_grid, y_grid)
                     path = self.get_path(start, end)
+                    if not path:
+                        break
                     self.handle_sqr_movment(path)
                     self.selected_square = None
                     break
@@ -125,10 +125,11 @@ class AlignIt:
                     break
                 self.selected_square = self.sqr_grid[x_grid][y_grid]
             if event.type == pygame.QUIT:
-                self.buttons_instance.quit_menu(
-                    'Player name:', 'quit', 'reset', 'load',
-                    (255, 255, 255), 200, 200,
-                )
+                pass
+                # self.buttons_instance.quit_menu(
+                #     'Player name:', 'quit', 'reset', 'load',
+                #     (255, 255, 255), 200, 200,
+                # )
 
     def makes_square_pulse(self):
         sleep(.5)
@@ -153,7 +154,7 @@ class AlignIt:
             x = cords[0]
             y = cords[1]
             self.sqr_grid[x][y].draw_colored_rect(color)
-            sleep(0.1)
+            sleep(0.05)
             pygame.display.update()
 
     def draw_grid(self, new):
@@ -211,7 +212,8 @@ class AlignIt:
                 lines = self.find_adjacent_color((x_grid, y_grid), color)
                 self.check_length_remove_square(lines)
         if available_positions == 0:
-            Stats.game_over(self, 'Game Over', (RED), 10, 10)
+            # self.stats.game_over('Game Over', (RED), 10, 10)
+            pass
         return future_sqr_cord_color
 
     def find_adjacent_color(self, x_y, color):
