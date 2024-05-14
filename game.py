@@ -12,6 +12,7 @@ from constants import OFFSET
 from constants import WHITE
 from constants import WINDOW_HEIGHT
 from constants import WINDOW_WIDTH
+# from buttons import Buttons
 # from constants import RED
 # from buttons import Buttons
 # from stats import Stats
@@ -36,7 +37,12 @@ class AlignIt:
         self.scoreall = 0
         # self.buttons_instance = Buttons(self.scoreall, self.moves_made)
         self.removed_lines = 0
-        self.sqr_grid = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
+        self.sqr_grid = [
+            [
+                ColoredRect(BLACK, x, y)
+                for x in range(self.dim)
+            ] for y in range(self.dim)
+        ]
         self.space = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
         self.next_sqrs = []
         self.selected_square = None
@@ -44,6 +50,7 @@ class AlignIt:
         self.move_made = True
         self.same_color_counter = 0
         # self.stats = Stats()
+
         self.main()
 
     def setup_game(self, next_colors):
@@ -94,9 +101,9 @@ class AlignIt:
     def handle_sqr_movment(self, path):
         first = path[0]
         last = path[-1]
-        color = self.sqr_grid[first[0]][first[1]].color
         self.space[last[0]][last[1]] = 1
         self.space[first[0]][first[1]] = 0
+        color = self.sqr_grid[first[0]][first[1]].color
         self.move_square(path, color)
         lines = self.find_adjacent_color(last, color)
         self.check_length_remove_square(lines)
