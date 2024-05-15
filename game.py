@@ -87,8 +87,8 @@ class AlignIt:
 
     def select_square(self, x, y):
         x, y = normalize_cords(x, y)
-        x_grid = int((x / 50) - 3)
-        y_grid = int((y / 50) - 3)
+        x_grid = int((x / BLOCKSIZE) - 3)
+        y_grid = int((y / BLOCKSIZE) - 3)
         return x_grid, y_grid
 
     def get_path(self, start, end):
@@ -194,9 +194,7 @@ class AlignIt:
         while placed < 3 and available_positions > 0 and next_colors:
             x = random.randint(OFFSET, WINDOW_WIDTH)
             y = random.randint(OFFSET, WINDOW_HEIGHT)
-            x, y = normalize_cords(x, y)
-            x_grid = int((x / 50) - 3)
-            y_grid = int((y / 50) - 3)
+            x_grid, y_grid = self.select_square(x, y)
             if (
                 0 <= x_grid < len(self.space[0])
                 and 0 <= y_grid < len(self.space[0])
@@ -205,8 +203,8 @@ class AlignIt:
                 color = next_colors.pop()
                 self.sqr_grid[x_grid][y_grid] = ColoredRect(
                     color,
-                    x,
-                    y,
+                    OFFSET + x_grid * BLOCKSIZE,
+                    OFFSET + y_grid * BLOCKSIZE,
                 ).draw_colored_rect(color)
                 self.space[x_grid][y_grid] = 1
                 placed += 1
