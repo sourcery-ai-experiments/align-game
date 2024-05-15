@@ -97,7 +97,7 @@ def test_check_length_remove_square(mock_rect):
     ]
     lines = {0: [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4)]}
     game.check_length_remove_square(lines)
-    for direction, line in lines.items():
+    for line in lines.values():
         for x, y in line:
             assert game.sqr_grid[x][y].draw_colored_rect(BLACK)
             assert game.space[x][y] == 0
