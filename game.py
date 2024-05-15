@@ -107,7 +107,7 @@ class AlignIt:
 
     def handle_mouse_click(self):
         for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONUP:
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
                 if x < OFFSET or y < OFFSET:
                     break
