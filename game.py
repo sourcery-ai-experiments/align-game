@@ -29,9 +29,7 @@ def normalize_cords(x, y):
 
 
 class AlignIt:
-    dim = 9
-
-    def __init__(self):
+    def __init__(self, dim=9):
         self.spawn = True
         self.moves_made = 0
         self.scoreall = 0
@@ -40,10 +38,10 @@ class AlignIt:
         self.sqr_grid = [
             [
                 ColoredRect(BLACK, x, y)
-                for x in range(self.dim)
-            ] for y in range(self.dim)
+                for x in range(dim)
+            ] for y in range(dim)
         ]
-        self.space = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
+        self.space = [[0 for _ in range(dim)] for _ in range(dim)]
         self.next_sqrs = []
         self.selected_square = None
         self.grow = True
