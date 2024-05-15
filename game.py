@@ -91,10 +91,7 @@ class AlignIt:
         y_grid = int((y / BLOCKSIZE) - 3)
         return x_grid, y_grid
 
-    def get_path(self, start, end):
-        return astar(self.space, start, end)
-
-    def handle_sqr_movment(self, path):
+    def handle_sqr_movement(self, path):
         first = path[0]
         last = path[-1]
         self.space[last[0]][last[1]] = 1
@@ -118,7 +115,7 @@ class AlignIt:
                         self.selected_square.grid_y,
                     )
                     end = (x_grid, y_grid)
-                    path = self.get_path(start, end)
+                    path = astar(self.space, start, end)
                     if not path:
                         break
                     self.handle_sqr_movment(path)
