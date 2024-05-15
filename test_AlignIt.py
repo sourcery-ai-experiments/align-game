@@ -48,7 +48,7 @@ def test_select_square(
         x_sqr_crd, y_sqr_crd, spc_x_cords, spc_y_cords,
 ):
     game = AlignIt()
-    x, y = game.select_square(x_sqr_crd, y_sqr_crd)
+    x, y = game.get_square_cords(x_sqr_crd, y_sqr_crd)
     assert x == spc_x_cords
     assert y == spc_y_cords
 

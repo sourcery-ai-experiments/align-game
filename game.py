@@ -85,7 +85,7 @@ class AlignIt:
             # self.stats.movesmade()
             pygame.display.update()
 
-    def select_square(self, x, y):
+    def get_square_cords(self, x, y):
         x, y = normalize_cords(x, y)
         x_grid = int((x / BLOCKSIZE) - 3)
         y_grid = int((y / BLOCKSIZE) - 3)
@@ -108,7 +108,7 @@ class AlignIt:
                 x, y = pygame.mouse.get_pos()
                 if x < OFFSET or y < OFFSET:
                     break
-                x_grid, y_grid = self.select_square(x, y)
+                x_grid, y_grid = self.get_square_cords(x, y)
                 if self.selected_square and self.space[x_grid][y_grid] == 0:
                     start = (
                         self.selected_square.grid_x,
@@ -191,7 +191,7 @@ class AlignIt:
         while placed < 3 and available_positions > 0 and next_colors:
             x = random.randint(OFFSET, WINDOW_WIDTH)
             y = random.randint(OFFSET, WINDOW_HEIGHT)
-            x_grid, y_grid = self.select_square(x, y)
+            x_grid, y_grid = self.get_square_cords(x, y)
             if (
                 0 <= x_grid < len(self.space[0])
                 and 0 <= y_grid < len(self.space[0])
