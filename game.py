@@ -49,8 +49,6 @@ class AlignIt:
         self.same_color_counter = 0
         # self.stats = Stats()
 
-        self.main()
-
     def setup_game(self, next_colors):
         global SCREEN, CLOCK
         pygame.init()
@@ -265,4 +263,5 @@ class AlignIt:
 
 
 if __name__ == '__main__':
-    AlignIt()
+    game = AlignIt()
+    game.main()
