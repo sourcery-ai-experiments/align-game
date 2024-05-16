@@ -29,9 +29,7 @@ def normalize_cords(x, y):
 
 
 class AlignIt:
-    dim = 9
-
-    def __init__(self):
+    def __init__(self, dim=9):
         self.spawn = True
         self.moves_made = 0
         self.scoreall = 0
@@ -40,18 +38,16 @@ class AlignIt:
         self.sqr_grid = [
             [
                 ColoredRect(BLACK, x, y)
-                for x in range(self.dim)
-            ] for y in range(self.dim)
+                for x in range(dim)
+            ] for y in range(dim)
         ]
-        self.space = [[0 for _ in range(self.dim)] for _ in range(self.dim)]
+        self.space = [[0 for _ in range(dim)] for _ in range(dim)]
         self.next_sqrs = []
         self.selected_square = None
         self.grow = True
         self.move_made = True
         self.same_color_counter = 0
         # self.stats = Stats()
-
-        self.main()
 
     def setup_game(self, next_colors):
         global SCREEN, CLOCK
@@ -65,9 +61,8 @@ class AlignIt:
         self.draw_grid(True)
 
     def aprove_spawning(self, next_colors):
-        for x_grid, y_grid, color in self.draw_predicted(next_colors):
-            lines = self.find_adjacent_color((x_grid, y_grid), color)
-            self.check_length_remove_square(lines)
+        for x_grid, y_grid in self.draw_predicted(next_colors):
+            self.update_score(x_grid, y_grid)
 
     def main(self):
         next_colors = [rand_color() for _ in range(3)]
@@ -89,44 +84,53 @@ class AlignIt:
             # self.stats.movesmade()
             pygame.display.update()
 
-    def select_square(self, x, y):
+    def get_square_cords(self, x, y):
         x, y = normalize_cords(x, y)
-        x_grid = int((x / 50) - 3)
-        y_grid = int((y / 50) - 3)
+        x_grid = int((x / BLOCKSIZE) - 3)
+        y_grid = int((y / BLOCKSIZE) - 3)
         return x_grid, y_grid
 
-    def get_path(self, start, end):
-        return astar(self.space, start, end)
-
-    def handle_sqr_movment(self, path):
+    def move_square(self, x, y):
+        start = (
+            self.selected_square.grid_x,
+            self.selected_square.grid_y,
+        )
+        end = (x, y)
+        path = astar(self.space, start, end)
+        if not path:
+            return
         first = path[0]
         last = path[-1]
         self.space[last[0]][last[1]] = 1
         self.space[first[0]][first[1]] = 0
         color = self.sqr_grid[first[0]][first[1]].color
-        self.move_square(path, color)
-        lines = self.find_adjacent_color(last, color)
-        self.check_length_remove_square(lines)
+        self.moves_made += 1
+        for i, cords in enumerate(path):
+            prev_x = path[i-1][0]
+            prev_y = path[i-1][1]
+            self.sqr_grid[prev_x][prev_y].draw_colored_rect(BLACK)
+            x = cords[0]
+            y = cords[1]
+            self.sqr_grid[x][y].draw_colored_rect(color)
+            sleep(0.05)
+            pygame.display.update()
         self.move_made = True
+        self.selected_square = None
+
+    def update_score(self, x_grid, y_grid):
+        lines = self.find_adjacent_color(x_grid, y_grid)
+        self.check_length_remove_square(lines)
 
     def handle_mouse_click(self):
         for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONUP:
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
                 if x < OFFSET or y < OFFSET:
                     break
-                x_grid, y_grid = self.select_square(x, y)
+                x_grid, y_grid = self.get_square_cords(x, y)
                 if self.selected_square and self.space[x_grid][y_grid] == 0:
-                    start = (
-                        self.selected_square.grid_x,
-                        self.selected_square.grid_y,
-                    )
-                    end = (x_grid, y_grid)
-                    path = self.get_path(start, end)
-                    if not path:
-                        break
-                    self.handle_sqr_movment(path)
-                    self.selected_square = None
+                    self.move_square(x_grid, y_grid)
+                    self.update_score(x_grid, y_grid)
                     break
                 if self.space[x_grid][y_grid] == 0:
                     break
@@ -151,18 +155,6 @@ class AlignIt:
         self.selected_square.inflate_ip(inf_val, inf_val)
         self.selected_square.draw_colored_rect(color, 2, False)
         pygame.display.update()
-
-    def move_square(self, path, color):
-        self.moves_made += 1
-        for i, cords in enumerate(path):
-            prev_x = path[i-1][0]
-            prev_y = path[i-1][1]
-            self.sqr_grid[prev_x][prev_y].draw_colored_rect(BLACK)
-            x = cords[0]
-            y = cords[1]
-            self.sqr_grid[x][y].draw_colored_rect(color)
-            sleep(0.05)
-            pygame.display.update()
 
     def draw_grid(self, new):
         if new:
@@ -191,16 +183,14 @@ class AlignIt:
 
     def draw_predicted(self, next_colors):
         placed = 0
-        future_sqr_cord_color = []
+        future_sqr_cord = []
         available_positions = 0
         for row in self.space:
             available_positions += row.count(0)
         while placed < 3 and available_positions > 0 and next_colors:
             x = random.randint(OFFSET, WINDOW_WIDTH)
             y = random.randint(OFFSET, WINDOW_HEIGHT)
-            x, y = normalize_cords(x, y)
-            x_grid = int((x / 50) - 3)
-            y_grid = int((y / 50) - 3)
+            x_grid, y_grid = self.get_square_cords(x, y)
             if (
                 0 <= x_grid < len(self.space[0])
                 and 0 <= y_grid < len(self.space[0])
@@ -209,22 +199,21 @@ class AlignIt:
                 color = next_colors.pop()
                 self.sqr_grid[x_grid][y_grid] = ColoredRect(
                     color,
-                    x,
-                    y,
+                    OFFSET + x_grid * BLOCKSIZE,
+                    OFFSET + y_grid * BLOCKSIZE,
                 ).draw_colored_rect(color)
                 self.space[x_grid][y_grid] = 1
                 placed += 1
-                future_sqr_cord_color.append((x_grid, y_grid, color))
+                future_sqr_cord.append((x_grid, y_grid))
                 available_positions -= 1
-                lines = self.find_adjacent_color((x_grid, y_grid), color)
-                self.check_length_remove_square(lines)
+                self.update_score(x_grid, y_grid)
         if available_positions == 0:
             # self.stats.game_over('Game Over', (RED), 10, 10)
             pass
-        return future_sqr_cord_color
+        return future_sqr_cord
 
-    def find_adjacent_color(self, x_y, color):
-        org_x, org_y = x_y
+    def find_adjacent_color(self, x, y):
+        org_x, org_y = x, y
         directions = [
             (1, 0),  (0, 1), (1, 1), (1, -1),
             (-1, 0),  (0, -1), (-1, -1), (-1, 1),
@@ -235,6 +224,7 @@ class AlignIt:
             2: [(org_x, org_y)],
             3: [(org_x, org_y)],
         }
+        color = self.sqr_grid[org_x][org_y].color
         for i, direction in enumerate(directions):
             x, y = org_x, org_y
             dir_x, dir_y = direction
@@ -267,4 +257,5 @@ class AlignIt:
 
 
 if __name__ == '__main__':
-    AlignIt()
+    game = AlignIt()
+    game.main()

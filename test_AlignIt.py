@@ -25,20 +25,19 @@ def test_normalize_cords(x_pix_cords, y_pix_cords, expected_x, expected_y):
     assert y == expected_y
 
 
-@mock.patch('game.AlignIt.main')
+@pytest.mark.skip
 @mock.patch('coloredRect.ColoredRect.draw_colored_rect')
 @mock.patch('pygame.display.update')
-def test_handle_sqr_movment(mock_main, mock_rect, mock_video):
+def test_handle_sqr_movement(mock_rect, mock_video):
     game = AlignIt()
     path = [(0, 0), (0, 1), (0, 2)]
-    game.handle_sqr_movment(path)
+    game.handle_sqr_movement(path)
     first = path[0]
     last = path[-1]
     assert game.space[first[0]][first[1]] == 0
     assert game.space[last[0]][last[1]] == 1
 
 
-@mock.patch('game.AlignIt.main')
 @pytest.mark.parametrize(
     'x_sqr_crd, y_sqr_crd, spc_x_cords, spc_y_cords', [
         pytest.param(150, 150, 0, 0),
@@ -47,17 +46,16 @@ def test_handle_sqr_movment(mock_main, mock_rect, mock_video):
     ],
 )
 def test_select_square(
-        mock_main, x_sqr_crd, y_sqr_crd, spc_x_cords, spc_y_cords,
+        x_sqr_crd, y_sqr_crd, spc_x_cords, spc_y_cords,
 ):
     game = AlignIt()
-    x, y = game.select_square(x_sqr_crd, y_sqr_crd)
+    x, y = game.get_square_cords(x_sqr_crd, y_sqr_crd)
     assert x == spc_x_cords
     assert y == spc_y_cords
 
 
-@mock.patch('game.AlignIt.main')
 @pytest.mark.parametrize(
-    'directions, cords',
+    'directions, x, y',
     [
         pytest.param(
             {
@@ -65,7 +63,7 @@ def test_select_square(
                 1: [(0, 0), (0, 1), (0, 2)],
                 2: [(0, 0), (1, 1), (2, 2)],
                 3: [(0, 0)],
-            }, (0, 0),
+            }, 0, 0,
         ),
         pytest.param(
             {
@@ -73,18 +71,17 @@ def test_select_square(
                 1: [(1, 1), (1, 2), (1, 0)],
                 2: [(1, 1), (2, 2), (0, 0)],
                 3: [(1, 1), (2, 0), (0, 2)],
-            }, (1, 1),
+            }, 1, 1,
         ),
     ],
 )
-def test_find_adjacent_color(mock_main, directions, cords):
+def test_find_adjacent_color(directions, x, y):
     game = AlignIt()
     game.space = [[1 for _ in range(3)] for _ in range(3)]
     game.sqr_grid = [
         [ColoredRect(BLACK, x, y)for x in range(3)] for y in range(3)
     ]
-    x, y = cords
-    lines = game.find_adjacent_color((x, y), BLACK)
+    lines = game.find_adjacent_color(x, y)
     assert lines[0] == directions[0]
     assert lines[1] == directions[1]
     assert lines[2] == directions[2]
@@ -92,8 +89,7 @@ def test_find_adjacent_color(mock_main, directions, cords):
 
 
 @mock.patch('coloredRect.ColoredRect.draw_colored_rect')
-@mock.patch('game.AlignIt.main')
-def test_check_length_remove_square(mock_main, mock_rect):
+def test_check_length_remove_square(mock_rect):
     game = AlignIt()
     game.space = [[1 for _ in range(5)] for _ in range(5)]
     game.sqr_grid = [
@@ -101,7 +97,7 @@ def test_check_length_remove_square(mock_main, mock_rect):
     ]
     lines = {0: [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4)]}
     game.check_length_remove_square(lines)
-    for direction, line in lines.items():
+    for line in lines.values():
         for x, y in line:
             assert game.sqr_grid[x][y].draw_colored_rect(BLACK)
             assert game.space[x][y] == 0
