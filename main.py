@@ -44,7 +44,7 @@ class MyPaintApp(App):
             self.selected_button.background_color = [1, 1, 1, 1]
             self.selected_color = None
             self.selected_button = None
-        print(self.logical_grid[0])
+        print(self.logical_grid)
 
     def update_logical_grid(self, row, col, value):
         self.logical_grid[row][col] = value
@@ -70,6 +70,15 @@ class MyPaintApp(App):
                 self.grid_layout.add_widget(btn)
         return self.grid_layout
 
+    def update_logical_grid_based_on_buttons(self):
+        for index, btn in enumerate(reversed(self.grid_layout.children)):
+            row = index // 9
+            col = index % 9
+            if btn.background_color != [1, 1, 1, 1]:
+                self.logical_grid[row][col] = 1
+            else:
+                self.logical_grid[row][col] = 0
+
     def future_grid(self):
         button_layout = BoxLayout(
             orientation='vertical',
@@ -94,6 +103,7 @@ class MyPaintApp(App):
         self.assign_random_colors_to_buttons(
             random_buttons, [btn.background_color for btn in left_buttons],
         )
+        self.update_logical_grid_based_on_buttons()
         parent.add_widget(grid_layout)
         parent.add_widget(button_layout)
         return parent
