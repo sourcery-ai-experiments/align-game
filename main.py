@@ -7,6 +7,8 @@ from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.widget import Widget
 
+from astar import astar
+
 COLOR_LIST = [
     [1, 0, 0, 1],     # Red
     [0, 1, 0, 1],     # Green
@@ -35,16 +37,19 @@ class MyPaintApp(App):
             self.selected_button = tile
             self.update_logical_grid(row, col, 0)
             print('colored')
-
         elif tile.background_color == [
             1, 1, 1, 1,
         ] and self.selected_color is not None:
             tile.background_color = self.selected_color
             self.update_logical_grid(row, col, 1)
+            start = self.get_button_position(self.selected_button)
+            end = (row, col)
+            self.find_path(start, end)
             self.selected_button.background_color = [1, 1, 1, 1]
             self.selected_color = None
             self.selected_button = None
-        print(self.logical_grid)
+            print(start, end)
+        print(self.logical_grid[0])
 
     def update_logical_grid(self, row, col, value):
         self.logical_grid[row][col] = value
@@ -52,7 +57,7 @@ class MyPaintApp(App):
     def assign_random_colors_to_buttons(self, buttons, colors):
         for btn, color in zip(buttons, colors):
             btn.background_color = color
-            btn.logical_color = 1
+            # btn.logical_color = 1
 
     def build_grid_layout(self):
         self.grid_layout = GridLayout(
@@ -78,6 +83,23 @@ class MyPaintApp(App):
                 self.logical_grid[row][col] = 1
             else:
                 self.logical_grid[row][col] = 0
+
+    def find_path(self, start, end):
+        path = astar(self.logical_grid, start, end)
+        if path:
+            print('Path found:', path)
+            for pos in path:
+                row, col = pos
+                button_index = (8 - row) * 9 + col
+                self.grid_layout.children[button_index].background_color = [
+                    0, 0, 0, 1,
+                ]
+
+    def get_button_position(self, button):
+        index = self.grid_layout.children.index(button)
+        row = 8 - index // 9
+        col = index % 9
+        return row, col
 
     def future_grid(self):
         button_layout = BoxLayout(
