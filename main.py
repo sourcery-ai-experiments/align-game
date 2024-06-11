@@ -23,6 +23,8 @@ class MyPaintApp(App):
 
     def on_button_press(self, instance, row, col):
         print(row, col)
+        if instance.background_color != [1, 1, 1, 1]:
+            print('colored')
 
     def assign_random_colors_to_buttons(self, buttons, colors):
         for btn, color in zip(buttons, colors):
