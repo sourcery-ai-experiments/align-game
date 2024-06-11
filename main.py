@@ -1,53 +1,76 @@
-from random import random
+from random import choice
+from random import sample
 
 from kivy.app import App
-from kivy.core.window import Window
-from kivy.graphics import Color
-from kivy.graphics import Rectangle
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.widget import Widget
 
-BLOCKSIZE = 50
-
-
-class MyPaintWidget(Widget):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        with self.canvas.before:
-            Rectangle(
-                source='assets/board.jpg',
-                pos=self.pos, size=Window.size,
-            )
-
-    def on_touch_down(self, touch):
-        color = (random(), 1, 1)
-        print(touch.x, touch.y)
-        if touch.x > 150 and touch.y < 450 and touch.y > 20:
-            with self.canvas:
-                Color(*color, mode='hsv')
-                Rectangle(
-                    pos=(
-                        touch.x - BLOCKSIZE / 2, touch.y -
-                        BLOCKSIZE / 2,
-                    ), size=(BLOCKSIZE, BLOCKSIZE),
-                )
+COLOR_LIST = [
+    [1, 0, 0, 1],     # Red
+    [0, 1, 0, 1],     # Green
+    [0, 0, 1, 1],     # Blue
+    [1, 1, 0, 1],     # Yellow
+    [1, 0, 1, 1],     # Magenta
+    [0, 1, 1, 1],     # Cyan
+    [1, 0.5, 0, 1],   # Orange
+    [0.5, 0, 0.5, 1],  # Purple
+]
 
 
 class MyPaintApp(App):
 
+    def on_button_press(self, instance, row, col):
+        print(row, col)
+
+    def assign_random_colors_to_buttons(self, buttons, colors):
+        for btn, color in zip(buttons, colors):
+            btn.background_color = color
+
+    def build_grid_layout(self):
+        grid_layout = GridLayout(
+            cols=9, rows=9,
+            size_hint=(None, None),
+            size=(450, 450), pos=(330, 20),
+        )
+        for row in range(9):
+            for col in range(9):
+                btn = Button()
+                btn.bind(
+                    on_press=lambda instance, x=row,
+                    y=col: self.on_button_press(instance, x, y),
+                )
+                grid_layout.add_widget(btn)
+        return grid_layout
+
+    def future_grid(self):
+        button_layout = BoxLayout(
+            orientation='vertical',
+            size_hint=(None, None),
+            size=(100, 250), pos=(50, 150),
+        )
+        left_buttons = []
+        for i in range(3):
+            btn = Button(
+                text=f'Button {i+1}',
+                background_color=choice(COLOR_LIST),
+            )
+            button_layout.add_widget(btn)
+            left_buttons.append(btn)
+        return button_layout, left_buttons
+
     def build(self):
         parent = Widget()
-        self.painter = MyPaintWidget()
-        clearbtn = Button(text='Clear', background_color=[1.0, 1.0, 1.0, 0.0])
-        clearbtn.bind(on_release=self.clear_canvas)
-        parent.add_widget(self.painter)
-        parent.add_widget(clearbtn)
+        grid_layout = self.build_grid_layout()
+        button_layout, left_buttons = self.future_grid()
+        random_buttons = sample(grid_layout.children, 3)
+        self.assign_random_colors_to_buttons(
+            random_buttons, [btn.background_color for btn in left_buttons],
+        )
+        parent.add_widget(grid_layout)
+        parent.add_widget(button_layout)
         return parent
-
-    def clear_canvas(self, obj):
-        print('clicked')
-        self.painter.canvas.clear()
 
 
 if __name__ == '__main__':
