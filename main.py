@@ -1,3 +1,4 @@
+import time
 from random import choice
 from random import sample
 
@@ -8,7 +9,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.widget import Widget
 
 from astar import astar
-
+BLACK = [1, 1, 1, 1]
 COLOR_LIST = [
     [1, 0, 0, 1],     # Red
     [0, 1, 0, 1],     # Green
@@ -19,6 +20,8 @@ COLOR_LIST = [
     [1, 0.5, 0, 1],   # Orange
     [0.5, 0, 0.5, 1],  # Purple
 ]
+
+print('start:', time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()))
 
 
 class MyPaintApp(App):
@@ -32,32 +35,42 @@ class MyPaintApp(App):
 
     def on_button_press(self, tile, row, col):
         print(row, col)
-        if tile.background_color != [1, 1, 1, 1]:
+        if tile.background_color != BLACK:
             self.selected_color = tile.background_color
-            self.selected_button = tile
-            self.update_logical_grid(row, col, 0)
+            self.selected_button = (tile, row, col)
             print('colored')
-        elif tile.background_color == [
-            1, 1, 1, 1,
-        ] and self.selected_color is not None:
+        elif tile.background_color == BLACK and self.selected_color:
+            # self.selected_color is not None
             tile.background_color = self.selected_color
-            self.update_logical_grid(row, col, 1)
-            start = self.get_button_position(self.selected_button)
+            self.logical_grid[row][col] = 1
+            start = (self.selected_button[1], self.selected_button[2])
             end = (row, col)
+            print(
+                'find path start:', time.strftime(
+                    '%Y-%m-%d %H:%M:%S', time.localtime(),
+                ),
+            )
             self.find_path(start, end)
-            self.selected_button.background_color = [1, 1, 1, 1]
+            print(
+                'find path end:', time.strftime(
+                    '%Y-%m-%d %H:%M:%S', time.localtime(),
+                ),
+            )
+            self.selected_button[0].background_color = BLACK
+            self.logical_grid[start[0]][start[1]] = 0
             self.selected_color = None
             self.selected_button = None
             print(start, end)
-        print(self.logical_grid[0])
-
-    def update_logical_grid(self, row, col, value):
-        self.logical_grid[row][col] = value
+        print(self.logical_grid)
+        print(
+            'button press:', time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(),
+            ),
+        )
 
     def assign_random_colors_to_buttons(self, buttons, colors):
         for btn, color in zip(buttons, colors):
             btn.background_color = color
-            # btn.logical_color = 1
 
     def build_grid_layout(self):
         self.grid_layout = GridLayout(
@@ -76,10 +89,15 @@ class MyPaintApp(App):
         return self.grid_layout
 
     def update_logical_grid_based_on_buttons(self):
+        print(
+            'update logical grid:', time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(),
+            ),
+        )
         for index, btn in enumerate(reversed(self.grid_layout.children)):
             row = index // 9
             col = index % 9
-            if btn.background_color != [1, 1, 1, 1]:
+            if btn.background_color != BLACK:
                 self.logical_grid[row][col] = 1
             else:
                 self.logical_grid[row][col] = 0
@@ -92,14 +110,14 @@ class MyPaintApp(App):
                 row, col = pos
                 button_index = (8 - row) * 9 + col
                 self.grid_layout.children[button_index].background_color = [
-                    0, 0, 0, 1,
+                    1, 1, 1, 1,
                 ]
 
-    def get_button_position(self, button):
-        index = self.grid_layout.children.index(button)
-        row = 8 - index // 9
-        col = index % 9
-        return row, col
+    # def get_button_position(self, button):
+    #     index = self.grid_layout.children.index(button)
+    #     row = 8 - index // 9
+    #     col = index % 9
+    #     return row, col
 
     def future_grid(self):
         button_layout = BoxLayout(
@@ -122,12 +140,37 @@ class MyPaintApp(App):
         grid_layout = self.build_grid_layout()
         button_layout, left_buttons = self.future_grid()
         random_buttons = sample(grid_layout.children, 3)
+        print(
+            'Current time:', time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(),
+            ),
+        )
         self.assign_random_colors_to_buttons(
             random_buttons, [btn.background_color for btn in left_buttons],
         )
+        print(
+            'Current time:', time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(),
+            ),
+        )
         self.update_logical_grid_based_on_buttons()
+        print(
+            'Current time:', time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(),
+            ),
+        )
         parent.add_widget(grid_layout)
+        print(
+            'Current time:', time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(),
+            ),
+        )
         parent.add_widget(button_layout)
+        print(
+            'Current time:', time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(),
+            ),
+        )
         return parent
 
 
