@@ -8,6 +8,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.widget import Widget
 
 from astar import astar
+
 BLACK = [1, 1, 1, 1]
 COLOR_LIST = [
     [1, 0, 0, 1],     # Red
@@ -32,56 +33,11 @@ class MyPaintApp(App):
         self.grid_layout = None
         self.button_layout = None
 
-    def on_button_press(self, tile, row, col):
-        print(row, col)
-        if tile.background_color != BLACK:
-            self.selected_color = tile.background_color
-            self.selected_button = (tile, row, col)
-        elif tile.background_color == BLACK and self.selected_color:
-            start = (self.selected_button[1], self.selected_button[2])
-            end = (row, col)
-            path = astar(self.logical_grid, start, end)
-            if not path:
-                return
-            tile.background_color = self.selected_color
-            self.logical_grid[row][col] = 1
-            self.pos_set.remove((row, col))
-            self.selected_button[0].background_color = BLACK
-            self.logical_grid[start[0]][start[1]] = 0
-            self.pos_set.add((start[0], start[1]))
-            self.selected_color = None
-            self.selected_button = None
-            self.assign_random_colors_to_buttons()
-        print('-----------------------')
-        for inner_list in self.logical_grid:
-            print(inner_list)
-
-    def assign_random_colors_to_buttons(self):
-        if len(self.pos_set) < 3:
-            return
-        cords = sample(self.pos_set, 3)
-        colors = []
-        for btn in self.button_layout.children:
-            colors.append(btn.background_color)
-            btn.background_color = choice(COLOR_LIST)
-        for cord, color in zip(cords, colors):
-            row, col = cord
-            # print(row, col)
-            # print(self.pos_set)
-            button = self.grid_layout.children[9 * (8 - row) + (8 - col)]
-            button.background_color = color
-            self.pos_set.remove(cord)
-            self.logical_grid[cord[0]][cord[1]] = 1
-            if len(self.pos_set) <= 0:
-                print('Game Over')
-                break
-        print(len(self.pos_set))
-
     def build_grid_layout(self):
         self.grid_layout = GridLayout(
-            cols=9, rows=9,
-            size_hint=(None, None),
-            size=(450, 450), pos=(330, 20),
+            cols=9, rows=9, size_hint=(
+                None, None,
+            ), size=(450, 450), pos=(330, 20),
         )
         for row in range(9):
             for col in range(9):
@@ -93,11 +49,11 @@ class MyPaintApp(App):
                 self.grid_layout.add_widget(btn)
         return self.grid_layout
 
-    def future_grid(self):
+    def build_predicted_layout(self):
         self.button_layout = BoxLayout(
-            orientation='vertical',
-            size_hint=(None, None),
-            size=(100, 250), pos=(50, 150),
+            orientation='vertical', size_hint=(
+                None, None,
+            ), size=(100, 250), pos=(50, 150),
         )
         for i in range(3):
             btn = Button(
@@ -105,14 +61,65 @@ class MyPaintApp(App):
                 background_color=choice(COLOR_LIST),
             )
             self.button_layout.add_widget(btn)
+        return self.button_layout
+
+    def on_button_press(self, tile, row, col):
+        # print(row, col)
+        if tile.background_color != BLACK:
+            self.select_button(tile, row, col)
+        elif tile.background_color == BLACK and self.selected_color:
+            self.move_selected_button(tile, row, col)
+        for cord in self.logical_grid:
+            print(cord)
+
+    def select_button(self, tile, row, col):
+        self.selected_color = tile.background_color
+        self.selected_button = (tile, row, col)
+
+    def move_selected_button(self, tile, row, col):
+        start = (self.selected_button[1], self.selected_button[2])
+        end = (row, col)
+        path = astar(self.logical_grid, start, end)
+        if not path:
+            return
+        tile.background_color = self.selected_color
+        self.update_logical_grid(row, col, start)
+        self.assign_random_colors_to_buttons()
+
+    def update_logical_grid(self, row, col, start):
+        self.logical_grid[row][col] = 1
+        self.pos_set.remove((row, col))
+        self.selected_button[0].background_color = BLACK
+        self.logical_grid[start[0]][start[1]] = 0
+        self.pos_set.add((start[0], start[1]))
+        self.selected_color = None
+        self.selected_button = None
+
+    def assign_random_colors_to_buttons(self):
+        if len(self.pos_set) < 3:
+            return
+        cords = sample(self.pos_set, 3)
+        colors = [btn.background_color for btn in self.button_layout.children]
+        for btn in self.button_layout.children:
+            btn.background_color = choice(COLOR_LIST)
+        self.update_grid_with_new_colors(cords, colors)
+
+    def update_grid_with_new_colors(self, cords, colors):
+        for cord, color in zip(cords, colors):
+            row, col = cord
+            button = self.grid_layout.children[9 * (8 - row) + (8 - col)]
+            button.background_color = color
+            self.pos_set.remove(cord)
+            self.logical_grid[cord[0]][cord[1]] = 1
+            if len(self.pos_set) <= 0:
+                print('Game Over')
+                break
 
     def build(self):
         parent = Widget()
-        grid_layout = self.build_grid_layout()
-        self.future_grid()
+        parent.add_widget(self.build_grid_layout())
+        parent.add_widget(self.build_predicted_layout())
         self.assign_random_colors_to_buttons()
-        parent.add_widget(grid_layout)
-        parent.add_widget(self.button_layout)
         return parent
 
 
