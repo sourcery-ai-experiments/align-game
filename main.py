@@ -26,10 +26,11 @@ class MyPaintApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.logical_grid = [[0 for _ in range(9)] for _ in range(9)]
+        self.pos_set = {(row, col) for row in range(9) for col in range(9)}
         self.selected_color = None
         self.selected_button = None
         self.grid_layout = None
-        self.pos_set = {(row, col) for row in range(9) for col in range(9)}
+        self.button_layout = None
 
     def on_button_press(self, tile, row, col):
         print(row, col)
@@ -48,14 +49,21 @@ class MyPaintApp(App):
             self.logical_grid[start[0]][start[1]] = 0
             self.selected_color = None
             self.selected_button = None
+            self.assign_random_colors_to_buttons()
         print('-----------------------')
         for inner_list in self.logical_grid:
             print(inner_list)
 
-    def assign_random_colors_to_buttons(self, cords, colors):
+    def assign_random_colors_to_buttons(self):
+        cords = sample(self.pos_set, 3)
+        colors = []
+        for btn in self.button_layout.children:
+            colors.append(btn.background_color)
+            btn.background_color = choice(COLOR_LIST)
         for cord, color in zip(cords, colors):
             row, col = cord
-            print(row, col)
+            # print(row, col)
+            # print(self.pos_set)
             button = self.grid_layout.children[9 * (8 - row) + (8 - col)]
             button.background_color = color
             self.pos_set.remove(cord)
@@ -78,43 +86,26 @@ class MyPaintApp(App):
                 self.grid_layout.add_widget(btn)
         return self.grid_layout
 
-    # def update_logical_grid_based_on_buttons(self):
-    #     for row in range(9):
-    #         for col in range(9):
-    #             btn = self.grid_layout.children[(8-row)*9 + col]
-    #             if self.logical_grid[row][col] == 1:
-    #                 btn.background_color = choice(COLOR_LIST)
-    #             else:
-    #                 btn.background_color = BLACK
-
     def future_grid(self):
-        button_layout = BoxLayout(
+        self.button_layout = BoxLayout(
             orientation='vertical',
             size_hint=(None, None),
             size=(100, 250), pos=(50, 150),
         )
-        left_buttons = []
         for i in range(3):
             btn = Button(
                 text=f'Button {i+1}',
                 background_color=choice(COLOR_LIST),
             )
-            button_layout.add_widget(btn)
-            left_buttons.append(btn)
-        return button_layout, left_buttons
+            self.button_layout.add_widget(btn)
 
     def build(self):
         parent = Widget()
         grid_layout = self.build_grid_layout()
-        button_layout, left_buttons = self.future_grid()
-        random_buttons = sample(self.pos_set, 3)
-        colors = [btn.background_color for btn in left_buttons]
-        self.assign_random_colors_to_buttons(
-            random_buttons, colors,
-        )
-        # self.update_logical_grid_based_on_buttons()
+        self.future_grid()
+        self.assign_random_colors_to_buttons()
         parent.add_widget(grid_layout)
-        parent.add_widget(button_layout)
+        parent.add_widget(self.button_layout)
         return parent
 
 
