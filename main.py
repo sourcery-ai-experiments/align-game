@@ -13,12 +13,12 @@ BLACK = [1, 1, 1, 1]
 COLOR_LIST = [
     [1, 0, 0, 1],     # Red
     [0, 1, 0, 1],     # Green
-    [0, 0, 1, 1],     # Blue
-    [1, 1, 0, 1],     # Yellow
-    [1, 0, 1, 1],     # Magenta
-    [0, 1, 1, 1],     # Cyan
-    [1, 0.5, 0, 1],   # Orange
-    [0.5, 0, 0.5, 1],  # Purple
+    # [0, 0, 1, 1],     # Blue
+    # [1, 1, 0, 1],     # Yellow
+    # [1, 0, 1, 1],     # Magenta
+    # [0, 1, 1, 1],     # Cyan
+    # [1, 0.5, 0, 1],   # Orange
+    # [0.5, 0, 0.5, 1],  # Purple
 ]
 
 
@@ -70,9 +70,9 @@ class MyPaintApp(App):
             self.select_button(tile, row, col)
         elif tile.background_color == BLACK and self.selected_color:
             self.move_selected_button(tile, row, col)
-        print('---------------------')
-        for cord in self.logical_grid:
-            print(cord)
+        # print('---------------------')
+        # for cord in self.logical_grid:
+        #     print(cord)
 
     def select_button(self, tile, row, col):
         self.selected_color = tile.background_color
@@ -91,7 +91,7 @@ class MyPaintApp(App):
             adjacent_lines = self.find_adjacent_color(row, col)
             if adjacent_lines:
                 self.check_length_remove_square(adjacent_lines)
-        self.spawn = True
+                self.spawn = True
 
     def update_logical_grid(self, row, col, start):
         self.logical_grid[row][col] = 1
@@ -103,7 +103,7 @@ class MyPaintApp(App):
         self.selected_button = None
 
     def assign_random_colors_to_buttons(self):
-        if len(self.pos_set) < 3:
+        if len(self.pos_set) < 3 or not self.spawn:
             return
         cords = sample(self.pos_set, 3)
         colors = [btn.background_color for btn in self.button_layout.children]
@@ -155,13 +155,14 @@ class MyPaintApp(App):
                         break
                 except IndexError:
                     break
-        print(adjacent_lines)
+        # print(adjacent_lines)
         return adjacent_lines
 
     def check_length_remove_square(self, lines):
         for direction, line in lines.items():
             if len(line) >= 5:
                 self.spawn = False
+                print('Spawn Flag Set to False')
                 for x, y in line:
                     self.grid_layout.children[
                         9 * (8 - x) + (8 - y)
