@@ -69,6 +69,7 @@ class MyPaintApp(App):
             self.select_button(tile, row, col)
         elif tile.background_color == BLACK and self.selected_color:
             self.move_selected_button(tile, row, col)
+        print('---------------------')
         for cord in self.logical_grid:
             print(cord)
 
@@ -85,6 +86,7 @@ class MyPaintApp(App):
         tile.background_color = self.selected_color
         self.update_logical_grid(row, col, start)
         self.assign_random_colors_to_buttons()
+        self.find_adjacent_color(row, col)
 
     def update_logical_grid(self, row, col, start):
         self.logical_grid[row][col] = 1
@@ -114,6 +116,28 @@ class MyPaintApp(App):
             if len(self.pos_set) <= 0:
                 print('Game Over')
                 break
+
+    def find_adjacent_color(self, row, col):
+        directions = [
+            (1, 0),  (0, 1), (1, 1), (1, -1),
+            (-1, 0),  (0, -1), (-1, -1), (-1, 1),
+        ]
+# it needs to store cords in dictionarys so to have key:vlue and no duplictes
+        adjacent_buttons = []
+        current_color = self.grid_layout.children[
+            9 * (8 - row) + (8 - col)
+        ].background_color
+        for direction in directions:
+            dir_x, dir_y = direction
+            adjacent_row, adjacent_col = row + dir_x, col + dir_y
+            if 0 <= adjacent_row < 9 and 0 <= adjacent_col < 9:
+                adjacent_button = self.grid_layout.children[
+                    9 * (8 - adjacent_row) + (8 - adjacent_col)
+                ]
+                if adjacent_button.background_color == current_color:
+                    adjacent_buttons.append((adjacent_row, adjacent_col))
+        print(adjacent_buttons)
+        return adjacent_buttons
 
     def build(self):
         parent = Widget()
