@@ -28,6 +28,7 @@ class MyPaintApp(App):
         super().__init__(**kwargs)
         self.logical_grid = [[0 for _ in range(9)] for _ in range(9)]
         self.pos_set = {(row, col) for row in range(9) for col in range(9)}
+        self.spawn = True
         self.selected_color = None
         self.selected_button = None
         self.grid_layout = None
@@ -85,8 +86,12 @@ class MyPaintApp(App):
             return
         tile.background_color = self.selected_color
         self.update_logical_grid(row, col, start)
-        self.assign_random_colors_to_buttons()
-        self.find_adjacent_color(row, col)
+        if self.spawn:
+            self.assign_random_colors_to_buttons()
+            adjacent_lines = self.find_adjacent_color(row, col)
+            if adjacent_lines:
+                self.check_length_remove_square(adjacent_lines)
+        self.spawn = True
 
     def update_logical_grid(self, row, col, start):
         self.logical_grid[row][col] = 1
@@ -122,22 +127,47 @@ class MyPaintApp(App):
             (1, 0),  (0, 1), (1, 1), (1, -1),
             (-1, 0),  (0, -1), (-1, -1), (-1, 1),
         ]
-# it needs to store cords in dictionarys so to have key:vlue and no duplictes
-        adjacent_buttons = []
+        adjacent_lines = {
+            0: [(row, col)],
+            1: [(row, col)],
+            2: [(row, col)],
+            3: [(row, col)],
+        }
         current_color = self.grid_layout.children[
             9 * (8 - row) + (8 - col)
         ].background_color
-        for direction in directions:
+        for i, direction in enumerate(directions):
+            x, y = row, col
             dir_x, dir_y = direction
-            adjacent_row, adjacent_col = row + dir_x, col + dir_y
-            if 0 <= adjacent_row < 9 and 0 <= adjacent_col < 9:
-                adjacent_button = self.grid_layout.children[
-                    9 * (8 - adjacent_row) + (8 - adjacent_col)
-                ]
-                if adjacent_button.background_color == current_color:
-                    adjacent_buttons.append((adjacent_row, adjacent_col))
-        print(adjacent_buttons)
-        return adjacent_buttons
+            while True:
+                x += dir_x
+                y += dir_y
+                try:
+                    adjacent_button = self.grid_layout.children[
+                        9 * (
+                            8 - x
+                        ) + (8 - y)
+                    ]
+                    adjacent_color = adjacent_button.background_color
+                    if adjacent_color == current_color:
+                        adjacent_lines[i % 4].append((x, y))
+                    else:
+                        break
+                except IndexError:
+                    break
+        print(adjacent_lines)
+        return adjacent_lines
+
+    def check_length_remove_square(self, lines):
+        for direction, line in lines.items():
+            if len(line) >= 5:
+                self.spawn = False
+                for x, y in line:
+                    self.grid_layout.children[
+                        9 * (8 - x) + (8 - y)
+                    ].background_color = BLACK
+                    self.logical_grid[x][y] = 0
+                    self.pos_set.add((x, y))
 
     def build(self):
         parent = Widget()
