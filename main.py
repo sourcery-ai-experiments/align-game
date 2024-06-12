@@ -1,4 +1,3 @@
-import time
 from random import choice
 from random import sample
 
@@ -21,8 +20,6 @@ COLOR_LIST = [
     [0.5, 0, 0.5, 1],  # Purple
 ]
 
-print('start:', time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()))
-
 
 class MyPaintApp(App):
 
@@ -34,43 +31,29 @@ class MyPaintApp(App):
         self.grid_layout = None
 
     def on_button_press(self, tile, row, col):
-        print(row, col)
         if tile.background_color != BLACK:
             self.selected_color = tile.background_color
             self.selected_button = (tile, row, col)
-            print('colored')
         elif tile.background_color == BLACK and self.selected_color:
-            # self.selected_color is not None
-            tile.background_color = self.selected_color
-            self.logical_grid[row][col] = 1
             start = (self.selected_button[1], self.selected_button[2])
             end = (row, col)
-            print(
-                'find path start:', time.strftime(
-                    '%Y-%m-%d %H:%M:%S', time.localtime(),
-                ),
-            )
-            self.find_path(start, end)
-            print(
-                'find path end:', time.strftime(
-                    '%Y-%m-%d %H:%M:%S', time.localtime(),
-                ),
-            )
+            path = astar(self.logical_grid, start, end)
+            if not path:
+                return
+            tile.background_color = self.selected_color
+            self.logical_grid[row][col] = 1
             self.selected_button[0].background_color = BLACK
             self.logical_grid[start[0]][start[1]] = 0
             self.selected_color = None
             self.selected_button = None
-            print(start, end)
-        print(self.logical_grid)
-        print(
-            'button press:', time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(),
-            ),
-        )
 
     def assign_random_colors_to_buttons(self, buttons, colors):
         for btn, color in zip(buttons, colors):
             btn.background_color = color
+            index = self.grid_layout.children.index(btn)
+            row = index // 9
+            col = index % 9
+            self.logical_grid[row][col] = 1
 
     def build_grid_layout(self):
         self.grid_layout = GridLayout(
@@ -80,7 +63,7 @@ class MyPaintApp(App):
         )
         for row in range(9):
             for col in range(9):
-                btn = Button(background_color=[1, 1, 1, 1])
+                btn = Button(background_color=BLACK)
                 btn.bind(
                     on_press=lambda instance, x=row,
                     y=col: self.on_button_press(instance, x, y),
@@ -89,35 +72,13 @@ class MyPaintApp(App):
         return self.grid_layout
 
     def update_logical_grid_based_on_buttons(self):
-        print(
-            'update logical grid:', time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(),
-            ),
-        )
-        for index, btn in enumerate(reversed(self.grid_layout.children)):
-            row = index // 9
-            col = index % 9
-            if btn.background_color != BLACK:
-                self.logical_grid[row][col] = 1
-            else:
-                self.logical_grid[row][col] = 0
-
-    def find_path(self, start, end):
-        path = astar(self.logical_grid, start, end)
-        if path:
-            print('Path found:', path)
-            for pos in path:
-                row, col = pos
-                button_index = (8 - row) * 9 + col
-                self.grid_layout.children[button_index].background_color = [
-                    1, 1, 1, 1,
-                ]
-
-    # def get_button_position(self, button):
-    #     index = self.grid_layout.children.index(button)
-    #     row = 8 - index // 9
-    #     col = index % 9
-    #     return row, col
+        for row in range(9):
+            for col in range(9):
+                btn = self.grid_layout.children[(8-row)*9 + col]
+                if self.logical_grid[row][col] == 1:
+                    btn.background_color = choice(COLOR_LIST)
+                else:
+                    btn.background_color = BLACK
 
     def future_grid(self):
         button_layout = BoxLayout(
@@ -140,37 +101,12 @@ class MyPaintApp(App):
         grid_layout = self.build_grid_layout()
         button_layout, left_buttons = self.future_grid()
         random_buttons = sample(grid_layout.children, 3)
-        print(
-            'Current time:', time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(),
-            ),
-        )
         self.assign_random_colors_to_buttons(
             random_buttons, [btn.background_color for btn in left_buttons],
         )
-        print(
-            'Current time:', time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(),
-            ),
-        )
         self.update_logical_grid_based_on_buttons()
-        print(
-            'Current time:', time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(),
-            ),
-        )
         parent.add_widget(grid_layout)
-        print(
-            'Current time:', time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(),
-            ),
-        )
         parent.add_widget(button_layout)
-        print(
-            'Current time:', time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(),
-            ),
-        )
         return parent
 
 
