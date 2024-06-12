@@ -45,8 +45,10 @@ class MyPaintApp(App):
                 return
             tile.background_color = self.selected_color
             self.logical_grid[row][col] = 1
+            self.pos_set.remove((row, col))
             self.selected_button[0].background_color = BLACK
             self.logical_grid[start[0]][start[1]] = 0
+            self.pos_set.add((start[0], start[1]))
             self.selected_color = None
             self.selected_button = None
             self.assign_random_colors_to_buttons()
@@ -55,6 +57,8 @@ class MyPaintApp(App):
             print(inner_list)
 
     def assign_random_colors_to_buttons(self):
+        if len(self.pos_set) < 3:
+            return
         cords = sample(self.pos_set, 3)
         colors = []
         for btn in self.button_layout.children:
@@ -68,7 +72,10 @@ class MyPaintApp(App):
             button.background_color = color
             self.pos_set.remove(cord)
             self.logical_grid[cord[0]][cord[1]] = 1
-        # print(len(self.pos_set))
+            if len(self.pos_set) <= 0:
+                print('Game Over')
+                break
+        print(len(self.pos_set))
 
     def build_grid_layout(self):
         self.grid_layout = GridLayout(
