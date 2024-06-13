@@ -75,12 +75,9 @@ class MyPaintApp(App):
             pos=(53, 206),
             spacing=44,
         )
-        # Only use the first 3 images from IMAGE_LIST
-        for img_path in IMAGE_LIST[:3]:
+        for i in range(3):
             btn = Button(
-                background_normal=img_path,
-                size_hint=(None, None),
-                size=(64, 64),  # Adjust size of the button as needed
+                background_color=choice(COLOR_LIST),
             )
             self.button_layout.add_widget(btn)
         return self.button_layout
@@ -164,6 +161,7 @@ class MyPaintApp(App):
             button.background_color = color
             self.pos_set.remove(cord)
             self.logical_grid[cord[0]][cord[1]] = 1
+            self.check_length_remove_square(self.find_adjacent_color(row, col))
             if len(self.pos_set) <= 0:
                 print('Game Over')
                 break
