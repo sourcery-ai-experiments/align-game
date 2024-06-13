@@ -2,6 +2,7 @@ from random import choice
 from random import sample
 
 from kivy.app import App
+from kivy.clock import Clock
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
@@ -33,6 +34,9 @@ class MyPaintApp(App):
         self.selected_button = None
         self.grid_layout = None
         self.button_layout = None
+        self.path = []
+        self.path_index = 0
+        self.last_position = None
 
     def build_grid_layout(self):
         self.grid_layout = GridLayout(
@@ -84,14 +88,37 @@ class MyPaintApp(App):
         path = astar(self.logical_grid, start, end)
         if not path:
             return
-        tile.background_color = self.selected_color
-        self.update_logical_grid(row, col, start)
-        if self.spawn:
-            self.assign_random_colors_to_buttons()
-            adjacent_lines = self.find_adjacent_color(row, col)
-            if adjacent_lines:
-                self.check_length_remove_square(adjacent_lines)
-                self.spawn = True
+        self.path = path
+        self.path_index = 0
+        self.last_position = start
+        Clock.schedule_interval(self.update, 0.2)
+
+    def update(self, dt):
+        if self.path_index < len(self.path):
+            if self.path_index > 0:
+                last_row, last_col = self.path[self.path_index - 1]
+                last_button = self.grid_layout.children[
+                    9 * (8 - last_row) + (8 - last_col)
+                ]
+                last_button.background_color = BLACK
+
+            current_pos = self.path[self.path_index]
+            row, col = current_pos
+            button = self.grid_layout.children[9 * (8 - row) + (8 - col)]
+            button.background_color = self.selected_color
+            self.path_index += 1
+        else:
+            Clock.unschedule(self.update)
+            start = self.selected_button[1], self.selected_button[2]
+            self.update_logical_grid(self.path[-1][0], self.path[-1][1], start)
+            if self.spawn:
+                self.assign_random_colors_to_buttons()
+                adjacent_lines = self.find_adjacent_color(
+                    self.path[-1][0], self.path[-1][1],
+                )
+                if adjacent_lines:
+                    self.check_length_remove_square(adjacent_lines)
+                    self.spawn = True
 
     def update_logical_grid(self, row, col, start):
         self.logical_grid[row][col] = 1
