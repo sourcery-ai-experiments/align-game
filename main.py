@@ -9,28 +9,16 @@ from kivy.uix.button import Button
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.image import Image
-from kivy.uix.widget import Widget
 
 from astar import astar
-
-BLACK = [1, 1, 1, 0]
-COLOR_LIST = [
-    [1, 0, 0, 1],     # Red
-    [0, 1, 0, 1],     # Green
-    # [0, 0, 1, 1],     # Blue
-    # [1, 1, 0, 1],     # Yellow
-    # [1, 0, 1, 1],     # Magenta
-    # [0, 1, 1, 1],     # Cyan
-    # [1, 0.5, 0, 1],   # Orange
-    # [0.5, 0, 0.5, 1],  # Purple
-]
+TRANS = 'assets/trans.png'
+BLACK = [1, 1, 1, 1]
 IMAGE_LIST = [
-    'assets/red.png',
+    'assets/pink.png',
     'assets/green.png',
     'assets/blue.png',
     'assets/yellow.png',
-    'assets/magenta.png',
-    'assets/cyan.png',
+    'assets/turquoise.png',
     'assets/orange.png',
     'assets/purple.png',
 ]
@@ -43,7 +31,7 @@ class MyPaintApp(App):
         self.logical_grid = [[0 for _ in range(9)] for _ in range(9)]
         self.pos_set = {(row, col) for row in range(9) for col in range(9)}
         self.spawn = True
-        self.selected_color = None
+        self.selected_image = None
         self.selected_button = None
         self.grid_layout = None
         self.button_layout = None
@@ -59,10 +47,12 @@ class MyPaintApp(App):
         )
         for row in range(9):
             for col in range(9):
-                btn = Button(background_color=BLACK)
+                btn = Button(
+                    background_normal='', background_color=[0, 0, 0, 0],
+                )
                 btn.bind(
-                    on_press=lambda tile, x=row,
-                    y=col: self.on_button_press(tile, x, y),
+                    on_press=lambda tile,
+                    x=row, y=col: self.on_button_press(tile, x, y),
                 )
                 self.grid_layout.add_widget(btn)
         return self.grid_layout
@@ -71,29 +61,28 @@ class MyPaintApp(App):
         self.button_layout = BoxLayout(
             orientation='vertical',
             size_hint=(None, None),
-            size=(70, 305),
+            size=(70, 300),
             pos=(53, 206),
             spacing=44,
         )
         for i in range(3):
-            btn = Button(
-                background_color=choice(COLOR_LIST),
+            img = Image(source=choice(IMAGE_LIST))
+            img.bind(
+                on_touch_down=lambda instance, touch,
+                idx=i: self.select_image(instance, touch, idx),
             )
-            self.button_layout.add_widget(btn)
+            self.button_layout.add_widget(img)
         return self.button_layout
 
     def on_button_press(self, tile, row, col):
-        # print(row, col)
-        if tile.background_color != BLACK:
+        if tile.background_normal:
             self.select_button(tile, row, col)
-        elif tile.background_color == BLACK and self.selected_color:
+            tile.background_color = [1, 1, 1, 1]
+        elif not tile.background_normal and self.selected_image:
             self.move_selected_button(tile, row, col)
-        print('---------------------')
-        for cord in self.logical_grid:
-            print(cord)
 
     def select_button(self, tile, row, col):
-        self.selected_color = tile.background_color
+        self.selected_image = tile.background_normal
         self.selected_button = (tile, row, col)
 
     def move_selected_button(self, tile, row, col):
@@ -114,23 +103,21 @@ class MyPaintApp(App):
                 last_button = self.grid_layout.children[
                     9 * (8 - last_row) + (8 - last_col)
                 ]
-                last_button.background_color = BLACK
+                last_button.background_normal = ''
             current_pos = self.path[self.path_index]
             row, col = current_pos
             button = self.grid_layout.children[
                 9 * (8 - row) + (8 - col)
             ]
-            button.background_color = self.selected_color
+            button.background_normal = self.selected_image
             self.path_index += 1
         else:
             Clock.unschedule(self.update)
             start = self.selected_button[1], self.selected_button[2]
-            self.update_logical_grid(
-                self.path[-1][0], self.path[-1][1], start,
-            )
+            self.update_logical_grid(self.path[-1][0], self.path[-1][1], start)
             if self.spawn:
-                self.assign_random_colors_to_buttons()
-                adjacent_lines = self.find_adjacent_color(
+                self.assign_random_images_to_buttons()
+                adjacent_lines = self.find_adjacent_image(
                     self.path[-1][0], self.path[-1][1],
                 )
                 if adjacent_lines:
@@ -139,37 +126,39 @@ class MyPaintApp(App):
     def update_logical_grid(self, row, col, start):
         self.logical_grid[row][col] = 1
         self.pos_set.remove((row, col))
-        self.selected_button[0].background_color = BLACK
+        self.selected_button[0].background_normal = ''
+        self.selected_button[0].background_color = [0, 0, 0, 0]
         self.logical_grid[start[0]][start[1]] = 0
         self.pos_set.add((start[0], start[1]))
-        self.selected_color = None
+        self.selected_image = None
         self.selected_button = None
 
-    def assign_random_colors_to_buttons(self):
+    def assign_random_images_to_buttons(self):
         if len(self.pos_set) < 3 or not self.spawn:
             return
         cords = sample(self.pos_set, 3)
-        colors = [btn.background_color for btn in self.button_layout.children]
-        for btn in self.button_layout.children:
-            btn.background_color = choice(COLOR_LIST)
-        self.update_grid_with_new_colors(cords, colors)
+        images = [img.source for img in self.button_layout.children]
+        for img in self.button_layout.children:
+            img.source = choice(IMAGE_LIST)
+        self.update_grid_with_new_images(cords, images)
 
-    def update_grid_with_new_colors(self, cords, colors):
-        for cord, color in zip(cords, colors):
+    def update_grid_with_new_images(self, cords, images):
+        for cord, image in zip(cords, images):
             row, col = cord
             button = self.grid_layout.children[9 * (8 - row) + (8 - col)]
-            button.background_color = color
+            button.background_normal = image
+            button.background_color = [1, 1, 1, 1]
             self.pos_set.remove(cord)
             self.logical_grid[cord[0]][cord[1]] = 1
-            self.check_length_remove_square(self.find_adjacent_color(row, col))
+            self.check_length_remove_square(self.find_adjacent_image(row, col))
             if len(self.pos_set) <= 0:
                 print('Game Over')
                 break
 
-    def find_adjacent_color(self, row, col):
+    def find_adjacent_image(self, row, col):
         directions = [
-            (1, 0),  (0, 1), (1, 1), (1, -1),
-            (-1, 0),  (0, -1), (-1, -1), (-1, 1),
+            (1, 0), (0, 1), (1, 1), (1, -1),
+            (-1, 0), (0, -1), (-1, -1), (-1, 1),
         ]
         adjacent_lines = {
             0: [(row, col)],
@@ -177,29 +166,26 @@ class MyPaintApp(App):
             2: [(row, col)],
             3: [(row, col)],
         }
-        current_color = self.grid_layout.children[
+        current_image = self.grid_layout.children[
             9 * (8 - row) + (8 - col)
-        ].background_color
+        ].background_normal
         for i, direction in enumerate(directions):
             x, y = row, col
             dir_x, dir_y = direction
             while True:
                 x += dir_x
                 y += dir_y
-                try:
+                if 0 <= x < 9 and 0 <= y < 9:
                     adjacent_button = self.grid_layout.children[
-                        9 * (
-                            8 - x
-                        ) + (8 - y)
+                        9 * (8 - x) + (8 - y)
                     ]
-                    adjacent_color = adjacent_button.background_color
-                    if adjacent_color == current_color:
+                    adjacent_image = adjacent_button.background_normal
+                    if adjacent_image == current_image:
                         adjacent_lines[i % 4].append((x, y))
                     else:
                         break
-                except IndexError:
+                else:
                     break
-        # print(adjacent_lines)
         return adjacent_lines
 
     def check_length_remove_square(self, lines):
@@ -209,30 +195,37 @@ class MyPaintApp(App):
                 print('Spawn Flag Set to False')
                 for x, y in line:
                     if 0 <= x < 9 and 0 <= y < 9:
-                        self.grid_layout.children[
-                            9 * (8 - x) + (8 - y)
-                        ].background_color = BLACK
-                        self.logical_grid[x][y] = 0
-                        self.pos_set.add((x, y))
+                        button_index = 9 * (8 - x) + (8 - y)
+                        if button_index < len(self.grid_layout.children):
+                            self.grid_layout.children[
+                                button_index
+                            ].background_normal = ''
+                            self.logical_grid[x][y] = 0
+                            self.pos_set.add((x, y))
+                        else:
+                            print(f'Out of bounds ({x}, {y}) in grid_layout')
                     else:
-                        print(f'losho, out of bounds ({x}, {y})')
+                        print(f'Out of bounds ({x}, {y})')
                 self.spawn = True
+
+    def select_image(self, instance, touch, idx):
+        if instance.collide_point(*touch.pos):
+            self.selected_image = instance.source
+            return True
+        return False
 
     def build(self):
         Window.size = (800, 800)
         Window.minimum_size = (400, 300)
         Window.maximum_size = (1000, 800)
-        parent = BoxLayout(orientation='vertical')
-        parent = Widget()
         parent = FloatLayout()
         background = Image(
-            source='assets/board.jpg',
-            allow_stretch=True, keep_ratio=True,
+            source='assets/board.jpg', allow_stretch=True, keep_ratio=True,
         )
         parent.add_widget(background)
         parent.add_widget(self.build_grid_layout())
         parent.add_widget(self.build_predicted_layout())
-        self.assign_random_colors_to_buttons()
+        self.assign_random_images_to_buttons()
         return parent
 
 
