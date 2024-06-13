@@ -3,14 +3,17 @@ from random import sample
 
 from kivy.app import App
 from kivy.clock import Clock
+from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.image import Image
 from kivy.uix.widget import Widget
 
 from astar import astar
 
-BLACK = [1, 1, 1, 1]
+BLACK = [1, 1, 1, 0]
 COLOR_LIST = [
     [1, 0, 0, 1],     # Red
     [0, 1, 0, 1],     # Green
@@ -20,6 +23,16 @@ COLOR_LIST = [
     # [0, 1, 1, 1],     # Cyan
     # [1, 0.5, 0, 1],   # Orange
     # [0.5, 0, 0.5, 1],  # Purple
+]
+IMAGE_LIST = [
+    'assets/red.png',
+    'assets/green.png',
+    'assets/blue.png',
+    'assets/yellow.png',
+    'assets/magenta.png',
+    'assets/cyan.png',
+    'assets/orange.png',
+    'assets/purple.png',
 ]
 
 
@@ -42,7 +55,7 @@ class MyPaintApp(App):
         self.grid_layout = GridLayout(
             cols=9, rows=9, size_hint=(
                 None, None,
-            ), size=(450, 450), pos=(330, 20),
+            ), size=(555, 555), pos=(191, 48),
         )
         for row in range(9):
             for col in range(9):
@@ -74,9 +87,9 @@ class MyPaintApp(App):
             self.select_button(tile, row, col)
         elif tile.background_color == BLACK and self.selected_color:
             self.move_selected_button(tile, row, col)
-        # print('---------------------')
-        # for cord in self.logical_grid:
-        #     print(cord)
+        print('---------------------')
+        for cord in self.logical_grid:
+            print(cord)
 
     def select_button(self, tile, row, col):
         self.selected_color = tile.background_color
@@ -91,7 +104,7 @@ class MyPaintApp(App):
         self.path = path
         self.path_index = 0
         self.last_position = start
-        Clock.schedule_interval(self.update, 0.2)
+        Clock.schedule_interval(self.update, 0.1)
 
     def update(self, dt):
         if self.path_index < len(self.path):
@@ -101,16 +114,19 @@ class MyPaintApp(App):
                     9 * (8 - last_row) + (8 - last_col)
                 ]
                 last_button.background_color = BLACK
-
             current_pos = self.path[self.path_index]
             row, col = current_pos
-            button = self.grid_layout.children[9 * (8 - row) + (8 - col)]
+            button = self.grid_layout.children[
+                9 * (8 - row) + (8 - col)
+            ]
             button.background_color = self.selected_color
             self.path_index += 1
         else:
             Clock.unschedule(self.update)
             start = self.selected_button[1], self.selected_button[2]
-            self.update_logical_grid(self.path[-1][0], self.path[-1][1], start)
+            self.update_logical_grid(
+                self.path[-1][0], self.path[-1][1], start,
+            )
             if self.spawn:
                 self.assign_random_colors_to_buttons()
                 adjacent_lines = self.find_adjacent_color(
@@ -118,7 +134,6 @@ class MyPaintApp(App):
                 )
                 if adjacent_lines:
                     self.check_length_remove_square(adjacent_lines)
-                    self.spawn = True
 
     def update_logical_grid(self, row, col, start):
         self.logical_grid[row][col] = 1
@@ -186,19 +201,33 @@ class MyPaintApp(App):
         return adjacent_lines
 
     def check_length_remove_square(self, lines):
-        for direction, line in lines.items():
+        for line in lines.values():
             if len(line) >= 5:
                 self.spawn = False
                 print('Spawn Flag Set to False')
                 for x, y in line:
-                    self.grid_layout.children[
-                        9 * (8 - x) + (8 - y)
-                    ].background_color = BLACK
-                    self.logical_grid[x][y] = 0
-                    self.pos_set.add((x, y))
+                    if 0 <= x < 9 and 0 <= y < 9:
+                        self.grid_layout.children[
+                            9 * (8 - x) + (8 - y)
+                        ].background_color = BLACK
+                        self.logical_grid[x][y] = 0
+                        self.pos_set.add((x, y))
+                    else:
+                        print(f'losho, out of bounds ({x}, {y})')
+                self.spawn = True
 
     def build(self):
+        Window.size = (800, 800)
+        Window.minimum_size = (400, 300)
+        Window.maximum_size = (1000, 800)
+        parent = BoxLayout(orientation='vertical')
         parent = Widget()
+        parent = FloatLayout()
+        background = Image(
+            source='assets/board.jpg',
+            allow_stretch=True, keep_ratio=True,
+        )
+        parent.add_widget(background)
         parent.add_widget(self.build_grid_layout())
         parent.add_widget(self.build_predicted_layout())
         self.assign_random_colors_to_buttons()
