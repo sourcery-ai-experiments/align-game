@@ -69,9 +69,11 @@ class MyPaintApp(App):
 
     def build_predicted_layout(self):
         self.button_layout = BoxLayout(
-            orientation='vertical', size_hint=(
-                None, None,
-            ), size=(100, 250), pos=(50, 150),
+            orientation='vertical',
+            size_hint=(None, None),
+            size=(70, 305),  # Fixed size for the BoxLayout
+            pos=(53, 206),
+            spacing=44,  # Adjust spacing between widgets
         )
         for i in range(3):
             btn = Button(
