@@ -13,8 +13,9 @@ from kivy.uix.image import Image
 from kivy.uix.label import Label
 
 from astar import astar
+BLACK = [0, 0, 0, 0]
+BOARD = 'assets/board.jpg'
 TRANS = 'assets/trans.png'
-BLACK = [1, 1, 1, 1]
 IMAGE_LIST = [
     'assets/pink.png',
     # 'assets/green.png',
@@ -51,7 +52,7 @@ class MyPaintApp(App):
         for row in range(9):
             for col in range(9):
                 btn = Button(
-                    background_normal='', background_color=[0, 0, 0, 0],
+                    background_normal='', background_color=BLACK,
                 )
                 btn.bind(
                     on_press=lambda tile,
@@ -68,11 +69,11 @@ class MyPaintApp(App):
             pos=(55, 207),
             spacing=44,
         )
-        for i in range(3):
+        for _ in range(3):
             img = Image(source=choice(IMAGE_LIST))
             img.bind(
-                on_touch_down=lambda instance, touch,
-                idx=i: self.select_image(instance, touch, idx),
+                on_touch_down=lambda instance, touch:
+                self.select_image(instance, touch),
             )
             self.button_layout.add_widget(img)
         return self.button_layout
@@ -107,7 +108,7 @@ class MyPaintApp(App):
                     9 * (8 - last_row) + (8 - last_col)
                 ]
                 last_button.background_normal = ''
-                last_button.background_color = [0, 0, 0, 0]
+                last_button.background_color = BLACK
             current_pos = self.path[self.path_index]
             row, col = current_pos
             button = self.grid_layout.children[
@@ -132,7 +133,7 @@ class MyPaintApp(App):
         self.logical_grid[row][col] = 1
         self.pos_set.remove((row, col))
         self.selected_button[0].background_normal = ''
-        self.selected_button[0].background_color = [0, 0, 0, 0]
+        self.selected_button[0].background_color = BLACK
         self.logical_grid[start[0]][start[1]] = 0
         self.pos_set.add((start[0], start[1]))
         self.selected_image = None
@@ -210,7 +211,7 @@ class MyPaintApp(App):
                             ].background_normal = ''
                             self.grid_layout.children[
                                 button_index
-                            ].background_color = [0, 0, 0, 0]
+                            ].background_color = BLACK
                             self.logical_grid[x][y] = 0
                             self.pos_set.add((x, y))
                         else:
@@ -220,7 +221,7 @@ class MyPaintApp(App):
                 self.spawn = True
         print(f'score: {self.score}')
 
-    def select_image(self, instance, touch, idx):
+    def select_image(self, instance, touch):
         if instance.collide_point(*touch.pos):
             self.selected_image = instance.source
             return True
@@ -235,7 +236,7 @@ class MyPaintApp(App):
         Window.maximum_size = (1000, 800)
         parent = FloatLayout()
         background = Image(
-            source='assets/board.jpg', allow_stretch=True, keep_ratio=True,
+            source=BOARD, allow_stretch=True, keep_ratio=True,
         )
         parent.add_widget(background)
         parent.add_widget(self.build_grid_layout())
