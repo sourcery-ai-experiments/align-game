@@ -71,14 +71,16 @@ class MyPaintApp(App):
         self.button_layout = BoxLayout(
             orientation='vertical',
             size_hint=(None, None),
-            size=(70, 305),  # Fixed size for the BoxLayout
+            size=(70, 305),
             pos=(53, 206),
-            spacing=44,  # Adjust spacing between widgets
+            spacing=44,
         )
-        for i in range(3):
+        # Only use the first 3 images from IMAGE_LIST
+        for img_path in IMAGE_LIST[:3]:
             btn = Button(
-                text=f'Button {i+1}',
-                background_color=choice(COLOR_LIST),
+                background_normal=img_path,
+                size_hint=(None, None),
+                size=(64, 64),  # Adjust size of the button as needed
             )
             self.button_layout.add_widget(btn)
         return self.button_layout
