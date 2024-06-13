@@ -4,23 +4,25 @@ from random import sample
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.window import Window
+from kivy.metrics import sp
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.image import Image
+from kivy.uix.label import Label
 
 from astar import astar
 TRANS = 'assets/trans.png'
 BLACK = [1, 1, 1, 1]
 IMAGE_LIST = [
     'assets/pink.png',
-    'assets/green.png',
-    'assets/blue.png',
-    'assets/yellow.png',
-    'assets/turquoise.png',
-    'assets/orange.png',
-    'assets/purple.png',
+    # 'assets/green.png',
+    # 'assets/blue.png',
+    # 'assets/yellow.png',
+    # 'assets/turquoise.png',
+    # 'assets/orange.png',
+    # 'assets/purple.png',
 ]
 
 
@@ -38,6 +40,7 @@ class MyPaintApp(App):
         self.path = []
         self.path_index = 0
         self.last_position = None
+        self.score = 0
 
     def build_grid_layout(self):
         self.grid_layout = GridLayout(
@@ -194,6 +197,9 @@ class MyPaintApp(App):
         for line in lines.values():
             if len(line) >= 5:
                 self.spawn = False
+                line_score = len(line)
+                self.score += line_score
+                self.update_score_label()
                 print('Spawn Flag Set to False')
                 for x, y in line:
                     if 0 <= x < 9 and 0 <= y < 9:
@@ -212,12 +218,16 @@ class MyPaintApp(App):
                     else:
                         print(f'Out of bounds ({x}, {y})')
                 self.spawn = True
+        print(f'score: {self.score}')
 
     def select_image(self, instance, touch, idx):
         if instance.collide_point(*touch.pos):
             self.selected_image = instance.source
             return True
         return False
+
+    def update_score_label(self):
+        self.scorelb.text = ' '.join(list(f'{self.score:04d}'))
 
     def build(self):
         Window.size = (800, 800)
@@ -231,6 +241,15 @@ class MyPaintApp(App):
         parent.add_widget(self.build_grid_layout())
         parent.add_widget(self.build_predicted_layout())
         self.assign_random_images_to_buttons()
+        self.scorelb = Label(
+            text=' '.join(list(f'{self.score:04d}')),
+            pos_hint={'x': 0.62, 'y': 0.85},
+            size_hint=(None, None),
+            size=(200, 50),
+            font_size=sp(55),
+            halign='center',
+        )
+        parent.add_widget(self.scorelb)
         return parent
 
 
