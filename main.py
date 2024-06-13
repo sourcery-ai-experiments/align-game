@@ -62,7 +62,7 @@ class MyPaintApp(App):
             orientation='vertical',
             size_hint=(None, None),
             size=(70, 300),
-            pos=(53, 206),
+            pos=(55, 207),
             spacing=44,
         )
         for i in range(3):
@@ -104,12 +104,14 @@ class MyPaintApp(App):
                     9 * (8 - last_row) + (8 - last_col)
                 ]
                 last_button.background_normal = ''
+                last_button.background_color = [0, 0, 0, 0]
             current_pos = self.path[self.path_index]
             row, col = current_pos
             button = self.grid_layout.children[
                 9 * (8 - row) + (8 - col)
             ]
             button.background_normal = self.selected_image
+            button.background_color = [1, 1, 1, 1]
             self.path_index += 1
         else:
             Clock.unschedule(self.update)
@@ -200,6 +202,9 @@ class MyPaintApp(App):
                             self.grid_layout.children[
                                 button_index
                             ].background_normal = ''
+                            self.grid_layout.children[
+                                button_index
+                            ].background_color = [0, 0, 0, 0]
                             self.logical_grid[x][y] = 0
                             self.pos_set.add((x, y))
                         else:
