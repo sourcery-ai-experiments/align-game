@@ -1,5 +1,5 @@
 from random import choice
-from random import sample
+from random import choices
 
 from kivy.app import App
 from kivy.clock import Clock
@@ -141,7 +141,7 @@ class MyPaintApp(App):
     def assign_random_images_to_buttons(self):
         if len(self.pos_set) < 3 or not self.spawn:
             return
-        cords = sample(self.pos_set, 3)
+        cords = choices(list(self.pos_set), k=3)
         images = [img.source for img in self.button_layout.children]
         for img in self.button_layout.children:
             img.source = choice(IMAGE_LIST)
