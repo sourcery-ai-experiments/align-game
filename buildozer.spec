@@ -16,7 +16,7 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
 
 # (list) List of inclusions using pattern matching
-#source.include_patterns = assets/*,images/*.png
+source.include_patterns = assets/*.png
 
 # (list) Source files to exclude (let empty to not exclude anything)
 #source.exclude_exts = spec
@@ -47,7 +47,7 @@ requirements = python3,kivy
 #presplash.filename = %(source.dir)s/data/presplash.png
 
 # (str) Icon of the application
-#icon.filename = %(source.dir)s/data/icon.png
+icon.filename = assets/icon.png
 
 # (list) Supported orientations
 # Valid options are: landscape, portrait, portrait-reverse or landscape-reverse
