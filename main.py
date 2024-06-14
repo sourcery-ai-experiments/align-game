@@ -15,7 +15,6 @@ from kivy.uix.label import Label
 from astar import astar
 BLACK = [0, 0, 0, 0]
 BOARD = 'assets/board.jpg'
-TRANS = 'assets/trans.png'
 IMAGE_LIST = [
     'assets/pink.png',
     # 'assets/green.png',
