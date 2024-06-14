@@ -1,5 +1,4 @@
 from random import choice
-from random import choices
 
 from kivy.app import App
 from kivy.clock import Clock
@@ -97,7 +96,6 @@ class MyPaintApp(App):
         self.path = path
         self.path_index = 0
         self.last_position = start
-
         Clock.schedule_interval(self.update, 0.1)
 
     def update(self, dt):
@@ -126,7 +124,9 @@ class MyPaintApp(App):
                 adjacent_lines = self.find_adjacent_image(
                     self.path[-1][0], self.path[-1][1],
                 )
-                if adjacent_lines:
+                if not adjacent_lines:
+                    self.assign_random_images_to_buttons()
+                elif adjacent_lines:
                     self.check_length_remove_square(adjacent_lines)
 
     def update_logical_grid(self, row, col, start):
@@ -142,7 +142,11 @@ class MyPaintApp(App):
     def assign_random_images_to_buttons(self):
         if len(self.pos_set) < 3 or not self.spawn:
             return
-        cords = choices(list(self.pos_set), k=3)
+        cords = []
+        while len(cords) < 3:
+            new_cord = choice(list(self.pos_set))
+            if new_cord not in cords:
+                cords.append(new_cord)
         images = [img.source for img in self.button_layout.children]
         for img in self.button_layout.children:
             img.source = choice(IMAGE_LIST)
@@ -196,7 +200,6 @@ class MyPaintApp(App):
 
     def check_length_remove_square(self, lines):
         variable = len(self.pos_set)
-        print(f'{variable=}')
         for line in lines.values():
             if len(line) >= 5:
                 self.spawn = False
@@ -216,10 +219,10 @@ class MyPaintApp(App):
                             print(f'Out of bounds ({x}, {y}) in grid_layout')
                     else:
                         print(f'Out of bounds ({x}, {y})')
-                self.spawn = True
+        self.spawn = True
         self.score += (len(self.pos_set) - variable)
-        print(f'pos set: {len(self.pos_set)}')
         self.update_score_label()
+        print(self.spawn)
 
     def select_image(self, instance, touch):
         if instance.collide_point(*touch.pos):
