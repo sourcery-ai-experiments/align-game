@@ -1,4 +1,5 @@
 from random import choice
+from random import randrange
 
 from kivy.app import App
 from kivy.clock import Clock
@@ -111,6 +112,7 @@ class MyPaintApp(App):
         else:
             Clock.unschedule(self.update)
             self.handle_reached_destination()
+            self.assign_random_images_to_buttons()
 
     def move_along_path(self):
         if self.path_index > 0:
@@ -135,14 +137,12 @@ class MyPaintApp(App):
         start = self.selected_button[1], self.selected_button[2]
         self.update_logical_grid(self.path[-1][0], self.path[-1][1], start)
         if self.spawn:
-            self.assign_random_images_to_buttons()
+
             adjacent_lines = self.find_adjacent_image(
                 self.path[-1][0],
                 self.path[-1][1],
             )
-            if not adjacent_lines:
-                self.assign_random_images_to_buttons()
-            elif adjacent_lines:
+            if adjacent_lines:
                 self.check_length_remove_square(adjacent_lines)
 
     def get_button_at(self, row, col):
@@ -170,11 +170,13 @@ class MyPaintApp(App):
         self.update_grid_with_new_images(cords, images)
 
     def get_unique_random_cords(self, count):
+        pos_list = list(self.pos_set)
         cords = []
         while len(cords) < count:
-            new_cord = choice(list(self.pos_set))
-            if new_cord not in cords:
-                cords.append(new_cord)
+            index = randrange(len(pos_list))
+            new_cord = pos_list[index]
+            cords.append(new_cord)
+            pos_list.pop(index)
         return cords
 
     def update_button_layout_images(self):
@@ -238,7 +240,7 @@ class MyPaintApp(App):
             if len(line) >= 5:
                 self.spawn = False
                 self.remove_line(line)
-        # self.spawn = True
+        self.spawn = True
 
         self.score += (len(self.pos_set) - variable)
         self.update_score_label()
