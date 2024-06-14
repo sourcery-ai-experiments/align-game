@@ -46,7 +46,7 @@ class MyPaintApp(App):
         self.grid_layout = GridLayout(
             cols=9, rows=9, size_hint=(
                 None, None,
-            ), size=(555, 555), pos=(191, 48),
+            ), size=(555, 555), pos=(191, 49),
         )
         for row in range(9):
             for col in range(9):
@@ -97,6 +97,7 @@ class MyPaintApp(App):
         self.path = path
         self.path_index = 0
         self.last_position = start
+
         Clock.schedule_interval(self.update, 0.1)
 
     def update(self, dt):
@@ -194,13 +195,11 @@ class MyPaintApp(App):
         return adjacent_lines
 
     def check_length_remove_square(self, lines):
+        variable = len(self.pos_set)
+        print(f'{variable=}')
         for line in lines.values():
             if len(line) >= 5:
                 self.spawn = False
-                line_score = len(line)
-                self.score += line_score
-                self.update_score_label()
-                print('Spawn Flag Set to False')
                 for x, y in line:
                     if 0 <= x < 9 and 0 <= y < 9:
                         button_index = 9 * (8 - x) + (8 - y)
@@ -218,7 +217,9 @@ class MyPaintApp(App):
                     else:
                         print(f'Out of bounds ({x}, {y})')
                 self.spawn = True
-        print(f'score: {self.score}')
+        self.score += (len(self.pos_set) - variable)
+        print(f'pos set: {len(self.pos_set)}')
+        self.update_score_label()
 
     def select_image(self, instance, touch, idx):
         if instance.collide_point(*touch.pos):
@@ -240,16 +241,17 @@ class MyPaintApp(App):
         parent.add_widget(background)
         parent.add_widget(self.build_grid_layout())
         parent.add_widget(self.build_predicted_layout())
-        self.assign_random_images_to_buttons()
+
         self.scorelb = Label(
             text=' '.join(list(f'{self.score:04d}')),
-            pos_hint={'x': 0.62, 'y': 0.85},
+            pos_hint={'x': 0.61 + 0.005, 'y': 0.85},
             size_hint=(None, None),
             size=(200, 50),
-            font_size=sp(55),
+            font_size=sp(54),
             halign='center',
         )
         parent.add_widget(self.scorelb)
+        self.assign_random_images_to_buttons()
         return parent
 
 
