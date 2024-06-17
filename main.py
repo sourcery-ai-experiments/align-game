@@ -13,7 +13,6 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.image import Image
 from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
 from kivy.uix.widget import Widget
 
 from astar import astar
@@ -87,13 +86,13 @@ class MyPaintApp(App):
         self.button = Button(
             background_normal=img_source,
             size_hint=(None, None),
-            size=(50, 50),
-            pos_hint={'x': 0.1, 'y': 0.85},
+            size=(40, 40),
+            pos_hint={'x': 0.84, 'y': 0.91},
         )
-        self.button.bind(on_press=self.save_button)
+        self.button.bind(on_press=self.score_button)
         return self.button
 
-    def save_button(self, _):
+    def score_button(self, _):
         if self.overlay is None:
             self.overlay = Widget()
             with self.overlay.canvas:
@@ -103,33 +102,21 @@ class MyPaintApp(App):
                     size=self.root.size,
                 )
             self.root.add_widget(self.overlay)
-
             self.overlay.bind(on_touch_down=self.on_overlay_touch)
 
-        submit_button = Button(
-            text='Submit',
-            size_hint=(None, None),
-            size=(100, 50),
-            pos_hint={'center_x': 0.5, 'center_y': 0.3},
-        )
-        submit_button.bind(on_press=self.submit_action)
-        self.overlay.add_widget(submit_button)
-
-        self.text_input = TextInput(
-            multiline=False,
-            size_hint=(None, None),
-            size=(200, 50),
-            pos_hint={'center_x': 0.5, 'center_y': 0.5},
-        )
-        self.root.add_widget(self.text_input)
-
     def on_overlay_touch(self, instance, touch):
-        pass
+        self.root.remove_widget(self.overlay)
+        self.overlay = None
+        return True
 
-    def submit_action(self, instance):
-        if self.text_input:
-            submitted_text = self.text_input.text
-            print(f'Submitted text: {submitted_text}')
+    # def submit_action(self, instance):
+    #     if self.text_input:
+    #         submitted_text = self.text_input.text
+    #         print(f'Submitted text: {submitted_text}')
+    #     if self.overlay:
+    #         self.root.remove_widget(self.overlay)
+    #         self.root.remove_widget(self.text_input)
+    #         self.overlay = None
 
     def create_image_widget(self):
         img = Image(source=choice(IMAGE_LIST))
