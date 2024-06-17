@@ -94,6 +94,7 @@ class MyPaintApp(App):
     def select_button(self, tile, row, col):
         self.selected_image = tile.background_normal
         self.selected_button = (tile, row, col)
+        self.spawn = True
 
     def move_selected_button(self, tile, row, col):
         start = (self.selected_button[1], self.selected_button[2])
@@ -112,7 +113,8 @@ class MyPaintApp(App):
         else:
             Clock.unschedule(self.update)
             self.handle_reached_destination()
-            self.assign_random_images_to_buttons()
+            if self.spawn:
+                self.assign_random_images_to_buttons()
 
     def move_along_path(self):
         if self.path_index > 0:
@@ -136,14 +138,14 @@ class MyPaintApp(App):
     def handle_reached_destination(self):
         start = self.selected_button[1], self.selected_button[2]
         self.update_logical_grid(self.path[-1][0], self.path[-1][1], start)
-        if self.spawn:
+        # if self.spawn:
 
-            adjacent_lines = self.find_adjacent_image(
-                self.path[-1][0],
-                self.path[-1][1],
-            )
-            if adjacent_lines:
-                self.check_length_remove_square(adjacent_lines)
+        adjacent_lines = self.find_adjacent_image(
+            self.path[-1][0],
+            self.path[-1][1],
+        )
+        if adjacent_lines:
+            self.check_length_remove_square(adjacent_lines)
 
     def get_button_at(self, row, col):
         return self.grid_layout.children[9 * (8 - row) + (8 - col)]
@@ -240,7 +242,7 @@ class MyPaintApp(App):
             if len(line) >= 5:
                 self.spawn = False
                 self.remove_line(line)
-        self.spawn = True
+        # self.spawn = True
 
         self.score += (len(self.pos_set) - variable)
         self.update_score_label()
