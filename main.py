@@ -58,6 +58,7 @@ class MyPaintApp(App):
                 self.score = int(lines[0].strip())
                 self.pos_set = eval(lines[1].strip())
                 self.logical_grid = eval(lines[2].strip())
+                self.image_grid = eval(lines[3].strip())
 
     def build_grid_layout(self):
         self.grid_layout = GridLayout(
@@ -135,12 +136,22 @@ class MyPaintApp(App):
         self.score_data = str(self.score)
         self.pos = str(self.pos_set)
         self.logrid = str(self.logical_grid)
+        self.image_grid = [
+            [
+                self.get_button_at(
+                    row, col,
+                ).background_normal for col in range(9)
+            ]
+            for row in range(9)
+        ]
+        image_grid_str = str(self.image_grid)
         file_path = os.path.join(os.getcwd(), 'score.txt')
 
         with open(file_path, 'w') as file:
             file.write(self.score_data + '\n')
             file.write(self.pos + '\n')
             file.write(self.logrid + '\n')
+            file.write(image_grid_str + '\n')
         self.stop()
 
     def reset_button(self):
@@ -391,7 +402,7 @@ class MyPaintApp(App):
             for col in range(9):
                 if self.logical_grid[row][col] == 1:
                     button = self.get_button_at(row, col)
-                    button.background_normal = choice(IMAGE_LIST)
+                    button.background_normal = self.image_grid[row][col]
                     button.background_color = [1, 1, 1, 1]
                     self.pos_set.discard((row, col))
 
