@@ -48,6 +48,7 @@ class MyPaintApp(App):
         self.score = 0
         self.overlay = None
         self.text_input = None
+        self.score_rank = []
         self.load_game_state()
 
     def load_game_state(self):
@@ -59,6 +60,7 @@ class MyPaintApp(App):
                 self.pos_set = eval(lines[1].strip())
                 self.logical_grid = eval(lines[2].strip())
                 self.image_grid = eval(lines[3].strip())
+                self.score_rank = eval(lines[4].strip())
 
     def build_grid_layout(self):
         self.grid_layout = GridLayout(
@@ -133,7 +135,7 @@ class MyPaintApp(App):
         return self.save_exit_button
 
     def save_and_exit(self, _):
-        self.score_data = str(self.score)
+        self.score_current = str(self.score)
         self.pos = str(self.pos_set)
         self.logrid = str(self.logical_grid)
         self.image_grid = [
@@ -145,13 +147,18 @@ class MyPaintApp(App):
             for row in range(9)
         ]
         image_grid_str = str(self.image_grid)
+        if not self.score_rank:
+            self.score_rank = [0]
+        self.score_bestfive = str(self.score_rank)
         file_path = os.path.join(os.getcwd(), 'score.txt')
 
         with open(file_path, 'w') as file:
-            file.write(self.score_data + '\n')
+            file.write(self.score_current + '\n')
             file.write(self.pos + '\n')
             file.write(self.logrid + '\n')
             file.write(image_grid_str + '\n')
+            file.write(f"{','.join(map(str, self.score_rank))}\n")
+
         self.stop()
 
     def reset_button(self):
@@ -272,6 +279,9 @@ class MyPaintApp(App):
             )
             self.gameover()
             return
+        if len(self.pos_set) == 0:
+            self.gameover()
+            return
         cords = self.get_unique_random_cords(3)
         images = [img.source for img in self.button_layout.children]
         self.update_button_layout_images()
@@ -279,6 +289,22 @@ class MyPaintApp(App):
 
     def gameover(self):
         print('Game Over')
+
+        file_path = os.path.join(os.getcwd(), 'score.txt')
+        scores = []
+        if os.path.exists(file_path):
+            with open(file_path) as file:
+                lines = file.readlines()
+                for line in lines:
+                    if line.startswith('bestfive'):
+                        scores = [
+                            int(score) for score in line.split(
+                                ':',
+                            )[1].strip().split(',')
+                        ]
+                        break
+        self.score_rank.append(scores)
+        scores = sorted(scores, reverse=True)[:5]
 
     def get_unique_random_cords(self, count):
         pos_list = list(self.pos_set)
