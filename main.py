@@ -93,7 +93,7 @@ class MyPaintApp(App):
             self.button_layout.add_widget(img)
         return self.button_layout
 
-    def score_check(self):
+    def score_check_button(self):
         img_source = 'assets/unique.png'
         self.sc_button = Button(
             background_normal=img_source,
@@ -101,10 +101,10 @@ class MyPaintApp(App):
             size=(40, 40),
             pos_hint={'x': 0.84, 'y': 0.91},
         )
-        self.sc_button.bind(on_press=self.score_button)
+        self.sc_button.bind(on_press=self.score_check)
         return self.sc_button
 
-    def score_button(self, _):
+    def score_check(self, _):
         if self.overlay is None:
             self.overlay = Widget()
             with self.overlay.canvas:
@@ -121,7 +121,7 @@ class MyPaintApp(App):
         self.overlay = None
         return True
 
-    def saveexit(self):
+    def saveexit_button(self):
         img_source = 'assets/unique.png'
         self.save_exit_button = Button(
             background_normal=img_source,
@@ -266,11 +266,19 @@ class MyPaintApp(App):
 
     def assign_random_images_to_buttons(self):
         if len(self.pos_set) < 3:
+            images = [img.source for img in self.button_layout.children]
+            self.update_grid_with_new_images(
+                self.get_unique_random_cords(len(self.pos_set)), images,
+            )
+            self.gameover()
             return
         cords = self.get_unique_random_cords(3)
         images = [img.source for img in self.button_layout.children]
         self.update_button_layout_images()
         self.update_grid_with_new_images(cords, images)
+
+    def gameover(self):
+        print('Game Over')
 
     def get_unique_random_cords(self, count):
         pos_list = list(self.pos_set)
@@ -297,9 +305,9 @@ class MyPaintApp(App):
             self.check_length_remove_square(
                 self.find_adjacent_image(row, col),
             )
-            if len(self.pos_set) <= 0:
-                print('Game Over')
-                break
+            # if len(self.pos_set) <= 0:
+            #     print('Game Over')
+            #     break
 
     def find_adjacent_image(self, row, col):
         directions = [
@@ -387,8 +395,8 @@ class MyPaintApp(App):
         parent.add_widget(self.create_background())
         parent.add_widget(self.build_grid_layout())
         parent.add_widget(self.build_predicted_layout())
-        parent.add_widget(self.score_check())
-        parent.add_widget(self.saveexit())
+        parent.add_widget(self.score_check_button())
+        parent.add_widget(self.saveexit_button())
         parent.add_widget(self.reset_button())
         self.scorelb = self.create_score_label()
         parent.add_widget(self.scorelb)
