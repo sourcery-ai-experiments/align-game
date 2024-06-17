@@ -1,3 +1,4 @@
+import os
 from random import choice
 from random import randrange
 
@@ -81,16 +82,16 @@ class MyPaintApp(App):
             self.button_layout.add_widget(img)
         return self.button_layout
 
-    def build_user_butt_layout(self):
+    def score_check(self):
         img_source = 'assets/unique.png'
-        self.button = Button(
+        self.sc_button = Button(
             background_normal=img_source,
             size_hint=(None, None),
             size=(40, 40),
             pos_hint={'x': 0.84, 'y': 0.91},
         )
-        self.button.bind(on_press=self.score_button)
-        return self.button
+        self.sc_button.bind(on_press=self.score_button)
+        return self.sc_button
 
     def score_button(self, _):
         if self.overlay is None:
@@ -109,14 +110,39 @@ class MyPaintApp(App):
         self.overlay = None
         return True
 
-    # def submit_action(self, instance):
-    #     if self.text_input:
-    #         submitted_text = self.text_input.text
-    #         print(f'Submitted text: {submitted_text}')
-    #     if self.overlay:
-    #         self.root.remove_widget(self.overlay)
-    #         self.root.remove_widget(self.text_input)
-    #         self.overlay = None
+    def saveexit(self):
+        img_source = 'assets/unique.png'
+        self.save_exit_button = Button(
+            background_normal=img_source,
+            size_hint=(None, None),
+            size=(40, 40),
+            pos_hint={'x': 0.2, 'y': 0.91},
+        )
+        self.save_exit_button.bind(on_press=self.save_and_exit)
+        return self.save_exit_button
+
+    def save_and_exit(self, _):
+        self.score_data = str(self.score)
+        file_path = os.path.join(os.getcwd(), 'score.txt')
+
+        with open(file_path, 'a') as file:
+            file.write(self.score_data)
+
+        self.stop()
+
+    def reset_button(self):
+        img_source = 'assets/unique.png'
+        self.reset = Button(
+            background_normal=img_source,
+            size_hint=(None, None),
+            size=(40, 40),
+            pos_hint={'x': 0.1, 'y': 0.91},
+        )
+        self.reset.bind(on_press=self.to_reset)
+        return self.reset
+
+    def to_reset(self, _):
+        MyPaintApp().run()
 
     def create_image_widget(self):
         img = Image(source=choice(IMAGE_LIST))
@@ -326,7 +352,9 @@ class MyPaintApp(App):
         parent.add_widget(self.create_background())
         parent.add_widget(self.build_grid_layout())
         parent.add_widget(self.build_predicted_layout())
-        parent.add_widget(self.build_user_butt_layout())
+        parent.add_widget(self.score_check())
+        parent.add_widget(self.saveexit())
+        parent.add_widget(self.reset_button())
         self.scorelb = self.create_score_label()
         parent.add_widget(self.scorelb)
         self.assign_random_images_to_buttons()
