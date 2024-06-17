@@ -22,12 +22,12 @@ BLACK = [0, 0, 0, 0]
 BOARD = 'assets/board.jpg'
 IMAGE_LIST = [
     'assets/pink.png',
-    # 'assets/green.png',
-    # 'assets/blue.png',
-    # 'assets/yellow.png',
-    # 'assets/turquoise.png',
-    # 'assets/orange.png',
-    # 'assets/purple.png',
+    'assets/green.png',
+    'assets/blue.png',
+    'assets/yellow.png',
+    'assets/turquoise.png',
+    'assets/orange.png',
+    'assets/purple.png',
 ]
 
 
@@ -37,7 +37,7 @@ class MyPaintApp(App):
         super().__init__(**kwargs)
         self.logical_grid = [[0 for _ in range(9)] for _ in range(9)]
         self.pos_set = {(row, col) for row in range(9) for col in range(9)}
-        self.spawn = True
+        self.spawn = False
         self.selected_image = None
         self.selected_button = None
         self.grid_layout = None
@@ -48,6 +48,16 @@ class MyPaintApp(App):
         self.score = 0
         self.overlay = None
         self.text_input = None
+        self.load_game_state()
+
+    def load_game_state(self):
+        file_path = os.path.join(os.getcwd(), 'score.txt')
+        if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+            with open(file_path) as file:
+                lines = file.readlines()
+                self.score = int(lines[0].strip())
+                self.pos_set = eval(lines[1].strip())
+                self.logical_grid = eval(lines[2].strip())
 
     def build_grid_layout(self):
         self.grid_layout = GridLayout(
@@ -123,11 +133,14 @@ class MyPaintApp(App):
 
     def save_and_exit(self, _):
         self.score_data = str(self.score)
+        self.pos = str(self.pos_set)
+        self.logrid = str(self.logical_grid)
         file_path = os.path.join(os.getcwd(), 'score.txt')
 
-        with open(file_path, 'a') as file:
-            file.write(self.score_data)
-
+        with open(file_path, 'w') as file:
+            file.write(self.score_data + '\n')
+            file.write(self.pos + '\n')
+            file.write(self.logrid + '\n')
         self.stop()
 
     def reset_button(self):
@@ -142,7 +155,18 @@ class MyPaintApp(App):
         return self.reset
 
     def to_reset(self, _):
-        MyPaintApp().run()
+        self.logical_grid = [[0 for _ in range(9)] for _ in range(9)]
+        self.pos_set = {(row, col) for row in range(9) for col in range(9)}
+        self.clear_grid_layout()
+        self.assign_random_images_to_buttons()
+        self.update_button_layout_images()
+        self.score = 0
+        self.update_score_label()
+
+    def clear_grid_layout(self):
+        for child in self.grid_layout.children:
+            child.background_normal = ''
+            child.background_color = BLACK
 
     def create_image_widget(self):
         img = Image(source=choice(IMAGE_LIST))
@@ -230,7 +254,7 @@ class MyPaintApp(App):
         self.pos_set.add((start[0], start[1]))
 
     def assign_random_images_to_buttons(self):
-        if len(self.pos_set) < 3 or not self.spawn:
+        if len(self.pos_set) < 3:
             return
         cords = self.get_unique_random_cords(3)
         images = [img.source for img in self.button_layout.children]
@@ -357,8 +381,19 @@ class MyPaintApp(App):
         parent.add_widget(self.reset_button())
         self.scorelb = self.create_score_label()
         parent.add_widget(self.scorelb)
-        self.assign_random_images_to_buttons()
+        # self.assign_random_images_to_buttons()
+        self.apply_game_state()
         return parent
+
+    def apply_game_state(self):
+        self.update_score_label()
+        for row in range(9):
+            for col in range(9):
+                if self.logical_grid[row][col] == 1:
+                    button = self.get_button_at(row, col)
+                    button.background_normal = choice(IMAGE_LIST)
+                    button.background_color = [1, 1, 1, 1]
+                    self.pos_set.discard((row, col))
 
     def create_background(self):
         return Image(source=BOARD, allow_stretch=True, keep_ratio=True)
