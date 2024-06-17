@@ -4,6 +4,8 @@ from random import randrange
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.window import Window
+from kivy.graphics import Color
+from kivy.graphics import Rectangle
 from kivy.metrics import sp
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
@@ -12,6 +14,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
+from kivy.uix.widget import Widget
 
 from astar import astar
 
@@ -43,6 +46,8 @@ class MyPaintApp(App):
         self.path_index = 0
         self.last_position = None
         self.score = 0
+        self.overlay = None
+        self.text_input = None
 
     def build_grid_layout(self):
         self.grid_layout = GridLayout(
@@ -89,13 +94,42 @@ class MyPaintApp(App):
         return self.button
 
     def save_button(self, _):
-        text_input = TextInput(
+        if self.overlay is None:
+            self.overlay = Widget()
+            with self.overlay.canvas:
+                Color(0, 0, 0, 0.5)
+                self.background = Rectangle(
+                    pos=self.root.pos,
+                    size=self.root.size,
+                )
+            self.root.add_widget(self.overlay)
+
+            self.overlay.bind(on_touch_down=self.on_overlay_touch)
+
+        submit_button = Button(
+            text='Submit',
+            size_hint=(None, None),
+            size=(100, 50),
+            pos_hint={'center_x': 0.5, 'center_y': 0.3},
+        )
+        submit_button.bind(on_press=self.submit_action)
+        self.overlay.add_widget(submit_button)
+
+        self.text_input = TextInput(
             multiline=False,
             size_hint=(None, None),
             size=(200, 50),
-            pos_hint={'x': 0.5, 'y': 0.5},
+            pos_hint={'center_x': 0.5, 'center_y': 0.5},
         )
-        self.root.add_widget(text_input)
+        self.root.add_widget(self.text_input)
+
+    def on_overlay_touch(self, instance, touch):
+        pass
+
+    def submit_action(self, instance):
+        if self.text_input:
+            submitted_text = self.text_input.text
+            print(f'Submitted text: {submitted_text}')
 
     def create_image_widget(self):
         img = Image(source=choice(IMAGE_LIST))
