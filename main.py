@@ -11,6 +11,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.image import Image
 from kivy.uix.label import Label
+from kivy.uix.textinput import TextInput
 
 from astar import astar
 
@@ -76,6 +77,26 @@ class MyPaintApp(App):
             self.button_layout.add_widget(img)
         return self.button_layout
 
+    def build_user_butt_layout(self):
+        img_source = 'assets/unique.png'
+        self.button = Button(
+            background_normal=img_source,
+            size_hint=(None, None),
+            size=(50, 50),
+            pos_hint={'x': 0.1, 'y': 0.85},
+        )
+        self.button.bind(on_press=self.save_button)
+        return self.button
+
+    def save_button(self, _):
+        text_input = TextInput(
+            multiline=False,
+            size_hint=(None, None),
+            size=(200, 50),
+            pos_hint={'x': 0.5, 'y': 0.5},
+        )
+        self.root.add_widget(text_input)
+
     def create_image_widget(self):
         img = Image(source=choice(IMAGE_LIST))
         img.bind(
@@ -138,8 +159,6 @@ class MyPaintApp(App):
     def handle_reached_destination(self):
         start = self.selected_button[1], self.selected_button[2]
         self.update_logical_grid(self.path[-1][0], self.path[-1][1], start)
-        # if self.spawn:
-
         adjacent_lines = self.find_adjacent_image(
             self.path[-1][0],
             self.path[-1][1],
@@ -242,8 +261,6 @@ class MyPaintApp(App):
             if len(line) >= 5:
                 self.spawn = False
                 self.remove_line(line)
-        # self.spawn = True
-
         self.score += (len(self.pos_set) - variable)
         self.update_score_label()
 
@@ -277,6 +294,9 @@ class MyPaintApp(App):
     def update_score_label(self):
         self.scorelb.text = ' '.join(list(f'{self.score:04d}'))
 
+    def unique_button(self):
+        pass
+
     def build(self):
         Window.size = (800, 800)
         Window.minimum_size = (400, 300)
@@ -285,6 +305,7 @@ class MyPaintApp(App):
         parent.add_widget(self.create_background())
         parent.add_widget(self.build_grid_layout())
         parent.add_widget(self.build_predicted_layout())
+        parent.add_widget(self.build_user_butt_layout())
         self.scorelb = self.create_score_label()
         parent.add_widget(self.scorelb)
         self.assign_random_images_to_buttons()
