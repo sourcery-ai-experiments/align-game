@@ -266,6 +266,7 @@ class MyPaintApp(App):
             self.gameover()
 
     def move_selected_button(self, tile, row, col):
+        self.disable_grid_buttons()
         start = (self.selected_button[1], self.selected_button[2])
         end = (row, col)
         path = astar(self.logical_grid, start, end)
@@ -313,6 +314,7 @@ class MyPaintApp(App):
         )
         if adjacent_lines:
             self.check_length_remove_square(adjacent_lines)
+        self.enable_grid_buttons()
 
     def get_button_at(self, row, col):
         return self.grid_layout.children[9 * (8 - row) + (8 - col)]
@@ -400,6 +402,7 @@ class MyPaintApp(App):
     def on_overlay_touch(self, instance, touch):
         self.root.remove_widget(self.overlay)
         self.overlay = None
+        self.clear_selected_buttons()
         self.enable_grid_buttons()
         self.to_reset(None)
 
