@@ -29,6 +29,7 @@ IMAGE_LIST = [
     'assets/turquoise.png',
     'assets/orange.png',
     'assets/purple.png',
+    'assets/unique.png',
 ]
 
 
@@ -54,14 +55,12 @@ class MyPaintApp(App):
 
     def unique_button(self):
         """
-        is selected img is unique.png than check_lenght,
+        if selected img is unique.png than check_lenght,
         if lenght of 4 or more is of same color,
         unique = this color
         than remove squares of that color
-
-        unique image should spawn less?
         """
-        pass
+        print('unique')
 
     def load_game_state(self):
         file_path = os.path.join(os.getcwd(), 'score.txt')
@@ -281,6 +280,8 @@ class MyPaintApp(App):
         self.selected_image = tile.background_normal
         self.selected_button = (tile, row, col)
         self.spawn = True
+        if self.selected_image == UNIQUE_BUTT:
+            self.unique_button()
         if len(self.pos_set) == 0:
             self.gameover()
 
