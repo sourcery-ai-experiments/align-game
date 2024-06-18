@@ -76,6 +76,7 @@ class MyPaintApp(App):
 
     def create_grid_button(self, row, col):
         btn = Button(background_normal='', background_color=BLACK)
+        btn.background_disabled_normal = btn.background_normal
         btn.bind(
             on_press=lambda tile,
             x=row, y=col: self.on_button_press(tile, x, y),
@@ -331,6 +332,7 @@ class MyPaintApp(App):
         self.selected_button[0].background_color = BLACK
         self.logical_grid[start[0]][start[1]] = 0
         self.pos_set.add((start[0], start[1]))
+        # self.enable_grid_buttons()
 
     def assign_random_images_to_buttons(self):
         if len(self.pos_set) < 3:
@@ -393,11 +395,13 @@ class MyPaintApp(App):
         for child in self.grid_layout.children:
             if isinstance(child, Button):
                 child.disabled = True
+                child.background_disabled_normal = child.background_normal
 
     def enable_grid_buttons(self):
         for child in self.grid_layout.children:
             if isinstance(child, Button):
                 child.disabled = False
+                child.background_disabled_normal = child.background_normal
 
     def on_overlay_touch(self, instance, touch):
         self.root.remove_widget(self.overlay)
