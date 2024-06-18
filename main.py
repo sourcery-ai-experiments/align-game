@@ -107,6 +107,15 @@ class MyPaintApp(App):
         return self.sc_button
 
     def score_check(self, _):
+        file_path = os.path.join(os.getcwd(), 'score.txt')
+        scores = []
+        if os.path.exists(file_path):
+            with open(file_path) as file:
+                lines = file.readlines()
+                if len(lines) >= 5:
+                    scores = [
+                        int(score) for score in lines[4].strip().split(',')
+                    ]
         if self.overlay is None:
             self.overlay = Widget()
             with self.overlay.canvas:
@@ -115,6 +124,19 @@ class MyPaintApp(App):
                     pos=self.root.pos,
                     size=self.root.size,
                 )
+            score_text = '\n'.join(
+                [
+                    f'{i + 1}. {score}' for i,
+                    score in enumerate(scores)
+                ],
+            )
+            scores_label = Label(
+                text=score_text,
+                font_size=20,
+                color=[1, 1, 1, 1],
+                pos_hint={'center_x': 0.8, 'center_y': 0.8},
+            )
+            self.overlay.add_widget(scores_label)
             self.root.add_widget(self.overlay)
             self.overlay.bind(on_touch_down=self.score_overlay_touch)
 
@@ -220,6 +242,8 @@ class MyPaintApp(App):
             tile.background_color = [1, 1, 1, 1]
         elif not tile.background_normal and self.selected_image:
             self.move_selected_button(tile, row, col)
+        #     print("-----------")
+        # print(self.pos_set)
 
     def select_button(self, tile, row, col):
         self.selected_image = tile.background_normal
@@ -227,8 +251,8 @@ class MyPaintApp(App):
         self.spawn = True
         if len(self.pos_set) == 0:
             self.gameover()
-        print('--------------------')
-        print(self.pos_set)
+        # print('--------------------')
+        # print(self.pos_set)
 
     def move_selected_button(self, tile, row, col):
         start = (self.selected_button[1], self.selected_button[2])
@@ -322,11 +346,11 @@ class MyPaintApp(App):
         self.score_rank.append(self.score)
         combined_scores = scores + self.score_rank
         combined_scores = sorted(combined_scores, reverse=True)[:5]
-        print(combined_scores)
-        with open(file_path, 'w') as file:
-            lines = lines[:4]
-            lines.append(','.join(map(str, combined_scores)) + '\n')
-            file.writelines(lines)
+        if self.score in combined_scores:
+            with open(file_path, 'w') as file:
+                lines = lines[:4]
+                lines.append(','.join(map(str, combined_scores)) + '\n')
+                file.writelines(lines)
         self.clear_selected_buttons()
         self.disable_grid_buttons()
         if self.overlay is None:
@@ -371,7 +395,7 @@ class MyPaintApp(App):
     def get_unique_random_cords(self, count):
         pos_list = list(self.pos_set)
         cords = []
-        while len(cords) < count:
+        while len(cords) < count and pos_list:
             index = randrange(len(pos_list))
             new_cord = pos_list[index]
             cords.append(new_cord)
