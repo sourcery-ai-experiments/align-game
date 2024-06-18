@@ -225,6 +225,10 @@ class MyPaintApp(App):
         self.selected_image = tile.background_normal
         self.selected_button = (tile, row, col)
         self.spawn = True
+        if len(self.pos_set) == 0:
+            self.gameover()
+        print('--------------------')
+        print(self.pos_set)
 
     def move_selected_button(self, tile, row, col):
         start = (self.selected_button[1], self.selected_button[2])
@@ -297,11 +301,6 @@ class MyPaintApp(App):
             self.update_grid_with_new_images(
                 self.get_unique_random_cords(len(self.pos_set)), images,
             )
-            self.gameover()
-            return
-        if len(self.pos_set) == 0:
-            self.gameover()
-            return
         cords = self.get_unique_random_cords(3)
         images = [img.source for img in self.button_layout.children]
         self.update_button_layout_images()
@@ -309,7 +308,6 @@ class MyPaintApp(App):
 
     def gameover(self):
         print('Game Over')
-
         file_path = os.path.join(os.getcwd(), 'score.txt')
         scores = []
         if os.path.exists(file_path):
@@ -322,12 +320,9 @@ class MyPaintApp(App):
         if not isinstance(self.score_rank, list):
             self.score_rank = []
         self.score_rank.append(self.score)
-
         combined_scores = scores + self.score_rank
         combined_scores = sorted(combined_scores, reverse=True)[:5]
-
         print(combined_scores)
-
         with open(file_path, 'w') as file:
             lines = lines[:4]
             lines.append(','.join(map(str, combined_scores)) + '\n')
