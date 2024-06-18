@@ -7,6 +7,7 @@ from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.graphics import Color
 from kivy.graphics import Rectangle
+from kivy.metrics import dp
 from kivy.metrics import sp
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
@@ -17,7 +18,7 @@ from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 
 from astar import astar
-
+UNIQUE_BUTT = 'assets/unique.png'
 BLACK = [0, 0, 0, 0]
 BOARD = 'assets/board.jpg'
 IMAGE_LIST = [
@@ -51,6 +52,17 @@ class MyPaintApp(App):
         self.score_rank = []
         self.load_game_state()
 
+    def unique_button(self):
+        """
+        is selected img is unique.png than check_lenght,
+        if lenght of 4 or more is of same color,
+        unique = this color
+        than remove squares of that color
+
+        unique image should spawn less?
+        """
+        pass
+
     def load_game_state(self):
         file_path = os.path.join(os.getcwd(), 'score.txt')
         if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
@@ -66,7 +78,9 @@ class MyPaintApp(App):
         self.grid_layout = GridLayout(
             cols=9, rows=9,
             size_hint=(None, None),
-            size=(555, 555), pos=(191, 49),
+            size=(dp(200), dp(300)),
+            pos_hint={'center_x': 0.37 - 0.001, 'center_y': 0.56 + 0.001},
+            spacing=dp(12),
         )
         for row in range(9):
             for col in range(9):
@@ -75,7 +89,10 @@ class MyPaintApp(App):
         return self.grid_layout
 
     def create_grid_button(self, row, col):
-        btn = Button(background_normal='', background_color=BLACK)
+        btn = Button(
+            background_normal='', background_color=BLACK,
+            size_hint=(None, None), size=(dp(50), dp(50)),
+        )
         btn.background_disabled_normal = btn.background_normal
         btn.bind(
             on_press=lambda tile,
@@ -522,9 +539,6 @@ class MyPaintApp(App):
 
     def update_score_label(self):
         self.scorelb.text = ' '.join(list(f'{self.score:04d}'))
-
-    def unique_button(self):
-        pass
 
     def build(self):
         Window.size = (800, 800)
