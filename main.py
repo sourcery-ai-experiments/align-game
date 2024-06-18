@@ -116,9 +116,9 @@ class MyPaintApp(App):
                     size=self.root.size,
                 )
             self.root.add_widget(self.overlay)
-            self.overlay.bind(on_touch_down=self.on_overlay_touch)
+            self.overlay.bind(on_touch_down=self.score_overlay_touch)
 
-    def on_overlay_touch(self, instance, touch):
+    def score_overlay_touch(self, instance, touch):
         self.root.remove_widget(self.overlay)
         self.overlay = None
         return True
@@ -327,6 +327,46 @@ class MyPaintApp(App):
             lines = lines[:4]
             lines.append(','.join(map(str, combined_scores)) + '\n')
             file.writelines(lines)
+        self.clear_selected_buttons()
+        self.disable_grid_buttons()
+        if self.overlay is None:
+            self.overlay = Widget()
+            with self.overlay.canvas:
+                Color(0, 0, 0, 0.5)
+                self.background = Rectangle(
+                    pos=self.root.pos,
+                    size=self.root.size,
+                )
+            self.root.add_widget(self.overlay)
+            game_over_label = Label(
+                text=f'Game Over\nScore: {self.score}',
+                font_size=30,
+                color=[1, 1, 1, 1],
+                pos_hint={'center_x': 0.8, 'center_y': 0.8},
+            )
+            self.overlay.add_widget(game_over_label)
+            self.overlay.bind(on_touch_down=self.on_overlay_touch)
+
+    def clear_selected_buttons(self):
+        for child in self.grid_layout.children:
+            if isinstance(child, Button) and child.state == 'down':
+                child.state = 'normal'
+
+    def disable_grid_buttons(self):
+        for child in self.grid_layout.children:
+            if isinstance(child, Button):
+                child.disabled = True
+
+    def enable_grid_buttons(self):
+        for child in self.grid_layout.children:
+            if isinstance(child, Button):
+                child.disabled = False
+
+    def on_overlay_touch(self, instance, touch):
+        self.root.remove_widget(self.overlay)
+        self.overlay = None
+        self.enable_grid_buttons()
+        self.to_reset(None)
 
     def get_unique_random_cords(self, count):
         pos_list = list(self.pos_set)
