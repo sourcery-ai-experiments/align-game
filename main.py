@@ -282,8 +282,8 @@ class MyPaintApp(App):
         self.spawn = True
         if self.selected_image == UNIQUE_BUTT:
             self.unique_button()
-        if len(self.pos_set) == 0:
-            self.gameover()
+        # if len(self.pos_set) == 0:
+        #     self.gameover()
 
     def move_selected_button(self, tile, row, col):
         self.disable_grid_buttons()
@@ -305,6 +305,8 @@ class MyPaintApp(App):
             self.handle_reached_destination()
             if self.spawn:
                 self.assign_random_images_to_buttons()
+                if len(self.pos_set) == 0:
+                    self.gameover()
 
     def move_along_path(self):
         if self.path_index > 0:
@@ -494,7 +496,9 @@ class MyPaintApp(App):
                 break
             adjacent_button = self.get_button_at(x, y)
             adjacent_image = adjacent_button.background_normal
-            if adjacent_image == current_image:
+            if adjacent_image in (current_image, UNIQUE_BUTT):
+                adjacent_lines[i % 4].append((x, y))
+            if current_image == UNIQUE_BUTT:
                 adjacent_lines[i % 4].append((x, y))
             else:
                 break
