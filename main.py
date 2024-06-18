@@ -236,6 +236,7 @@ class MyPaintApp(App):
         self.update_button_layout_images()
         self.score = 0
         self.update_score_label()
+        self.clear_selected_buttons()
 
     def clear_grid_layout(self):
         for child in self.grid_layout.children:
@@ -303,6 +304,8 @@ class MyPaintApp(App):
     def update_current_button(self, current_pos):
         row, col = current_pos
         button = self.get_button_at(row, col)
+        # self.selected_image = button.background_normal
+        # # tried to keep img while moving but it dosnt work
         button.background_normal = self.selected_image
         button.background_color = [1, 1, 1, 1]
 
@@ -359,12 +362,18 @@ class MyPaintApp(App):
         if not isinstance(self.score_rank, list):
             self.score_rank = []
         self.score_rank.append(self.score)
-        combined_scores = scores + self.score_rank
-        combined_scores = sorted(combined_scores, reverse=True)[:5]
-        if self.score in combined_scores:
+        current_score = self.score
+        if len(scores) < 5:
+            scores.append(current_score)
+        else:
+            min_score = min(scores)
+            if current_score > min_score:
+                scores[scores.index(min_score)] = current_score
+        scores = sorted(scores, reverse=True)[:5]
+        if len(lines) >= 5:
             with open(file_path, 'w') as file:
                 lines = lines[:4]
-                lines.append(','.join(map(str, combined_scores)) + '\n')
+                lines.append(','.join(map(str, scores)) + '\n')
                 file.writelines(lines)
         self.clear_selected_buttons()
         self.disable_grid_buttons()
