@@ -147,18 +147,38 @@ class MyPaintApp(App):
             for row in range(9)
         ]
         image_grid_str = str(self.image_grid)
-        if not self.score_rank:
-            self.score_rank = [0]
-        self.score_bestfive = str(self.score_rank)
         file_path = os.path.join(os.getcwd(), 'score.txt')
-
+        existing_scores = []
+        if os.path.exists(file_path):
+            with open(file_path) as file:
+                lines = file.readlines()
+                if len(lines) >= 5:
+                    existing_scores = [
+                        int(score) for score in lines[4].strip().split(',')
+                    ]
+                else:
+                    existing_scores = self.score_rank if self.score_rank else [
+                        0,
+                    ]
+        else:
+            lines = []
+            existing_scores = self.score_rank if self.score_rank else [0]
+        if not isinstance(self.score_rank, list):
+            self.score_rank = []
+        combined_scores = existing_scores + self.score_rank
+        combined_scores = sorted(set(combined_scores), reverse=True)[:5]
+        updated_lines = [
+            self.score_current + '\n',
+            self.pos + '\n',
+            self.logrid + '\n',
+            image_grid_str + '\n',
+            f"{','.join(map(str, combined_scores))}\n",
+        ]
+        while len(lines) < 4:
+            lines.append('\n')
+        lines[:5] = updated_lines
         with open(file_path, 'w') as file:
-            file.write(self.score_current + '\n')
-            file.write(self.pos + '\n')
-            file.write(self.logrid + '\n')
-            file.write(image_grid_str + '\n')
-            file.write(f"{','.join(map(str, self.score_rank))}\n")
-
+            file.writelines(lines)
         self.stop()
 
     def reset_button(self):
@@ -295,16 +315,23 @@ class MyPaintApp(App):
         if os.path.exists(file_path):
             with open(file_path) as file:
                 lines = file.readlines()
-                for line in lines:
-                    if line.startswith('bestfive'):
-                        scores = [
-                            int(score) for score in line.split(
-                                ':',
-                            )[1].strip().split(',')
-                        ]
-                        break
-        self.score_rank.append(scores)
-        scores = sorted(scores, reverse=True)[:5]
+                if len(lines) >= 5:
+                    scores = [
+                        int(score) for score in lines[4].strip().split(',')
+                    ]
+        if not isinstance(self.score_rank, list):
+            self.score_rank = []
+        self.score_rank.append(self.score)
+
+        combined_scores = scores + self.score_rank
+        combined_scores = sorted(combined_scores, reverse=True)[:5]
+
+        print(combined_scores)
+
+        with open(file_path, 'w') as file:
+            lines = lines[:4]
+            lines.append(','.join(map(str, combined_scores)) + '\n')
+            file.writelines(lines)
 
     def get_unique_random_cords(self, count):
         pos_list = list(self.pos_set)
