@@ -124,6 +124,18 @@ class MyPaintApp(App):
                     pos=self.root.pos,
                     size=self.root.size,
                 )
+
+            pos_text = '\n'.join(
+                [
+                    f'Position left: {len(self.pos_set)}',
+                ],
+            )
+            pos_label = Label(
+                text=pos_text,
+                font_size=40,
+                color=[1, 1, 1, 1],
+                pos=(self.root.width * 0.4, self.root.height * 0.1),
+            )
             score_text = '\n'.join(
                 [
                     f'{i + 1}. {score}' for i,
@@ -132,11 +144,12 @@ class MyPaintApp(App):
             )
             scores_label = Label(
                 text=score_text,
-                font_size=20,
+                font_size=50,
                 color=[1, 1, 1, 1],
-                pos_hint={'center_x': 0.8, 'center_y': 0.8},
+                pos=(self.root.width * 0.4, self.root.height * 0.5),
             )
             self.overlay.add_widget(scores_label)
+            self.overlay.add_widget(pos_label)
             self.root.add_widget(self.overlay)
             self.overlay.bind(on_touch_down=self.score_overlay_touch)
 
@@ -242,8 +255,8 @@ class MyPaintApp(App):
             tile.background_color = [1, 1, 1, 1]
         elif not tile.background_normal and self.selected_image:
             self.move_selected_button(tile, row, col)
-        #     print("-----------")
-        # print(self.pos_set)
+            print('-----------')
+        print(len(self.pos_set))
 
     def select_button(self, tile, row, col):
         self.selected_image = tile.background_normal
@@ -251,8 +264,6 @@ class MyPaintApp(App):
         self.spawn = True
         if len(self.pos_set) == 0:
             self.gameover()
-        # print('--------------------')
-        # print(self.pos_set)
 
     def move_selected_button(self, tile, row, col):
         start = (self.selected_button[1], self.selected_button[2])
@@ -366,7 +377,7 @@ class MyPaintApp(App):
                 text=f'Game Over\nScore: {self.score}',
                 font_size=30,
                 color=[1, 1, 1, 1],
-                pos_hint={'center_x': 0.8, 'center_y': 0.8},
+                pos=(self.root.width * 0.5, self.root.height * 0.5),
             )
             self.overlay.add_widget(game_over_label)
             self.overlay.bind(on_touch_down=self.on_overlay_touch)
