@@ -18,6 +18,7 @@ from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 
 from astar import astar
+from score_manager import ScoreManager
 UNIQUE_BUTT = 'assets/unique.png'
 BLACK = [0, 0, 0, 0]
 BOARD = 'assets/board.jpg'
@@ -29,7 +30,7 @@ IMAGE_LIST = [
     # 'assets/turquoise.png',
     # 'assets/orange.png',
     # 'assets/purple.png',
-    'assets/unique.png',
+    UNIQUE_BUTT,
 ]
 
 
@@ -51,21 +52,12 @@ class MyPaintApp(App):
         self.overlay = None
         self.text_input = None
         self.score_rank = []
+        self.score_manager = ScoreManager()
         self.load_game_state()
 
-    def unique_button(self):
-        """
-        if selected img is unique.png than check_lenght,
-        if lenght of 4 or more is of same color,
-        unique = this color
-        than remove squares of that color
-        """
-        print('unique')
-
     def load_game_state(self):
-        file_path = os.path.join(os.getcwd(), 'score.txt')
-        if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
-            with open(file_path) as file:
+        if os.path.exists('score.txt'):
+            with open('score.txt') as file:
                 lines = file.readlines()
                 self.score = int(lines[0].strip())
                 self.pos_set = eval(lines[1].strip())
@@ -112,71 +104,13 @@ class MyPaintApp(App):
             self.button_layout.add_widget(img)
         return self.button_layout
 
-    def score_check_button(self):
-        img_source = 'assets/unique.png'
-        self.sc_button = Button(
-            background_normal=img_source,
-            size_hint=(None, None),
-            size=(40, 40),
-            pos_hint={'x': 0.84, 'y': 0.91},
-        )
-        self.sc_button.bind(on_press=self.score_check)
-        return self.sc_button
-
-    def score_check(self, _):
-        file_path = os.path.join(os.getcwd(), 'score.txt')
-        scores = []
-        if os.path.exists(file_path):
-            with open(file_path) as file:
-                lines = file.readlines()
-                if len(lines) >= 5:
-                    scores = [
-                        int(score) for score in lines[4].strip().split(',')
-                    ]
-        if self.overlay is None:
-            self.overlay = Widget()
-            with self.overlay.canvas:
-                Color(0, 0, 0, 0.5)
-                self.background = Rectangle(
-                    pos=self.root.pos,
-                    size=self.root.size,
-                )
-
-            pos_text = '\n'.join(
-                [
-                    f'Position left: {len(self.pos_set)}',
-                ],
-            )
-            pos_label = Label(
-                text=pos_text,
-                font_size=40,
-                color=[1, 1, 1, 1],
-                pos=(self.root.width * 0.4, self.root.height * 0.1),
-            )
-            score_text = '\n'.join(
-                [
-                    f'{i + 1}. {score}' for i,
-                    score in enumerate(scores)
-                ],
-            )
-            scores_label = Label(
-                text=score_text,
-                font_size=50,
-                color=[1, 1, 1, 1],
-                pos=(self.root.width * 0.4, self.root.height * 0.5),
-            )
-            self.overlay.add_widget(scores_label)
-            self.overlay.add_widget(pos_label)
-            self.root.add_widget(self.overlay)
-            self.overlay.bind(on_touch_down=self.score_overlay_touch)
-
     def score_overlay_touch(self, instance, touch):
         self.root.remove_widget(self.overlay)
         self.overlay = None
         return True
 
-    def saveexit_button(self):
-        img_source = 'assets/unique.png'
+    def save_exit_button(self):
+        img_source = UNIQUE_BUTT
         self.save_exit_button = Button(
             background_normal=img_source,
             size_hint=(None, None),
@@ -234,7 +168,7 @@ class MyPaintApp(App):
         self.stop()
 
     def reset_button(self):
-        img_source = 'assets/unique.png'
+        img_source = UNIQUE_BUTT
         self.reset = Button(
             background_normal=img_source,
             size_hint=(None, None),
@@ -273,17 +207,11 @@ class MyPaintApp(App):
             tile.background_color = [1, 1, 1, 1]
         elif not tile.background_normal and self.selected_image:
             self.move_selected_button(tile, row, col)
-            print('-----------')
-        print(len(self.pos_set))
 
     def select_button(self, tile, row, col):
         self.selected_image = tile.background_normal
         self.selected_button = (tile, row, col)
         self.spawn = True
-        if self.selected_image == UNIQUE_BUTT:
-            self.unique_button()
-        # if len(self.pos_set) == 0:
-        #     self.gameover()
 
     def move_selected_button(self, tile, row, col):
         self.disable_grid_buttons()
@@ -291,11 +219,33 @@ class MyPaintApp(App):
         end = (row, col)
         path = astar(self.logical_grid, start, end)
         if not path:
+            # self.show_no_path_overlay()
             return
         self.path = path
         self.path_index = 0
         self.last_position = start
         Clock.schedule_interval(self.update, 0.1)
+
+    def show_no_path_overlay(self):
+        self.overlay = Widget()
+        with self.overlay.canvas:
+            Color(0, 0, 0, 0)
+            self.background = Rectangle(
+                pos=self.root.pos,
+                size=self.root.size,
+            )
+        self.root.add_widget(self.overlay)
+        no_path_label = Label(
+            text='No Path Found',
+            font_size=30,
+            color=[1, 1, 1, 1],
+            pos=(self.root.width * 0.5, self.root.height * 0.5),
+            halign='center',
+            valign='middle',
+        )
+        no_path_label.bind(size=no_path_label.setter('text_size'))
+        self.overlay.add_widget(no_path_label)
+        # self.overlay.bind(on_touch_down=self.on_overlay_touch)
 
     def update(self, dt):
         if self.path_index < len(self.path):
@@ -332,7 +282,7 @@ class MyPaintApp(App):
     def handle_reached_destination(self):
         start = self.selected_button[1], self.selected_button[2]
         self.update_logical_grid(self.path[-1][0], self.path[-1][1], start)
-        adjacent_lines = self.find_adjacent_image(
+        adjacent_lines = self.find_adjacent_lines(
             self.path[-1][0],
             self.path[-1][1],
         )
@@ -355,7 +305,6 @@ class MyPaintApp(App):
         self.selected_button[0].background_color = BLACK
         self.logical_grid[start[0]][start[1]] = 0
         self.pos_set.add((start[0], start[1]))
-        # self.enable_grid_buttons()
 
     def assign_random_images_to_buttons(self):
         if len(self.pos_set) < 3:
@@ -432,7 +381,7 @@ class MyPaintApp(App):
                 child.disabled = False
                 child.background_disabled_normal = child.background_normal
 
-    def on_overlay_touch(self, instance, touch):
+    def on_overlay_touch(self):
         self.root.remove_widget(self.overlay)
         self.overlay = None
         self.clear_selected_buttons()
@@ -462,13 +411,10 @@ class MyPaintApp(App):
             self.pos_set.remove(cord)
             self.logical_grid[cord[0]][cord[1]] = 1
             self.check_length_remove_square(
-                self.find_adjacent_image(row, col),
+                self.find_adjacent_lines(row, col),
             )
-            # if len(self.pos_set) <= 0:
-            #     print('Game Over')
-            #     break
 
-    def find_adjacent_image(self, row, col):
+    def find_adjacent_lines(self, row, col):
         directions = [
             (1, 0), (0, 1), (1, 1), (1, -1),
             (-1, 0), (0, -1), (-1, -1), (-1, 1),
@@ -538,9 +484,7 @@ class MyPaintApp(App):
                 print(f'Out of bounds ({x}, {y})')
 
     def clear_button(self, x, y):
-        self.grid_layout.children[
-            9 * (8 - x) + (8 - y)
-        ].background_normal = ''
+        self.get_button_at(x, y).background_normal = ''
         self.grid_layout.children[
             9 * (8 - x) + (8 - y)
         ].background_color = BLACK
@@ -564,12 +508,11 @@ class MyPaintApp(App):
         parent.add_widget(self.create_background())
         parent.add_widget(self.build_grid_layout())
         parent.add_widget(self.build_predicted_layout())
-        parent.add_widget(self.score_check_button())
-        parent.add_widget(self.saveexit_button())
+        parent.add_widget(self.score_manager.score_check_button())
+        parent.add_widget(self.save_exit_button())
         parent.add_widget(self.reset_button())
         self.scorelb = self.create_score_label()
         parent.add_widget(self.scorelb)
-        # self.assign_random_images_to_buttons()
         self.apply_game_state()
         return parent
 
