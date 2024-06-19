@@ -8,7 +8,6 @@ from kivy.core.window import Window
 from kivy.graphics import Color
 from kivy.graphics import Rectangle
 from kivy.metrics import dp
-from kivy.metrics import sp
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.floatlayout import FloatLayout
@@ -18,6 +17,7 @@ from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 
 from astar import astar
+from save_load_exit import FuncManager
 from score_manager import ScoreManager
 UNIQUE_BUTT = 'assets/unique.png'
 BLACK = [0, 0, 0, 0]
@@ -48,22 +48,13 @@ class MyPaintApp(App):
         self.path = []
         self.path_index = 0
         self.last_position = None
-        self.score = 0
         self.overlay = None
         self.text_input = None
+        self.scorelb = None
         self.score_rank = []
-        self.score_manager = ScoreManager()
-        self.load_game_state()
-
-    def load_game_state(self):
-        if os.path.exists('score.txt'):
-            with open('score.txt') as file:
-                lines = file.readlines()
-                self.score = int(lines[0].strip())
-                self.pos_set = eval(lines[1].strip())
-                self.logical_grid = eval(lines[2].strip())
-                self.image_grid = eval(lines[3].strip())
-                self.score_rank = eval(lines[4].strip())
+        self.score_manager = ScoreManager(self)
+        self.func_manager = FuncManager(self)
+        self.func_manager.load_game_state()
 
     def build_grid_layout(self):
         self.grid_layout = GridLayout(
@@ -103,90 +94,6 @@ class MyPaintApp(App):
             img = self.create_image_widget()
             self.button_layout.add_widget(img)
         return self.button_layout
-
-    def score_overlay_touch(self, instance, touch):
-        self.root.remove_widget(self.overlay)
-        self.overlay = None
-        return True
-
-    def save_exit_button(self):
-        img_source = UNIQUE_BUTT
-        self.save_exit_button = Button(
-            background_normal=img_source,
-            size_hint=(None, None),
-            size=(40, 40),
-            pos_hint={'x': 0.2, 'y': 0.91},
-        )
-        self.save_exit_button.bind(on_press=self.save_and_exit)
-        return self.save_exit_button
-
-    def save_and_exit(self, _):
-        self.score_current = str(self.score)
-        self.pos = str(self.pos_set)
-        self.logrid = str(self.logical_grid)
-        self.image_grid = [
-            [
-                self.get_button_at(
-                    row, col,
-                ).background_normal for col in range(9)
-            ]
-            for row in range(9)
-        ]
-        image_grid_str = str(self.image_grid)
-        file_path = os.path.join(os.getcwd(), 'score.txt')
-        existing_scores = []
-        if os.path.exists(file_path):
-            with open(file_path) as file:
-                lines = file.readlines()
-                if len(lines) >= 5:
-                    existing_scores = [
-                        int(score) for score in lines[4].strip().split(',')
-                    ]
-                else:
-                    existing_scores = self.score_rank if self.score_rank else [
-                        0,
-                    ]
-        else:
-            lines = []
-            existing_scores = self.score_rank if self.score_rank else [0]
-        if not isinstance(self.score_rank, list):
-            self.score_rank = []
-        combined_scores = existing_scores + self.score_rank
-        combined_scores = sorted(set(combined_scores), reverse=True)[:5]
-        updated_lines = [
-            self.score_current + '\n',
-            self.pos + '\n',
-            self.logrid + '\n',
-            image_grid_str + '\n',
-            f"{','.join(map(str, combined_scores))}\n",
-        ]
-        while len(lines) < 4:
-            lines.append('\n')
-        lines[:5] = updated_lines
-        with open(file_path, 'w') as file:
-            file.writelines(lines)
-        self.stop()
-
-    def reset_button(self):
-        img_source = UNIQUE_BUTT
-        self.reset = Button(
-            background_normal=img_source,
-            size_hint=(None, None),
-            size=(40, 40),
-            pos_hint={'x': 0.1, 'y': 0.91},
-        )
-        self.reset.bind(on_press=self.to_reset)
-        return self.reset
-
-    def to_reset(self, _):
-        self.logical_grid = [[0 for _ in range(9)] for _ in range(9)]
-        self.pos_set = {(row, col) for row in range(9) for col in range(9)}
-        self.clear_grid_layout()
-        self.assign_random_images_to_buttons()
-        self.update_button_layout_images()
-        self.score = 0
-        self.update_score_label()
-        self.clear_selected_buttons()
 
     def clear_grid_layout(self):
         for child in self.grid_layout.children:
@@ -330,8 +237,8 @@ class MyPaintApp(App):
                     ]
         if not isinstance(self.score_rank, list):
             self.score_rank = []
-        self.score_rank.append(self.score)
-        current_score = self.score
+        self.score_rank.append(self.score_manager.score)
+        current_score = self.score_manager.score
         if len(scores) < 5:
             scores.append(current_score)
         else:
@@ -356,7 +263,7 @@ class MyPaintApp(App):
                 )
             self.root.add_widget(self.overlay)
             game_over_label = Label(
-                text=f'Game Over\nScore: {self.score}',
+                text=f'Game Over\nScore: {self.score_manager.score}',
                 font_size=30,
                 color=[1, 1, 1, 1],
                 pos=(self.root.width * 0.5, self.root.height * 0.5),
@@ -469,8 +376,8 @@ class MyPaintApp(App):
                 if len(color) >= 5:
                     self.spawn = False
                     self.remove_line(color)
-        self.score += (len(self.pos_set) - variable)
-        self.update_score_label()
+        self.score_manager.score += (len(self.pos_set) - variable)
+        self.score_manager.update_score_label()
 
     def remove_line(self, line):
         for x, y in line:
@@ -497,9 +404,6 @@ class MyPaintApp(App):
             return True
         return False
 
-    def update_score_label(self):
-        self.scorelb.text = ' '.join(list(f'{self.score:04d}'))
-
     def build(self):
         Window.size = (800, 800)
         Window.minimum_size = (400, 300)
@@ -509,35 +413,15 @@ class MyPaintApp(App):
         parent.add_widget(self.build_grid_layout())
         parent.add_widget(self.build_predicted_layout())
         parent.add_widget(self.score_manager.score_check_button())
-        parent.add_widget(self.save_exit_button())
-        parent.add_widget(self.reset_button())
-        self.scorelb = self.create_score_label()
+        parent.add_widget(self.func_manager.create_save_exit_button())
+        parent.add_widget(self.func_manager.reset_button())
+        self.scorelb = self.score_manager.create_score_label()
         parent.add_widget(self.scorelb)
-        self.apply_game_state()
+        self.func_manager.apply_game_state()
         return parent
-
-    def apply_game_state(self):
-        self.update_score_label()
-        for row in range(9):
-            for col in range(9):
-                if self.logical_grid[row][col] == 1:
-                    button = self.get_button_at(row, col)
-                    button.background_normal = self.image_grid[row][col]
-                    button.background_color = [1, 1, 1, 1]
-                    self.pos_set.discard((row, col))
 
     def create_background(self):
         return Image(source=BOARD, allow_stretch=True, keep_ratio=True)
-
-    def create_score_label(self):
-        return Label(
-            text=' '.join(list(f'{self.score:04d}')),
-            pos_hint={'x': 0.61 + 0.005, 'y': 0.85},
-            size_hint=(None, None),
-            size=(200, 50),
-            font_size=sp(54),
-            halign='center',
-        )
 
 
 if __name__ == '__main__':
