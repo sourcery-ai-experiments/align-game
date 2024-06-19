@@ -24,11 +24,11 @@ BOARD = 'assets/board.jpg'
 IMAGE_LIST = [
     'assets/pink.png',
     'assets/green.png',
-    'assets/blue.png',
-    'assets/yellow.png',
-    'assets/turquoise.png',
-    'assets/orange.png',
-    'assets/purple.png',
+    # 'assets/blue.png',
+    # 'assets/yellow.png',
+    # 'assets/turquoise.png',
+    # 'assets/orange.png',
+    # 'assets/purple.png',
     'assets/unique.png',
 ]
 
@@ -473,8 +473,8 @@ class MyPaintApp(App):
             (1, 0), (0, 1), (1, 1), (1, -1),
             (-1, 0), (0, -1), (-1, -1), (-1, 1),
         ]
-        adjacent_lines = {i: [(row, col)] for i in range(4)}
         current_image = self.get_button_at(row, col).background_normal
+        adjacent_lines = {i: {current_image: [(row, col)]} for i in range(4)}
         for i, direction in enumerate(directions):
             self.find_line_in_direction(
                 adjacent_lines, i,
@@ -489,6 +489,7 @@ class MyPaintApp(App):
     ):
         x, y = row, col
         dir_x, dir_y = direction
+        unique_button_coordinates = None
         while True:
             x += dir_x
             y += dir_y
@@ -497,9 +498,18 @@ class MyPaintApp(App):
             adjacent_button = self.get_button_at(x, y)
             adjacent_image = adjacent_button.background_normal
             if adjacent_image in (current_image, UNIQUE_BUTT):
-                adjacent_lines[i % 4].append((x, y))
-            if current_image == UNIQUE_BUTT:
-                adjacent_lines[i % 4].append((x, y))
+                adjacent_lines[i % 4][current_image].append((x, y))
+                if adjacent_image == UNIQUE_BUTT:
+                    unique_button_coordinates = (x, y)
+            elif current_image == UNIQUE_BUTT and adjacent_image != '':
+                current_image = adjacent_image
+                if not adjacent_lines[i % 4].get(current_image):
+                    adjacent_lines[i % 4][current_image] = [(row, col)]
+                adjacent_lines[i % 4][current_image].append((x, y))
+                if unique_button_coordinates:
+                    adjacent_lines[i % 4][
+                        current_image
+                    ].append(unique_button_coordinates)
             else:
                 break
 
@@ -509,9 +519,10 @@ class MyPaintApp(App):
     def check_length_remove_square(self, lines):
         variable = len(self.pos_set)
         for line in lines.values():
-            if len(line) >= 5:
-                self.spawn = False
-                self.remove_line(line)
+            for color in line.values():
+                if len(color) >= 5:
+                    self.spawn = False
+                    self.remove_line(color)
         self.score += (len(self.pos_set) - variable)
         self.update_score_label()
 
