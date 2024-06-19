@@ -4,15 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pygame = "2.5.0"
-cython = "==0.29.33"
-virtualenv = "*"
 kivy = "*"
-buildozer = "*"
 
 [dev-packages]
 pytest = "*"
 pre-commit = "*"
+buildozer = "*"
+cython = "*"
 virtualenv = "*"
 
 [requires]
