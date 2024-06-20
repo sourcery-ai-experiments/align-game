@@ -1,5 +1,3 @@
-import os
-
 from kivy.uix.button import Button
 
 
@@ -9,14 +7,22 @@ class FuncManager:
         self.score_file = 'score.txt'
 
     def load_game_state(self):
-        if os.path.exists('score.txt'):
-            with open('score.txt') as file:
-                lines = file.readlines()
-                self.game.score_manager.score = int(lines[0].strip())
-                self.game.pos_set = eval(lines[1].strip())
-                self.game.logical_grid = eval(lines[2].strip())
-                self.game.image_grid = eval(lines[3].strip())
-                self.game.score_rank = eval(lines[4].strip())
+        if self.score_file:
+            try:
+                with open(self.score_file) as file:
+                    lines = file.readlines()
+                    self.game.score_manager.score = int(lines[0].strip())
+                    self.game.pos_set = eval(lines[1].strip())
+                    self.game.logical_grid = eval(lines[2].strip())
+                    self.game.image_grid = eval(lines[3].strip())
+                    self.game.score_rank = eval(lines[4].strip())
+            except FileNotFoundError:
+                with open(self.score_file, 'w') as file:
+                    self.game.score_manager.score = 0
+                    self.game.pos_set = set()
+                    self.game.logical_grid = [[0] * 9 for _ in range(9)]
+                    self.game.image_grid = [[None] * 9 for _ in range(9)]
+                    self.game.score_rank = []
 
     def apply_game_state(self):
         self.game.score_manager.update_score_label()
@@ -53,10 +59,10 @@ class FuncManager:
             for row in range(9)
         ]
         image_grid_str = str(image_grid)
-        file_path = os.path.join(os.getcwd(), 'score.txt')
+        file_path = self.score_file
         existing_scores = []
-        if os.path.exists(file_path):
-            with open(file_path) as file:
+        if self.score_file:
+            with open(self.score_file) as file:
                 lines = file.readlines()
                 if len(lines) >= 5:
                     existing_scores = [
@@ -77,11 +83,11 @@ class FuncManager:
         combined_scores = existing_scores + self.game.score_rank
         combined_scores = sorted(set(combined_scores), reverse=True)[:5]
         updated_lines = [
-            score_current + '\n',
-            pos + '\n',
-            logrid + '\n',
-            image_grid_str + '\n',
-            f"{','.join(map(str, combined_scores))}\n",
+            f'{score_current}\n',
+            f'{pos}\n',
+            f'{logrid}\n',
+            f'{image_grid_str}\n',
+            f"{','.join(map(str, combined_scores))}",
         ]
         while len(lines) < 4:
             lines.append('\n')
