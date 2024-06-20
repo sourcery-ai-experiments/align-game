@@ -327,7 +327,7 @@ class MyPaintApp(App):
             (-1, 0), (0, -1), (-1, -1), (-1, 1),
         ]
         current_image = self.get_button_at(row, col).background_normal
-        adjacent_lines = {i: {current_image: [(row, col)]} for i in range(4)}
+        adjacent_lines = {i: {current_image: {(row, col)}} for i in range(4)}
         for i, direction in enumerate(directions):
             self.find_line_in_direction(
                 adjacent_lines, i,
@@ -337,12 +337,16 @@ class MyPaintApp(App):
         return adjacent_lines
 
     def find_line_in_direction(
-            self, adjacent_lines, i,
-            direction, row, col, current_image,
+            self,
+            adjacent_lines,
+            i,
+            direction,
+            row, col,
+            current_image,
     ):
+        current_line = adjacent_lines[i % 4]
         x, y = row, col
         dir_x, dir_y = direction
-        unique_button_coordinates = None
         while True:
             x += dir_x
             y += dir_y
@@ -351,18 +355,23 @@ class MyPaintApp(App):
             adjacent_button = self.get_button_at(x, y)
             adjacent_image = adjacent_button.background_normal
             if adjacent_image in (current_image, UNIQUE_BUTT):
-                adjacent_lines[i % 4][current_image].append((x, y))
+                current_line[current_image].add((x, y))
                 if adjacent_image == UNIQUE_BUTT:
-                    unique_button_coordinates = (x, y)
+                    if not current_line.get(adjacent_image):
+                        current_line[adjacent_image] = {(row, col)}
+                    current_line[
+                        adjacent_image
+                    ].add((x, y))
             elif current_image == UNIQUE_BUTT and adjacent_image != '':
                 current_image = adjacent_image
-                if not adjacent_lines[i % 4].get(current_image):
-                    adjacent_lines[i % 4][current_image] = [(row, col)]
-                adjacent_lines[i % 4][current_image].append((x, y))
-                if unique_button_coordinates:
-                    adjacent_lines[i % 4][
-                        current_image
-                    ].append(unique_button_coordinates)
+                if not current_line.get(current_image):
+                    current_line[current_image] = {(row, col)}
+                current_line[current_image].add((x, y))
+                current_line[
+                    current_image
+                ] = current_line[
+                    current_image
+                ].union(current_line[UNIQUE_BUTT])
             else:
                 break
 
