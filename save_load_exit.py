@@ -95,7 +95,6 @@ class FuncManager:
         combined_scores = sorted(set(combined_scores), reverse=True)[:5]
         return combined_scores
 
-    # 3. Updates data after a save
     def update_data_to_save_file(
         self, file_path,
         lines, score_current, pos,

@@ -4,6 +4,7 @@ from random import randrange
 
 from kivy.app import App
 from kivy.clock import Clock
+from kivy.core.audio import SoundLoader
 from kivy.core.window import Window
 from kivy.graphics import Color
 from kivy.graphics import Rectangle
@@ -55,6 +56,7 @@ class MyPaintApp(App):
         self.score_manager = ScoreManager(self)
         self.func_manager = FuncManager(self)
         self.func_manager.load_game_state()
+        self.no_path_sound = SoundLoader.load('assets/no path.wav')
 
     def build_grid_layout(self):
         self.grid_layout = GridLayout(
@@ -126,7 +128,8 @@ class MyPaintApp(App):
         end = (row, col)
         path = astar(self.logical_grid, start, end)
         if not path:
-            # self.show_no_path_overlay()
+            self.show_no_path_overlay()
+            print('no path')
             return
         self.path = path
         self.path_index = 0
@@ -144,15 +147,26 @@ class MyPaintApp(App):
         self.root.add_widget(self.overlay)
         no_path_label = Label(
             text='No Path Found',
-            font_size=30,
+            font_size=35,
             color=[1, 1, 1, 1],
-            pos=(self.root.width * 0.5, self.root.height * 0.5),
+            pos=(self.root.width * 0.5, self.root.height * 0.75),
             halign='center',
             valign='middle',
         )
         no_path_label.bind(size=no_path_label.setter('text_size'))
         self.overlay.add_widget(no_path_label)
-        # self.overlay.bind(on_touch_down=self.on_overlay_touch)
+        if self.no_path_sound:
+            self.no_path_sound.play()
+        self.overlay.bind(
+            on_touch_down=lambda instance,
+            touch: self.remove_overlay(instance, touch),
+        )
+
+    def remove_overlay(self, instance, touch):
+        if self.overlay:
+            self.root.remove_widget(self.overlay)
+            self.overlay = None
+            self.enable_grid_buttons()
 
     def update(self, dt):
         if self.path_index < len(self.path):
