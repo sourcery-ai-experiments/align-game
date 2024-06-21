@@ -30,9 +30,7 @@ class ScoreManager:
         with open(self.score_file) as file:
             lines = file.readlines()
             if len(lines) >= 5:
-                scores = [
-                    int(score) for score in lines[4].strip().split(',')
-                ]
+                scores = [int(score) for score in lines[4].strip().split(',')]
         if scores[0] == 0:
             print('no score yet')
             # if no file is found maybe we should, no highscores yet, get to aligning!
@@ -44,7 +42,6 @@ class ScoreManager:
                     pos=self.game.root.pos,
                     size=self.game.root.size,
                 )
-
             pos_text = (f'Position left: {len(self.game.pos_set)}')
             pos_label = Label(
                 text=pos_text,
