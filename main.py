@@ -371,17 +371,13 @@ class MyPaintApp(App):
             # if the color is unique but the adjacent is not
             elif current_image == UNIQUE_BUTT and adjacent_image != UNIQUE_BUTT:
                 if not current_line.get(adjacent_image):
-                    current_line[adjacent_image] = {(x, y)}
-                current_line[current_image].add((x, y))
+                    current_line[adjacent_image] = set()
+                current_line[adjacent_image].add((x, y))
                 current_line[adjacent_image] = current_line[
-                    current_image
+                    adjacent_image
                 ].union(current_line[UNIQUE_BUTT])
-                print(current_line)
             # if the color is the same as the one we are looking for
-            elif adjacent_image == current_image:
-                current_line[current_image].add((x, y))
-            # if the color is not unique but the adjacent is
-            elif adjacent_image == UNIQUE_BUTT:
+            elif adjacent_image in (current_image, UNIQUE_BUTT):
                 current_line[current_image].add((x, y))
 
     def is_within_bounds(self, x, y):
