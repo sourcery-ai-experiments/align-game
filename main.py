@@ -344,7 +344,7 @@ class MyPaintApp(App):
         adjacent_lines = {i: {current_image: {(row, col)}} for i in range(4)}
         for i, direction in enumerate(directions):
             self.find_line_in_direction(
-                adjacent_lines, i,
+                adjacent_lines[i % 4],
                 direction, row, col,
                 current_image,
             )
@@ -352,13 +352,11 @@ class MyPaintApp(App):
 
     def find_line_in_direction(
             self,
-            adjacent_lines,
-            i,
+            current_line,
             direction,
             row, col,
             current_image,
     ):
-        current_line = adjacent_lines[i % 4]
         x, y = row, col
         dir_x, dir_y = direction
         while True:
@@ -368,26 +366,23 @@ class MyPaintApp(App):
                 break
             adjacent_button = self.get_button_at(x, y)
             adjacent_image = adjacent_button.background_normal
-            if adjacent_image in (current_image, UNIQUE_BUTT):
+            if adjacent_image == '':
+                break
+            # if the color is unique but the adjacent is not
+            elif current_image == UNIQUE_BUTT and adjacent_image != UNIQUE_BUTT:
+                if not current_line.get(adjacent_image):
+                    current_line[adjacent_image] = {(x, y)}
                 current_line[current_image].add((x, y))
-                if adjacent_image == UNIQUE_BUTT:
-                    if not current_line.get(adjacent_image):
-                        current_line[adjacent_image] = {(row, col)}
-                    current_line[
-                        adjacent_image
-                    ].add((x, y))
-            elif current_image == UNIQUE_BUTT and adjacent_image != '':
-                current_image = adjacent_image
-                if not current_line.get(current_image):
-                    current_line[current_image] = {(row, col)}
-                current_line[current_image].add((x, y))
-                current_line[
-                    current_image
-                ] = current_line[
+                current_line[adjacent_image] = current_line[
                     current_image
                 ].union(current_line[UNIQUE_BUTT])
-            else:
-                break
+                print(current_line)
+            # if the color is the same as the one we are looking for
+            elif adjacent_image == current_image:
+                current_line[current_image].add((x, y))
+            # if the color is not unique but the adjacent is
+            elif adjacent_image == UNIQUE_BUTT:
+                current_line[current_image].add((x, y))
 
     def is_within_bounds(self, x, y):
         return 0 <= x < 9 and 0 <= y < 9
