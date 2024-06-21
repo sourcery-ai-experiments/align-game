@@ -46,7 +46,21 @@ class FuncManager:
         save_exit_button.bind(on_press=self.save_and_exit)
         return save_exit_button
 
-    def save_and_exit(self, _):
+    def save_and_exit(self, *args):
+        score_current, pos, logrid, image_grid_str = self.prep_for_save()
+        combined_scores = self.top_five_score_save(self.score_file)
+        with open(self.score_file) as file:
+            lines = file.readlines()
+        self.update_data_to_save_file(
+            self.score_file,
+            lines, score_current,
+            pos, logrid,
+            image_grid_str,
+            combined_scores,
+        )
+        self.game.stop()
+
+    def prep_for_save(self):
         score_current = str(self.game.score_manager.score)
         pos = str(self.game.pos_set)
         logrid = str(self.game.logical_grid)
@@ -59,42 +73,47 @@ class FuncManager:
             for row in range(9)
         ]
         image_grid_str = str(image_grid)
-        file_path = self.score_file
+        return score_current, pos, logrid, image_grid_str
+
+    def top_five_score_save(self, file_path):
         existing_scores = []
-        if self.score_file:
-            with open(self.score_file) as file:
+        if file_path:
+            with open(file_path) as file:
                 lines = file.readlines()
                 if len(lines) >= 5:
                     existing_scores = [
                         int(score) for score in lines[4].strip().split(',')
                     ]
                 else:
-                    # TODO: figureout a better name for score_rank and where it should be
-                    existing_scores = self.game.score_rank if self.game.score_rank else [
-                        0,
-                    ]
+                    existing_scores = self.game.score_top_five or [0]
         else:
             lines = []
-            existing_scores = self.game.score_rank if self.game.score_rank else [
-                0,
-            ]
-        if not isinstance(self.game.score_rank, list):
-            self.game.score_rank = []
-        combined_scores = existing_scores + self.game.score_rank
+            existing_scores = self.game.score_top_five or [0]
+        if not isinstance(self.game.score_top_five, list):
+            self.game.score_top_five = []
+        combined_scores = existing_scores + self.game.score_top_five
         combined_scores = sorted(set(combined_scores), reverse=True)[:5]
+        return combined_scores
+
+    # 3. Updates data after a save
+    def update_data_to_save_file(
+        self, file_path,
+        lines, score_current, pos,
+        logrid, image_grid_str,
+        combined_scores,
+    ):
         updated_lines = [
             f'{score_current}\n',
             f'{pos}\n',
             f'{logrid}\n',
             f'{image_grid_str}\n',
-            f"{','.join(map(str, combined_scores))}",
+            f"{','.join(map(str, combined_scores))}\n",
         ]
         while len(lines) < 4:
             lines.append('\n')
         lines[:5] = updated_lines
         with open(file_path, 'w') as file:
             file.writelines(lines)
-        self.game.stop()
 
     def reset_button(self):
         # TODO: set the proper image as the rest

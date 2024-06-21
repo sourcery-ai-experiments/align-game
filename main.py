@@ -25,11 +25,11 @@ BOARD = 'assets/board.jpg'
 IMAGE_LIST = [
     'assets/pink.png',
     'assets/green.png',
-    # 'assets/blue.png',
-    # 'assets/yellow.png',
-    # 'assets/turquoise.png',
-    # 'assets/orange.png',
-    # 'assets/purple.png',
+    'assets/blue.png',
+    'assets/yellow.png',
+    'assets/turquoise.png',
+    'assets/orange.png',
+    'assets/purple.png',
     UNIQUE_BUTT,
 ]
 
@@ -51,7 +51,7 @@ class MyPaintApp(App):
         self.overlay = None
         self.text_input = None
         self.scorelb = None
-        self.score_rank = []
+        self.score_top_five = []
         self.score_manager = ScoreManager(self)
         self.func_manager = FuncManager(self)
         self.func_manager.load_game_state()
@@ -235,9 +235,9 @@ class MyPaintApp(App):
                     scores = [
                         int(score) for score in lines[4].strip().split(',')
                     ]
-        if not isinstance(self.score_rank, list):
-            self.score_rank = []
-        self.score_rank.append(self.score_manager.score)
+        if not isinstance(self.score_top_five, list):
+            self.score_top_five = []
+        self.score_top_five.append(self.score_manager.score)
         current_score = self.score_manager.score
         if len(scores) < 5:
             scores.append(current_score)
@@ -288,12 +288,12 @@ class MyPaintApp(App):
                 child.disabled = False
                 child.background_disabled_normal = child.background_normal
 
-    def on_overlay_touch(self):
+    def on_overlay_touch(self, instance, touch):
         self.root.remove_widget(self.overlay)
         self.overlay = None
         self.clear_selected_buttons()
         self.enable_grid_buttons()
-        self.to_reset(None)
+        self.func_manager.to_reset(None)
 
     def get_unique_random_cords(self, count):
         pos_list = list(self.pos_set)
