@@ -77,18 +77,16 @@ class FuncManager:
 
     def top_five_score_save(self, file_path):
         existing_scores = []
-        if file_path:
-            with open(file_path) as file:
-                lines = file.readlines()
-                if len(lines) >= 5:
-                    existing_scores = [
-                        int(score) for score in lines[4].strip().split(',')
-                    ]
-                else:
-                    existing_scores = self.game.score_top_five or [0]
-        else:
-            lines = []
-            existing_scores = self.game.score_top_five or [0]
+        with open(file_path) as file:
+            lines = file.readlines()
+            if len(lines) >= 5:
+                existing_scores = [
+                    int(score) for score in lines[4].strip().split(',')
+                ]
+            else:
+                existing_scores = self.game.score_top_five or [0]
+        lines = []
+        existing_scores = self.game.score_top_five or [0]
         if not isinstance(self.game.score_top_five, list):
             self.game.score_top_five = []
         combined_scores = existing_scores + self.game.score_top_five
