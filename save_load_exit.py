@@ -36,7 +36,7 @@ class FuncManager:
 
     def create_save_exit_button(self):
         # TODO: change to img when Kati gives it.
-        img_source = 'assets/unique.png'
+        img_source = 'assets/savexit.png'
         save_exit_button = Button(
             background_normal=img_source,
             size_hint=(None, None),
@@ -114,7 +114,7 @@ class FuncManager:
 
     def reset_button(self):
         # TODO: set the proper image as the rest
-        img_source = 'assets/unique.png'
+        img_source = 'assets/restart.png'
         reset = Button(
             background_normal=img_source,
             size_hint=(None, None),
