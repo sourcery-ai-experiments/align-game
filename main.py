@@ -26,11 +26,11 @@ BOARD = 'assets/board.jpg'
 IMAGE_LIST = [
     'assets/pink.png',
     'assets/green.png',
-    'assets/blue.png',
-    'assets/yellow.png',
-    'assets/turquoise.png',
-    'assets/orange.png',
-    'assets/purple.png',
+    # 'assets/blue.png',
+    # 'assets/yellow.png',
+    # 'assets/turquoise.png',
+    # 'assets/orange.png',
+    # 'assets/purple.png',
     UNIQUE_BUTT,
 ]
 
@@ -341,7 +341,7 @@ class MyPaintApp(App):
             (-1, 0), (0, -1), (-1, -1), (-1, 1),
         ]
         current_image = self.get_button_at(row, col).background_normal
-        adjacent_lines = {i: {current_image: {(row, col)}} for i in range(4)}
+        adjacent_lines = {i: {(row, col)} for i in range(4)}
         for i, direction in enumerate(directions):
             self.find_line_in_direction(
                 adjacent_lines[i % 4],
@@ -359,6 +359,7 @@ class MyPaintApp(App):
     ):
         x, y = row, col
         dir_x, dir_y = direction
+        previous_image = None
         while True:
             x += dir_x
             y += dir_y
@@ -368,17 +369,17 @@ class MyPaintApp(App):
             adjacent_image = adjacent_button.background_normal
             if adjacent_image == '':
                 break
-            # if the color is unique but the adjacent is not
-            elif current_image == UNIQUE_BUTT and adjacent_image != UNIQUE_BUTT:
-                if not current_line.get(adjacent_image):
-                    current_line[adjacent_image] = set()
-                current_line[adjacent_image].add((x, y))
-                current_line[adjacent_image] = current_line[
-                    adjacent_image
-                ].union(current_line[UNIQUE_BUTT])
+            # every line has one color, that is the first not unique
+            if not previous_image and adjacent_image != UNIQUE_BUTT:
+                previous_image = adjacent_image
+            if previous_image and adjacent_image not in (previous_image, UNIQUE_BUTT):
+                break
             # if the color is the same as the one we are looking for
-            elif adjacent_image in (current_image, UNIQUE_BUTT):
-                current_line[current_image].add((x, y))
+            if adjacent_image in (current_image, UNIQUE_BUTT):
+                current_line.add((x, y))
+            # if the color is unique but the adjacent is not
+            if current_image == UNIQUE_BUTT and adjacent_image != UNIQUE_BUTT:
+                current_line.add((x, y))
 
     def is_within_bounds(self, x, y):
         return 0 <= x < 9 and 0 <= y < 9
@@ -386,10 +387,9 @@ class MyPaintApp(App):
     def check_length_remove_square(self, lines):
         variable = len(self.pos_set)
         for line in lines.values():
-            for color in line.values():
-                if len(color) >= 5:
-                    self.spawn = False
-                    self.remove_line(color)
+            if len(line) >= 5:
+                self.spawn = False
+                self.remove_line(line)
         self.score_manager.score += (len(self.pos_set) - variable)
         self.score_manager.update_score_label()
 
