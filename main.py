@@ -20,17 +20,17 @@ from kivy.uix.widget import Widget
 from astar import astar
 from save_load_exit import FuncManager
 from score_manager import ScoreManager
-UNIQUE_BUTT = 'assets/unique.png'
+UNIQUE_BUTT = 'assets/crown.png'
 BLACK = [0, 0, 0, 0]
 BOARD = 'assets/board.jpg'
 IMAGE_LIST = [
     'assets/pink.png',
     'assets/green.png',
-    # 'assets/blue.png',
-    # 'assets/yellow.png',
-    # 'assets/turquoise.png',
-    # 'assets/orange.png',
-    # 'assets/purple.png',
+    'assets/blue.png',
+    'assets/yellow.png',
+    'assets/turquoise.png',
+    'assets/orange.png',
+    'assets/purple.png',
     UNIQUE_BUTT,
 ]
 
@@ -57,6 +57,7 @@ class MyPaintApp(App):
         self.func_manager = FuncManager(self)
         self.func_manager.load_game_state()
         self.no_path_sound = SoundLoader.load('assets/no path.wav')
+        self.is_moving = False
 
     def build_grid_layout(self):
         self.grid_layout = GridLayout(
@@ -111,6 +112,8 @@ class MyPaintApp(App):
         return img
 
     def on_button_press(self, tile, row, col):
+        if self.is_moving:
+            return
         if tile.background_normal:
             self.select_button(tile, row, col)
             tile.background_color = [1, 1, 1, 1]
@@ -123,7 +126,7 @@ class MyPaintApp(App):
         self.spawn = True
 
     def move_selected_button(self, tile, row, col):
-        self.disable_grid_buttons()
+        self.is_moving = True
         start = (self.selected_button[1], self.selected_button[2])
         end = (row, col)
         path = astar(self.logical_grid, start, end)
@@ -186,19 +189,17 @@ class MyPaintApp(App):
         self.update_current_button(current_pos)
         self.path_index += 1
 
+    def update_current_button(self, current_pos):
+        row, col = current_pos
+        button = self.get_button_at(row, col)
+        button.background_normal = self.selected_image
+        button.background_color = [1, 1, 1, 1]
+
     def clear_last_button(self):
         last_row, last_col = self.path[self.path_index - 1]
         last_button = self.get_button_at(last_row, last_col)
         last_button.background_normal = ''
         last_button.background_color = BLACK
-
-    def update_current_button(self, current_pos):
-        row, col = current_pos
-        button = self.get_button_at(row, col)
-        # self.selected_image = button.background_normal
-        # # tried to keep img while moving but it dosnt work
-        button.background_normal = self.selected_image
-        button.background_color = [1, 1, 1, 1]
 
     def handle_reached_destination(self):
         start = self.selected_button[1], self.selected_button[2]
@@ -210,6 +211,7 @@ class MyPaintApp(App):
         if adjacent_lines:
             self.check_length_remove_square(adjacent_lines)
         self.enable_grid_buttons()
+        self.is_moving = False
 
     def get_button_at(self, row, col):
         return self.grid_layout.children[9 * (8 - row) + (8 - col)]
@@ -289,12 +291,6 @@ class MyPaintApp(App):
         for child in self.grid_layout.children:
             if isinstance(child, Button) and child.state == 'down':
                 child.state = 'normal'
-
-    def disable_grid_buttons(self):
-        for child in self.grid_layout.children:
-            if isinstance(child, Button):
-                child.disabled = True
-                child.background_disabled_normal = child.background_normal
 
     def enable_grid_buttons(self):
         for child in self.grid_layout.children:
