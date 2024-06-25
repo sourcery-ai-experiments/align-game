@@ -11,10 +11,10 @@ from kivy.graphics import Rectangle
 from kivy.metrics import dp
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
-from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.image import Image
 from kivy.uix.label import Label
+from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.widget import Widget
 
 from astar import astar
@@ -26,11 +26,11 @@ BOARD = 'assets/board.jpg'
 IMAGE_LIST = [
     'assets/pink.png',
     'assets/green.png',
-    'assets/blue.png',
-    'assets/yellow.png',
-    'assets/turquoise.png',
-    'assets/orange.png',
-    'assets/purple.png',
+    # 'assets/blue.png',
+    # 'assets/yellow.png',
+    # 'assets/turquoise.png',
+    # 'assets/orange.png',
+    # 'assets/purple.png',
     UNIQUE_BUTT,
 ]
 
@@ -62,9 +62,9 @@ class MyPaintApp(App):
     def build_grid_layout(self):
         self.grid_layout = GridLayout(
             cols=9, rows=9,
-            size_hint=(None, None),
-            size=(dp(200), dp(300)),
-            pos_hint={'center_x': 0.37 - 0.001, 'center_y': 0.56 + 0.001},
+            size_hint=(dp(0.68), dp(0.68)),
+            # size=(dp(90.0), dp(90.0)),
+            pos_hint={'x': 0.245, 'y': 0.068},
             spacing=dp(12),
         )
         for row in range(9):
@@ -76,7 +76,8 @@ class MyPaintApp(App):
     def create_grid_button(self, row, col):
         btn = Button(
             background_normal='', background_color=BLACK,
-            size_hint=(None, None), size=(dp(50), dp(50)),
+            size_hint=(50.0, 50.0),
+            # size=(dp(50.0), dp(50.0)),
         )
         btn.background_disabled_normal = btn.background_normal
         btn.bind(
@@ -164,6 +165,7 @@ class MyPaintApp(App):
             on_touch_down=lambda instance,
             touch: self.remove_overlay(instance, touch),
         )
+        self.enable_grid_buttons()
 
     def remove_overlay(self, instance, touch):
         if self.overlay:
@@ -292,6 +294,12 @@ class MyPaintApp(App):
             if isinstance(child, Button) and child.state == 'down':
                 child.state = 'normal'
 
+    def disable_grid_buttons(self):
+        for child in self.grid_layout.children:
+            if isinstance(child, Button):
+                child.disabled = True
+                child.background_disabled_normal = child.background_normal
+
     def enable_grid_buttons(self):
         for child in self.grid_layout.children:
             if isinstance(child, Button):
@@ -416,10 +424,12 @@ class MyPaintApp(App):
 
     def build(self):
         Window.size = (800, 800)
-        Window.minimum_size = (400, 300)
-        Window.maximum_size = (1000, 800)
-        parent = FloatLayout()
-        parent.add_widget(self.create_background())
+        Window.minimum_size = (300, 300)
+        Window.maximum_size = (1000, 1000)
+        parent = RelativeLayout()
+        # parent.add_widget(self.create_background())
+        background = Image(source=BOARD, allow_stretch=True, keep_ratio=False)
+        parent.add_widget(background)
         parent.add_widget(self.build_grid_layout())
         parent.add_widget(self.build_predicted_layout())
         parent.add_widget(self.score_manager.score_check_button())
@@ -430,8 +440,12 @@ class MyPaintApp(App):
         self.func_manager.apply_game_state()
         return parent
 
-    def create_background(self):
-        return Image(source=BOARD, allow_stretch=True, keep_ratio=True)
+    # def create_background(self):
+    #     background = Image(source=BOARD, allow_stretch=True, keep_ratio=True)
+    #     background.size_hint = (None, None)
+    #     background.size = (dp(800), dp(800))
+
+    #     return background
 
 
 if __name__ == '__main__':
