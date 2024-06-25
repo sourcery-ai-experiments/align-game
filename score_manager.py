@@ -1,5 +1,6 @@
 from kivy.graphics import Color
 from kivy.graphics import Rectangle
+from kivy.metrics import dp
 from kivy.metrics import sp
 from kivy.uix.button import Button
 from kivy.uix.label import Label
@@ -17,8 +18,7 @@ class ScoreManager:
         img_source = 'assets/score.png'
         self.sc_button = Button(
             background_normal=img_source,
-            size_hint=(None, None),
-            size=(40, 40),
+            size_hint=(dp(0.050), dp(0.050)),
             pos_hint={'x': 0.84, 'y': 0.91},
         )
         self.sc_button.bind(on_press=self.score_check)
@@ -76,9 +76,9 @@ class ScoreManager:
     def create_score_label(self):
         return Label(
             text=' '.join(list(f'{self.score:04d}')),
-            pos_hint={'x': 0.61 + 0.005, 'y': 0.85},
-            size_hint=(None, None),
-            size=(200, 50),
+            pos_hint={'x': 0.64, 'y': 0.784},
+            size_hint=(dp(0.2), dp(0.2)),
             font_size=sp(54),
+
             halign='center',
         )

@@ -5,10 +5,8 @@ from random import randrange
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.audio import SoundLoader
-from kivy.core.window import Window
 from kivy.graphics import Color
 from kivy.graphics import Rectangle
-from kivy.metrics import dp
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
@@ -62,10 +60,9 @@ class MyPaintApp(App):
     def build_grid_layout(self):
         self.grid_layout = GridLayout(
             cols=9, rows=9,
-            size_hint=(dp(0.68), dp(0.68)),
-            # size=(dp(90.0), dp(90.0)),
+            size_hint=(0.68, 0.68),
             pos_hint={'x': 0.245, 'y': 0.068},
-            spacing=dp(12),
+            spacing=12,
         )
         for row in range(9):
             for col in range(9):
@@ -77,7 +74,6 @@ class MyPaintApp(App):
         btn = Button(
             background_normal='', background_color=BLACK,
             size_hint=(50.0, 50.0),
-            # size=(dp(50.0), dp(50.0)),
         )
         btn.background_disabled_normal = btn.background_normal
         btn.bind(
@@ -89,10 +85,9 @@ class MyPaintApp(App):
     def build_predicted_layout(self):
         self.button_layout = BoxLayout(
             orientation='vertical',
-            size_hint=(None, None),
-            size=(70, 300),
-            pos=(55, 207),
-            spacing=44,
+            size_hint=(0.180, 0.365),
+            pos_hint={'x': 0.069, 'y': 0.264},
+            spacing=54,
         )
         for _ in range(3):
             img = self.create_image_widget()
@@ -105,7 +100,7 @@ class MyPaintApp(App):
             child.background_color = BLACK
 
     def create_image_widget(self):
-        img = Image(source=choice(IMAGE_LIST))
+        img = Image(source=choice(IMAGE_LIST), size_hint=(0.50, 0.50))
         img.bind(
             on_touch_down=lambda instance,
             touch: self.select_image(instance, touch),
@@ -134,6 +129,7 @@ class MyPaintApp(App):
         if not path:
             self.show_no_path_overlay()
             print('no path')
+            self.is_moving = False
             return
         self.path = path
         self.path_index = 0
@@ -165,7 +161,6 @@ class MyPaintApp(App):
             on_touch_down=lambda instance,
             touch: self.remove_overlay(instance, touch),
         )
-        self.enable_grid_buttons()
 
     def remove_overlay(self, instance, touch):
         if self.overlay:
@@ -423,12 +418,12 @@ class MyPaintApp(App):
         return False
 
     def build(self):
-        Window.size = (800, 800)
-        Window.minimum_size = (300, 300)
-        Window.maximum_size = (1000, 1000)
+        # Window.size = (800, 800)
+        # Window.minimum_size = (300, 300)
+        # Window.maximum_size = (1000, 1000)
         parent = RelativeLayout()
-        # parent.add_widget(self.create_background())
-        background = Image(source=BOARD, allow_stretch=True, keep_ratio=False)
+
+        background = Image(source=BOARD, fit_mode='fill')
         parent.add_widget(background)
         parent.add_widget(self.build_grid_layout())
         parent.add_widget(self.build_predicted_layout())

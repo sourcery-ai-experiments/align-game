@@ -1,3 +1,4 @@
+from kivy.metrics import dp
 from kivy.uix.button import Button
 
 
@@ -39,8 +40,7 @@ class FuncManager:
         img_source = 'assets/savexit.png'
         save_exit_button = Button(
             background_normal=img_source,
-            size_hint=(None, None),
-            size=(40, 40),
+            size_hint=(dp(0.050), dp(0.050)),
             pos_hint={'x': 0.2, 'y': 0.91},
         )
         save_exit_button.bind(on_press=self.save_and_exit)
@@ -117,8 +117,7 @@ class FuncManager:
         img_source = 'assets/restart.png'
         reset = Button(
             background_normal=img_source,
-            size_hint=(None, None),
-            size=(40, 40),
+            size_hint=(dp(0.050), dp(0.050)),
             pos_hint={'x': 0.1, 'y': 0.91},
         )
         reset.bind(on_press=self.to_reset)
