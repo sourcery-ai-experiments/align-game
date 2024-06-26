@@ -61,7 +61,8 @@ class MyPaintApp(App):
         self.grid_layout = GridLayout(
             cols=9, rows=9,
             size_hint=(0.68, 0.68),
-            pos_hint={'x': 0.245, 'y': 0.068},
+            # size=(500, 500),
+            pos_hint={'x': 0.1, 'y': 0.0},
             spacing=12,
         )
         for row in range(9):
@@ -85,13 +86,21 @@ class MyPaintApp(App):
     def build_predicted_layout(self):
         self.button_layout = BoxLayout(
             orientation='vertical',
-            size_hint=(0.180, 0.365),
-            pos_hint={'x': 0.069, 'y': 0.264},
-            spacing=54,
+            size_hint=(0.20, 0.50),
+            pos_hint={'x': 0.0, 'y': 0.0},
+            spacing=0.01,
         )
         for _ in range(3):
             img = self.create_image_widget()
             self.button_layout.add_widget(img)
+        return self.button_layout
+
+    def build_right_layout(self):
+        self.button_layout = BoxLayout(
+            orientation='vertical',
+            size_hint=(0.1, 0.50),
+            pos_hint={'x': 0.0, 'y': 0.0},
+        )
         return self.button_layout
 
     def clear_grid_layout(self):
@@ -398,10 +407,6 @@ class MyPaintApp(App):
                 button_index = 9 * (8 - x) + (8 - y)
                 if button_index < len(self.grid_layout.children):
                     self.clear_button(x, y)
-                else:
-                    print(f'Out of bounds ({x}, {y}) in grid_layout')
-            else:
-                print(f'Out of bounds ({x}, {y})')
 
     def clear_button(self, x, y):
         self.get_button_at(x, y).background_normal = ''
@@ -418,15 +423,15 @@ class MyPaintApp(App):
         return False
 
     def build(self):
-        # Window.size = (800, 800)
-        # Window.minimum_size = (300, 300)
-        # Window.maximum_size = (1000, 1000)
         parent = RelativeLayout()
+        parent.add_widget(Image(source=BOARD, fit_mode='contain'))
 
-        background = Image(source=BOARD, fit_mode='fill')
-        parent.add_widget(background)
-        parent.add_widget(self.build_grid_layout())
-        parent.add_widget(self.build_predicted_layout())
+        box_layout = BoxLayout(orientation='horizontal')
+        box_layout.add_widget(self.build_predicted_layout())
+        box_layout.add_widget(self.build_grid_layout())
+        box_layout.add_widget(self.build_right_layout())
+        parent.add_widget(box_layout)
+
         parent.add_widget(self.score_manager.score_check_button())
         parent.add_widget(self.func_manager.create_save_exit_button())
         parent.add_widget(self.func_manager.reset_button())
@@ -434,13 +439,6 @@ class MyPaintApp(App):
         parent.add_widget(self.scorelb)
         self.func_manager.apply_game_state()
         return parent
-
-    # def create_background(self):
-    #     background = Image(source=BOARD, allow_stretch=True, keep_ratio=True)
-    #     background.size_hint = (None, None)
-    #     background.size = (dp(800), dp(800))
-
-    #     return background
 
 
 if __name__ == '__main__':
