@@ -86,7 +86,7 @@ class MyPaintApp(App):
     def build_predicted_layout(self):
         self.button_layout = BoxLayout(
             orientation='vertical',
-            size_hint=(0.20, 0.50),
+            size_hint=(0.1, 0.1),
             pos_hint={'x': 0.0, 'y': 0.0},
             spacing=0.01,
         )
@@ -98,7 +98,23 @@ class MyPaintApp(App):
     def build_right_layout(self):
         self.button_layout = BoxLayout(
             orientation='vertical',
-            size_hint=(0.1, 0.50),
+            size_hint=(0.01, 0.1),
+            pos_hint={'x': 0.0, 'y': 0.0},
+        )
+        return self.button_layout
+
+    def build_top_layout(self):
+        self.button_layout = BoxLayout(
+            orientation='horizontal',
+            size_hint=(0.2, 0.1),
+            pos_hint={'x': 0.0, 'y': 0.0},
+        )
+        return self.button_layout
+
+    def build_bottom_layout(self):
+        self.button_layout = BoxLayout(
+            orientation='horizontal',
+            size_hint=(0.3, 0.1),
             pos_hint={'x': 0.0, 'y': 0.0},
         )
         return self.button_layout
@@ -427,9 +443,11 @@ class MyPaintApp(App):
         parent.add_widget(Image(source=BOARD, fit_mode='contain'))
 
         box_layout = BoxLayout(orientation='horizontal')
+        box_layout.add_widget(self.build_bottom_layout())
         box_layout.add_widget(self.build_predicted_layout())
         box_layout.add_widget(self.build_grid_layout())
         box_layout.add_widget(self.build_right_layout())
+        box_layout.add_widget(self.build_top_layout())
         parent.add_widget(box_layout)
 
         parent.add_widget(self.score_manager.score_check_button())
