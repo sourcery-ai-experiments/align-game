@@ -5,6 +5,7 @@ from random import randrange
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.audio import SoundLoader
+from kivy.core.window import Window
 from kivy.graphics import Color
 from kivy.graphics import Rectangle
 from kivy.uix.boxlayout import BoxLayout
@@ -57,12 +58,25 @@ class MyPaintApp(App):
         self.no_path_sound = SoundLoader.load('assets/no path.wav')
         self.is_moving = False
 
+        self.right_wide = 0.12
+        self.left_wide = 0.37
+        self.top_height = 0.38
+        self.bottom_height = 0.11
+
+    def window_size(self, instance, width, height):
+        if width > height:
+            diff = width - height
+            self.right_wide += diff / 1000
+            self.left_wide += diff / 1000
+        if height > width:
+            diff = height - width
+            self.top_height += diff / 1000
+            self.bottom_height += diff / 1000
+
     def build_grid_layout(self):
         self.grid_layout = GridLayout(
             cols=9, rows=9,
-            size_hint=(0.68, 0.68),
-            # size=(500, 500),
-            pos_hint={'x': 0.1, 'y': 0.0},
+            size_hint=(1.0, 1.0),
             spacing=12,
         )
         for row in range(9):
@@ -86,8 +100,7 @@ class MyPaintApp(App):
     def build_predicted_layout(self):
         self.button_layout = BoxLayout(
             orientation='vertical',
-            size_hint=(0.1, 0.1),
-            pos_hint={'x': 0.0, 'y': 0.0},
+            size_hint=(self.left_wide, 1.0),
             spacing=0.01,
         )
         for _ in range(3):
@@ -95,29 +108,11 @@ class MyPaintApp(App):
             self.button_layout.add_widget(img)
         return self.button_layout
 
-    def build_right_layout(self):
-        self.button_layout = BoxLayout(
-            orientation='vertical',
-            size_hint=(0.01, 0.1),
-            pos_hint={'x': 0.0, 'y': 0.0},
+    def build_placeholder_layout(self, orientation, size_hint):
+        return BoxLayout(
+            orientation=orientation,
+            size_hint=size_hint,
         )
-        return self.button_layout
-
-    def build_top_layout(self):
-        self.button_layout = BoxLayout(
-            orientation='horizontal',
-            size_hint=(0.2, 0.1),
-            pos_hint={'x': 0.0, 'y': 0.0},
-        )
-        return self.button_layout
-
-    def build_bottom_layout(self):
-        self.button_layout = BoxLayout(
-            orientation='horizontal',
-            size_hint=(0.3, 0.1),
-            pos_hint={'x': 0.0, 'y': 0.0},
-        )
-        return self.button_layout
 
     def clear_grid_layout(self):
         for child in self.grid_layout.children:
@@ -147,6 +142,8 @@ class MyPaintApp(App):
         self.spawn = True
 
     def move_selected_button(self, tile, row, col):
+        if self.selected_button is None:
+            return
         self.is_moving = True
         start = (self.selected_button[1], self.selected_button[2])
         end = (row, col)
@@ -439,20 +436,36 @@ class MyPaintApp(App):
         return False
 
     def build(self):
+        Window.size = (600, 1000)
         parent = RelativeLayout()
         parent.add_widget(Image(source=BOARD, fit_mode='contain'))
+        self.window_size(None, *Window.size)
+        main_layout = BoxLayout(orientation='vertical')
+        top_layout = self.build_placeholder_layout(
+            'vertical', (1.0, self.top_height),
+        )
+        main_layout.add_widget(top_layout)
 
-        box_layout = BoxLayout(orientation='horizontal')
-        box_layout.add_widget(self.build_bottom_layout())
-        box_layout.add_widget(self.build_predicted_layout())
-        box_layout.add_widget(self.build_grid_layout())
-        box_layout.add_widget(self.build_right_layout())
-        box_layout.add_widget(self.build_top_layout())
-        parent.add_widget(box_layout)
+        middle_layout = BoxLayout(orientation='horizontal')
+        predicted_layout = self.build_predicted_layout()
+        middle_layout.add_widget(predicted_layout)
+        grid_layout = self.build_grid_layout()
+        middle_layout.add_widget(grid_layout)
+        right_layout = self.build_placeholder_layout(
+            'horizontal', (self.right_wide, 1.0),
+        )
+        middle_layout.add_widget(right_layout)
+        main_layout.add_widget(middle_layout)
 
+        bottom_layout = self.build_placeholder_layout(
+            'horizontal', (1.0, self.bottom_height),
+        )
+        main_layout.add_widget(bottom_layout)
+        parent.add_widget(main_layout)
+
+        parent.add_widget(self.func_manager.reset_button())
         parent.add_widget(self.score_manager.score_check_button())
         parent.add_widget(self.func_manager.create_save_exit_button())
-        parent.add_widget(self.func_manager.reset_button())
         self.scorelb = self.score_manager.create_score_label()
         parent.add_widget(self.scorelb)
         self.func_manager.apply_game_state()
