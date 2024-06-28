@@ -58,20 +58,33 @@ class MyPaintApp(App):
         self.no_path_sound = SoundLoader.load('assets/no path.wav')
         self.is_moving = False
 
-        self.right_wide = 0.12
-        self.left_wide = 0.37
-        self.top_height = 0.38
-        self.bottom_height = 0.11
+        # self.right_wide = 0.12
+        # self.left_wide = 0.37
+        # self.top_height = 0.38
+        # self.bottom_height = 0.11
 
-    def window_size(self, instance, width, height):
-        if width > height:
-            diff = width - height
-            self.right_wide += diff / 1000
-            self.left_wide += diff / 1000
-        if height > width:
-            diff = height - width
-            self.top_height += diff / 1000
-            self.bottom_height += diff / 1000
+        # scaling for tablet 1200x2000
+        # self.right_wide = 0.11
+        # self.left_wide = 0.36
+        # self.top_height = 0.83
+        # self.bottom_height = 0.55
+
+        # phone scaling
+        self.right_wide = 0.11
+        self.left_wide = 0.36
+        self.top_height = 1.267
+        self.bottom_height = 1.0
+
+    # algorytm for dynamic scaling
+    # def window_size(self, instance, width, height):
+    #     if width > height:
+    #         diff = width - height
+    #         self.right_wide += diff / 1000
+    #         self.left_wide += diff / 1000
+    #     if height > width:
+    #         diff = height - width
+    #         self.top_height += diff / 1000
+    #         self.bottom_height += diff / 1000
 
     def build_grid_layout(self):
         self.grid_layout = GridLayout(
@@ -436,10 +449,10 @@ class MyPaintApp(App):
         return False
 
     def build(self):
-        Window.size = (600, 1000)
+        Window.size = (1080, 2400)
         parent = RelativeLayout()
         parent.add_widget(Image(source=BOARD, fit_mode='contain'))
-        self.window_size(None, *Window.size)
+        # self.window_size(None, *Window.size)
         main_layout = BoxLayout(orientation='vertical')
         top_layout = self.build_placeholder_layout(
             'vertical', (1.0, self.top_height),

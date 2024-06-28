@@ -113,7 +113,6 @@ class FuncManager:
             file.writelines(lines)
 
     def reset_button(self):
-        # TODO: set the proper image as the rest
         img_source = 'assets/restart.png'
         reset = Button(
             background_normal=img_source,
