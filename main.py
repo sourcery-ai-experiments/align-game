@@ -60,8 +60,10 @@ class MyPaintApp(App):
 
         self.right_wide = 0.11
         self.left_wide = 0.36
-        self.top_height = 0.87
-        self.bottom_height = 0.6
+        self.top_height = 0.77
+        self.bottom_height = 0.50
+
+        print(len(self.pos_set))
 
         # scaling for tablet 1200x2000
         # self.right_wide = 0.11
@@ -86,11 +88,16 @@ class MyPaintApp(App):
     #         self.top_height += diff / 1000
     #         self.bottom_height += diff / 1000
 
+    # def check_if_new_game(self):
+    #     if self.pos_set == 81:
+    #         self.update_grid_with_new_images(self.get_unique_random_cords(3), IMAGE_LIST)
+    #         print('new game')
+
     def build_grid_layout(self):
         self.grid_layout = GridLayout(
             cols=9, rows=9,
             size_hint=(1.0, 1.0),
-            spacing=12,
+            spacing=16,
         )
         for row in range(9):
             for col in range(9):
@@ -101,7 +108,7 @@ class MyPaintApp(App):
     def create_grid_button(self, row, col):
         btn = Button(
             background_normal='', background_color=BLACK,
-            size_hint=(49.0, 49.0),
+            size_hint=(45.0, 45.0),
         )
         btn.background_disabled_normal = btn.background_normal
         btn.bind(
@@ -114,7 +121,7 @@ class MyPaintApp(App):
         self.button_layout = BoxLayout(
             orientation='vertical',
             size_hint=(self.left_wide, 1.0),
-            spacing=92,
+            spacing=95,
             padding=(50, 238),
         )
         for _ in range(3):
@@ -139,7 +146,7 @@ class MyPaintApp(App):
             size_hint=(None, None),
             size=(80, 80),
         )
-        img.pos_hint = {'center_x': 0.44, 'y': 0.95}
+        img.pos_hint = {'center_x': 0.44, 'y': 0.99}
         img.allow_stretch = True
         img.keep_ratio = False
         img.bind(
@@ -457,7 +464,7 @@ class MyPaintApp(App):
         return False
 
     def build(self):
-        Window.size = (1200, 2000)
+        Window.size = (1200, 1850)
         parent = RelativeLayout()
         parent.add_widget(Image(source=BOARD, fit_mode='contain'))
 
@@ -477,19 +484,19 @@ class MyPaintApp(App):
 
         reset_button.size_hint = (None, None)
         reset_button.size = (80, 80)
-        reset_button.pos_hint = {'center_y': 0.32}
+        reset_button.pos_hint = {'center_y': 0.36}
 
         save_exit_button.size_hint = (None, None)
         save_exit_button.size = (80, 80)
-        save_exit_button.pos_hint = {'center_y': 0.32}
+        save_exit_button.pos_hint = {'center_y': 0.36}
 
         self.scorelb.size_hint = (None, None)
         self.scorelb.size = (100, 100)
-        self.scorelb.pos_hint = {'center_y': 0.23}
+        self.scorelb.pos_hint = {'center_y': 0.25}
 
         score_check_button.size_hint = (None, None)
         score_check_button.size = (80, 80)
-        score_check_button.pos_hint = {'center_y': 0.32}
+        score_check_button.pos_hint = {'center_y': 0.36}
 
         top_layout.add_widget(
             Widget(size_hint=(None, None), size=(Window.width * 0.02, 1)),
@@ -527,7 +534,7 @@ class MyPaintApp(App):
         parent.add_widget(main_layout)
 
         self.func_manager.apply_game_state()
-
+        # self.check_if_new_game()
         return parent
 
 

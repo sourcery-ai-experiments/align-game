@@ -18,12 +18,15 @@ class FuncManager:
                     self.game.image_grid = eval(lines[3].strip())
                     self.game.score_rank = eval(lines[4].strip())
             except FileNotFoundError:
-                with open(self.score_file, 'w') as file:
-                    self.game.score_manager.score = 0
-                    self.game.pos_set = set()
-                    self.game.logical_grid = [[0] * 9 for _ in range(9)]
-                    self.game.image_grid = [[None] * 9 for _ in range(9)]
-                    self.game.score_rank = []
+                self.create_initial_score_file()
+
+    def create_initial_score_file(self):
+        with open(self.score_file, 'w') as file:
+            file.write('0\n')
+            file.write(f'{set()}\n')
+            file.write(f'{[[0] * 9 for _ in range(9)]}\n')
+            file.write(f'{[[None] * 9 for _ in range(9)]}\n')
+            file.write(f'{0}\n')
 
     def apply_game_state(self):
         self.game.score_manager.update_score_label()
@@ -49,8 +52,12 @@ class FuncManager:
     def save_and_exit(self, *args):
         score_current, pos, logrid, image_grid_str = self.prep_for_save()
         combined_scores = self.top_five_score_save(self.score_file)
-        with open(self.score_file) as file:
-            lines = file.readlines()
+        try:
+            with open(self.score_file) as file:
+                lines = file.readlines()
+        except FileNotFoundError:
+            lines = []
+
         self.update_data_to_save_file(
             self.score_file,
             lines, score_current,
@@ -66,9 +73,8 @@ class FuncManager:
         logrid = str(self.game.logical_grid)
         image_grid = [
             [
-                self.game.get_button_at(
-                    row, col,
-                ).background_normal for col in range(9)
+                self.game.get_button_at(row, col).background_normal
+                for col in range(9)
             ]
             for row in range(9)
         ]
@@ -79,14 +85,13 @@ class FuncManager:
         existing_scores = []
         with open(file_path) as file:
             lines = file.readlines()
-            if len(lines) >= 5:
+            if len(lines) >= 5 and lines[4].strip() != '[]':
                 existing_scores = [
-                    int(score) for score in lines[4].strip().split(',')
+                    int(score)
+                    for score in lines[4].strip().split(',')
                 ]
             else:
                 existing_scores = self.game.score_top_five or [0]
-        lines = []
-        existing_scores = self.game.score_top_five or [0]
         if not isinstance(self.game.score_top_five, list):
             self.game.score_top_five = []
         combined_scores = existing_scores + self.game.score_top_five
