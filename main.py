@@ -58,10 +58,10 @@ class MyPaintApp(App):
         self.no_path_sound = SoundLoader.load('assets/no path.wav')
         self.is_moving = False
 
-        # self.right_wide = 0.12
-        # self.left_wide = 0.37
-        # self.top_height = 0.38
-        # self.bottom_height = 0.11
+        self.right_wide = 0.11
+        self.left_wide = 0.36
+        self.top_height = 0.87
+        self.bottom_height = 0.6
 
         # scaling for tablet 1200x2000
         # self.right_wide = 0.11
@@ -70,10 +70,10 @@ class MyPaintApp(App):
         # self.bottom_height = 0.55
 
         # phone scaling
-        self.right_wide = 0.11
-        self.left_wide = 0.36
-        self.top_height = 1.267
-        self.bottom_height = 1.0
+        # self.right_wide = 0.11
+        # self.left_wide = 0.36
+        # self.top_height = 1.267
+        # self.bottom_height = 1.0
 
     # algorytm for dynamic scaling
     # def window_size(self, instance, width, height):
@@ -101,7 +101,7 @@ class MyPaintApp(App):
     def create_grid_button(self, row, col):
         btn = Button(
             background_normal='', background_color=BLACK,
-            size_hint=(50.0, 50.0),
+            size_hint=(49.0, 49.0),
         )
         btn.background_disabled_normal = btn.background_normal
         btn.bind(
@@ -114,7 +114,8 @@ class MyPaintApp(App):
         self.button_layout = BoxLayout(
             orientation='vertical',
             size_hint=(self.left_wide, 1.0),
-            spacing=0.01,
+            spacing=92,
+            padding=(50, 238),
         )
         for _ in range(3):
             img = self.create_image_widget()
@@ -133,7 +134,14 @@ class MyPaintApp(App):
             child.background_color = BLACK
 
     def create_image_widget(self):
-        img = Image(source=choice(IMAGE_LIST), size_hint=(0.50, 0.50))
+        img = Image(
+            source=choice(IMAGE_LIST),
+            size_hint=(None, None),
+            size=(80, 80),
+        )
+        img.pos_hint = {'center_x': 0.44, 'y': 0.95}
+        img.allow_stretch = True
+        img.keep_ratio = False
         img.bind(
             on_touch_down=lambda instance,
             touch: self.select_image(instance, touch),
@@ -449,14 +457,45 @@ class MyPaintApp(App):
         return False
 
     def build(self):
-        Window.size = (1080, 2400)
+        Window.size = (1200, 2000)
         parent = RelativeLayout()
         parent.add_widget(Image(source=BOARD, fit_mode='contain'))
-        # self.window_size(None, *Window.size)
         main_layout = BoxLayout(orientation='vertical')
-        top_layout = self.build_placeholder_layout(
-            'vertical', (1.0, self.top_height),
+        top_layout = BoxLayout(
+            orientation='horizontal',
+            size_hint=(1.0, self.top_height),
+            padding=(5, 5),
+            spacing=40,
         )
+        reset_button = self.func_manager.reset_button()
+        score_check_button = self.score_manager.score_check_button()
+        save_exit_button = self.func_manager.create_save_exit_button()
+
+        reset_button.size_hint = (None, None)
+        reset_button.size = (80, 80)
+        reset_button.pos_hint = {'center_y': 0.32}
+        save_exit_button.size_hint = (None, None)
+        save_exit_button.size = (80, 80)
+        save_exit_button.pos_hint = {'center_y': 0.32}
+        score_check_button.size_hint = (None, None)
+        score_check_button.size = (80, 80)
+        score_check_button.pos_hint = {'center_y': 0.32}
+
+        top_layout.add_widget(
+            Widget(size_hint_x=None, width=Window.width * 0.05),
+        )
+        top_layout.add_widget(reset_button)
+        top_layout.add_widget(save_exit_button)
+
+        top_layout.add_widget(
+            Widget(size_hint_x=None, width=Window.width * 0.52),
+        )
+
+        top_layout.add_widget(score_check_button)
+        top_layout.add_widget(
+            Widget(size_hint_x=None, width=Window.width * 1.0),
+        )
+
         main_layout.add_widget(top_layout)
 
         middle_layout = BoxLayout(orientation='horizontal')
@@ -468,6 +507,7 @@ class MyPaintApp(App):
             'horizontal', (self.right_wide, 1.0),
         )
         middle_layout.add_widget(right_layout)
+
         main_layout.add_widget(middle_layout)
 
         bottom_layout = self.build_placeholder_layout(
@@ -475,10 +515,6 @@ class MyPaintApp(App):
         )
         main_layout.add_widget(bottom_layout)
         parent.add_widget(main_layout)
-
-        parent.add_widget(self.func_manager.reset_button())
-        parent.add_widget(self.score_manager.score_check_button())
-        parent.add_widget(self.func_manager.create_save_exit_button())
         self.scorelb = self.score_manager.create_score_label()
         parent.add_widget(self.scorelb)
         self.func_manager.apply_game_state()
