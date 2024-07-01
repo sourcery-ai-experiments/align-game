@@ -534,7 +534,10 @@ class MyPaintApp(App):
         parent.add_widget(main_layout)
 
         self.func_manager.apply_game_state()
+        if self.logical_grid == [[0 for _ in range(9)] for _ in range(9)]:
+            self.assign_random_images_to_buttons()
         # self.check_if_new_game()
+
         return parent
 
 
