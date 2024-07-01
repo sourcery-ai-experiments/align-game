@@ -63,8 +63,6 @@ class MyPaintApp(App):
         self.top_height = 0.77
         self.bottom_height = 0.50
 
-        print(len(self.pos_set))
-
         # scaling for tablet 1200x2000
         # self.right_wide = 0.11
         # self.left_wide = 0.36
@@ -87,11 +85,6 @@ class MyPaintApp(App):
     #         diff = height - width
     #         self.top_height += diff / 1000
     #         self.bottom_height += diff / 1000
-
-    # def check_if_new_game(self):
-    #     if self.pos_set == 81:
-    #         self.update_grid_with_new_images(self.get_unique_random_cords(3), IMAGE_LIST)
-    #         print('new game')
 
     def build_grid_layout(self):
         self.grid_layout = GridLayout(
@@ -421,14 +414,17 @@ class MyPaintApp(App):
             # every line has one color, that is the first not unique
             if not previous_image and adjacent_image != UNIQUE_BUTT:
                 previous_image = adjacent_image
+
             if previous_image and adjacent_image not in (previous_image, UNIQUE_BUTT):
                 break
             # if the color is the same as the one we are looking for
             if adjacent_image in (current_image, UNIQUE_BUTT):
                 current_line.add((x, y))
+                print('only color and unique or one color on line')
             # if the color is unique but the adjacent is not
-            if current_image == UNIQUE_BUTT and adjacent_image != UNIQUE_BUTT:
-                current_line.add((x, y))
+            elif current_image == UNIQUE_BUTT and adjacent_image == 'assets/green.png':
+                current_line.add((x, y))  # problem potentioly here
+                print('bbut is unique  but adjacent is not')
 
     def is_within_bounds(self, x, y):
         return 0 <= x < 9 and 0 <= y < 9
@@ -536,8 +532,6 @@ class MyPaintApp(App):
         self.func_manager.apply_game_state()
         if self.logical_grid == [[0 for _ in range(9)] for _ in range(9)]:
             self.assign_random_images_to_buttons()
-        # self.check_if_new_game()
-
         return parent
 
 
