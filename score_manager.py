@@ -78,7 +78,7 @@ class ScoreManager:
             text=' '.join(list(f'{self.score:04d}')),
             pos_hint={'x': 0.64, 'y': 0.784},
             size_hint=(dp(0.2), dp(0.2)),
-            font_size=sp(54),
+            font_size=sp(80),
 
             halign='center',
         )

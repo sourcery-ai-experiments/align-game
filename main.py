@@ -460,41 +460,50 @@ class MyPaintApp(App):
         Window.size = (1200, 2000)
         parent = RelativeLayout()
         parent.add_widget(Image(source=BOARD, fit_mode='contain'))
+
         main_layout = BoxLayout(orientation='vertical')
+
         top_layout = BoxLayout(
             orientation='horizontal',
             size_hint=(1.0, self.top_height),
             padding=(5, 5),
             spacing=40,
         )
+
         reset_button = self.func_manager.reset_button()
-        score_check_button = self.score_manager.score_check_button()
         save_exit_button = self.func_manager.create_save_exit_button()
+        score_check_button = self.score_manager.score_check_button()
+        self.scorelb = self.score_manager.create_score_label()
 
         reset_button.size_hint = (None, None)
         reset_button.size = (80, 80)
         reset_button.pos_hint = {'center_y': 0.32}
+
         save_exit_button.size_hint = (None, None)
         save_exit_button.size = (80, 80)
         save_exit_button.pos_hint = {'center_y': 0.32}
+
+        self.scorelb.size_hint = (None, None)
+        self.scorelb.size = (100, 100)
+        self.scorelb.pos_hint = {'center_y': 0.23}
+
         score_check_button.size_hint = (None, None)
         score_check_button.size = (80, 80)
         score_check_button.pos_hint = {'center_y': 0.32}
 
         top_layout.add_widget(
-            Widget(size_hint_x=None, width=Window.width * 0.05),
+            Widget(size_hint=(None, None), size=(Window.width * 0.02, 1)),
         )
         top_layout.add_widget(reset_button)
         top_layout.add_widget(save_exit_button)
-
         top_layout.add_widget(
-            Widget(size_hint_x=None, width=Window.width * 0.52),
+            Widget(size_hint=(None, None), size=(Window.width * 0.405, 1)),
         )
-
+        top_layout.add_widget(self.scorelb)
+        top_layout.add_widget(
+            Widget(size_hint=(None, None), size=(Window.width * 0.0, 1)),
+        )
         top_layout.add_widget(score_check_button)
-        top_layout.add_widget(
-            Widget(size_hint_x=None, width=Window.width * 1.0),
-        )
 
         main_layout.add_widget(top_layout)
 
@@ -514,10 +523,11 @@ class MyPaintApp(App):
             'horizontal', (1.0, self.bottom_height),
         )
         main_layout.add_widget(bottom_layout)
+
         parent.add_widget(main_layout)
-        self.scorelb = self.score_manager.create_score_label()
-        parent.add_widget(self.scorelb)
+
         self.func_manager.apply_game_state()
+
         return parent
 
 
