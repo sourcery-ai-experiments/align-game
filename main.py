@@ -412,19 +412,28 @@ class MyPaintApp(App):
             if adjacent_image == '':
                 break
             # every line has one color, that is the first not unique
+            # compares one by one if its the
+            # same or unique and if not then break
             if not previous_image and adjacent_image != UNIQUE_BUTT:
                 previous_image = adjacent_image
-
-            if previous_image and adjacent_image not in (previous_image, UNIQUE_BUTT):
+                print(f'Set previous_image to {previous_image}')
+                print('------------------------------')
+            if previous_image and adjacent_image not in (
+                    previous_image, UNIQUE_BUTT,
+            ):
+                print(f'image {adjacent_image} not matching previous_image')
+                print(f'{previous_image} or unique {UNIQUE_BUTT}')
+                print('------------------------------')
                 break
+
             # if the color is the same as the one we are looking for
-            if adjacent_image in (current_image, UNIQUE_BUTT):
-                current_line.add((x, y))
-                print('only color and unique or one color on line')
-            # if the color is unique but the adjacent is not
-            elif current_image == UNIQUE_BUTT and adjacent_image == 'assets/green.png':
-                current_line.add((x, y))  # problem potentioly here
-                print('bbut is unique  but adjacent is not')
+            # if adjacent_image in (current_image, UNIQUE_BUTT):
+            #     current_line.add((x, y))
+            #     print('only color and unique or one color on line')
+            # # if the color is unique but the adjacent is not
+            # elif current_image == UNIQUE_BUTT and adjacent_image == 'assets/green.png':
+            #     current_line.add((x, y))  # problem potentioly here
+            #     print('bbut is unique  but adjacent is not')
 
     def is_within_bounds(self, x, y):
         return 0 <= x < 9 and 0 <= y < 9
